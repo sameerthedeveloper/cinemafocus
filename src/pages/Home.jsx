@@ -7,7 +7,7 @@ import CategoryCard from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
 import * as Icon from 'lucide-react';
-import { getHero, getCategories, getFeaturedProducts, getTrustBadges } from '../lib/db';
+import { getHero, getCategories, getFeaturedProducts, getTrustBadges, getProjects } from '../lib/db';
 import { hero as fallbackHero, categories as seedCategories, products as seedProducts, trustBadges as seedTrustBadges } from '../lib/seed-data';
 
 const CustomIcon = ({ name, ...props }) => {
@@ -20,16 +20,18 @@ const Home = () => {
   const [categoriesData, setCategoriesData] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [trustBadgesData, setTrustBadgesData] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [h, c, f, t] = await Promise.all([
+        const [h, c, f, t, p] = await Promise.all([
           getHero(),
           getCategories(),
           getFeaturedProducts(),
-          getTrustBadges()
+          getTrustBadges(),
+          getProjects()
         ]);
         
         // db.js handles the fallback to seed data if DB is empty/fails
@@ -38,6 +40,7 @@ const Home = () => {
         setCategoriesData(c ? c.slice(0, 4) : []);
         setFeaturedProducts(f ? f.slice(0, 3) : []);
         setTrustBadgesData(t || []);
+        setProjects(p || []);
         
       } catch (error) {
         console.error("Home Page Fetch Error:", error);
@@ -142,18 +145,18 @@ const Home = () => {
            
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Dynamic Project Grid - eventually fetched from Firestore */}
-              {[
-                "https://images.unsplash.com/photo-1595202428954-5220d91dff7b?auto=format&fit=crop&q=80&w=1200",
-                "https://images.unsplash.com/photo-1545459720-aacfb5092126?auto=format&fit=crop&q=80&w=800",
-                "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&q=80&w=800"
-              ].map((imgUrl, i) => (
-                <div key={i} className="relative aspect-video overflow-hidden rounded-2xl group cursor-pointer">
-                  <img src={imgUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={`Project ${i + 1}`} />
+              {projects.length > 0 ? projects.slice(0, 3).map((project, i) => (
+                <div key={project.id || i} className="relative aspect-video overflow-hidden rounded-2xl group cursor-pointer">
+                  <img src={project.imageUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={project.title} />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                      <span className="text-white font-medium text-lg tracking-wide border border-white/30 px-6 py-2 rounded-full backdrop-blur-sm">View Project</span>
                   </div>
                 </div>
-              ))}
+              )) : (
+                 <div className="col-span-full text-center py-10 text-muted-foreground bg-secondary/10 rounded-xl">
+                    No projects to display yet.
+                 </div>
+              )}
            </div>
        </Section>
     </div>
