@@ -26,11 +26,9 @@ export const seedDatabase = async () => {
     const heroRef = doc(collection(db, "hero"), "main");
     batch.set(heroRef, hero);
 
-    // Seed Trust Badges
-    trustBadges.forEach((badge, index) => {
-        const ref = doc(collection(db, "trust_badges"), `badge_${index}`);
-        batch.set(ref, badge);
-    });
+    // Seed Trust Badges (Single Document in site_content)
+    const trustRef = doc(collection(db, "site_content"), "trust_badges");
+    batch.set(trustRef, { items: trustBadges });
 
     try {
         await batch.commit();
