@@ -1,7 +1,7 @@
 import React from 'react';
 import Section from '../components/Section';
-import heroImg from '../assets/images/hero-light.png';
-import speakersImg from '../assets/images/speakers.png';
+const heroImg = '/images/hero-light.png';
+const speakersImg = '/images/speakers.png';
 
 const About = () => {
   return (
