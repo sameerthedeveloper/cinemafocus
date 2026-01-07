@@ -20,6 +20,7 @@ import AdminCategories from './pages/admin/Categories';
 import AdminUsers from './pages/admin/Users';
 import AdminMessages from './pages/admin/Messages';
 import AdminProjects from './pages/admin/Projects';
+import AdminSEO from './pages/admin/SEO';
 import { usePageTracking } from './lib/analytics';
 
 const AppContent = () => {
@@ -50,6 +51,7 @@ const AppContent = () => {
              <Route path="users" element={<AdminUsers />} />
              <Route path="messages" element={<AdminMessages />} />
              <Route path="projects" element={<AdminProjects />} />
+             <Route path="seo" element={<AdminSEO />} />
              <Route path="site-control" element={<SiteControl />} />
           </Route>
         </Route>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, LayoutGrid, Users, MessageSquare, Image } from 'lucide-react';
+import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, LayoutGrid, Users, MessageSquare, Image, Search } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import clsx from 'clsx';
@@ -22,6 +22,7 @@ const AdminLayout = () => {
     { label: "Projects", path: "/admin/projects", icon: Image },
     { label: "Users", path: "/admin/users", icon: Users },
     { label: "Messages", path: "/admin/messages", icon: MessageSquare },
+    { label: "SEO", path: "/admin/seo", icon: Search },
     { label: "Site Control", path: "/admin/site-control", icon: Settings },
   ];
 
