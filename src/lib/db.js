@@ -107,3 +107,13 @@ export const getFeaturedProducts = async () => {
         return [];
     }
 };
+
+export const getProjects = async () => {
+    try {
+        const snapshot = await getDocs(collection(db, "projects"));
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (e) {
+        console.error("getProjects error:", e);
+        return [];
+    }
+};
