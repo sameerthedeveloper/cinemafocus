@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-// import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db /*, storage */ } from '../../lib/firebase';
+import { db } from '../../lib/firebase';
+import { supabase, storageBucket } from '../../lib/supabase';
 import { Loader2, Save, Upload, Database, LayoutTemplate, Info, Phone, Shield, Globe, Plus, Trash2 } from 'lucide-react';
 import { seedDatabase } from '../../lib/seeder';
 
@@ -67,19 +67,20 @@ const SiteControl = () => {
   };
 
   const handleHeroImageUpload = async (e) => {
-    // const file = e.target.files[0];
-    // if (!file) return;
-    // setLoading(true);
-    // try {
-    //   const storageRef = ref(storage, `hero/${Date.now()}_${file.name}`);
-    //   await uploadBytes(storageRef, file);
-    //   const url = await getDownloadURL(storageRef);
-    //   setHero({ ...hero, imageUrl: url });
-    //   setMessage('Image uploaded!');
-    //   setTimeout(() => setMessage(''), 3000);
-    // } catch (error) { console.error(error); }
-    // setLoading(false);
-    alert("Image upload paused for Supabase migration.");
+    const file = e.target.files[0];
+    if (!file) return;
+    setLoading(true);
+    try {
+      const filePath = `hero/${Date.now()}_${file.name}`;
+      const { error } = await supabase.storage.from(storageBucket).upload(filePath, file);
+      if (error) throw error;
+      
+      const { data } = supabase.storage.from(storageBucket).getPublicUrl(filePath);
+      setHero({ ...hero, imageUrl: data.publicUrl });
+      setMessage('Image uploaded!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) { console.error(error); }
+    setLoading(false);
   };
   
   const handleTrustChange = (index, field, value) => {
