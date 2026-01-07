@@ -1,0 +1,333 @@
+import React, { useState, useEffect } from 'react';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../../lib/firebase';
+import { Loader2, Save, Upload, Database, LayoutTemplate, Info, Phone, Shield, Globe, Plus, Trash2 } from 'lucide-react';
+import { seedDatabase } from '../../lib/seeder';
+
+const SiteControl = () => {
+  const [activeTab, setActiveTab] = useState('hero');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  
+  // States
+  const [hero, setHero] = useState({ title: '', imageUrl: '' });
+  const [philosophy, setPhilosophy] = useState({ title: '', text: '' });
+  const [footer, setFooter] = useState({ address: '', phone: '', email: '', facebook: '', instagram: '', twitter: '' });
+  const [trustBadges, setTrustBadges] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, [activeTab]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      if (activeTab === 'hero') {
+         const snap = await getDoc(doc(db, "hero", "main"));
+         if (snap.exists()) setHero(snap.data());
+         else setHero({ title: 'Sound, unbound.', imageUrl: '' });
+      } else if (activeTab === 'philosophy') {
+         const snap = await getDoc(doc(db, "site_content", "philosophy"));
+         if (snap.exists()) setPhilosophy(snap.data());
+         else setPhilosophy({ title: 'Our Mission', text: 'To reveal the soul of music...' });
+      } else if (activeTab === 'footer') {
+         const snap = await getDoc(doc(db, "site_content", "footer"));
+         if (snap.exists()) setFooter(snap.data());
+         else setFooter({ address: '', phone: '', email: '', facebook: '', instagram: '', twitter: '' });
+      } else if (activeTab === 'trust') {
+         const snap = await getDoc(doc(db, "site_content", "trust_badges"));
+         if (snap.exists()) setTrustBadges(snap.data().items || []);
+         else {
+           // Default if empty
+           setTrustBadges([
+             { icon: 'Globe', title: 'Global Shipping', description: 'Insured delivery worldwide' },
+             { icon: 'ShieldCheck', title: '5-Year Warranty', description: 'On all premium components' },
+             { icon: 'Headphones', title: 'Expert Support', description: 'Consult with audiophiles' },
+             { icon: 'Award', title: 'Authorized Dealer', description: '100% Genuine Products' }
+           ]);
+         }
+      }
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  };
+
+  const handleSave = async (collection, docId, data) => {
+    setLoading(true);
+    try {
+      await setDoc(doc(db, collection, docId), data, { merge: true });
+      setMessage('Saved successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (e) {
+      console.error(e);
+      setMessage('Error saving.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleHeroImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setLoading(true);
+    try {
+      const storageRef = ref(storage, `hero/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setHero({ ...hero, imageUrl: url });
+      setMessage('Image uploaded!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) { console.error(error); }
+    setLoading(false);
+  };
+  
+  const handleTrustChange = (index, field, value) => {
+    const newBadges = [...trustBadges];
+    newBadges[index] = { ...newBadges[index], [field]: value };
+    setTrustBadges(newBadges);
+  };
+
+  const handleSeed = async () => {
+    if (window.confirm("This will overwrite existing products and categories with sample data. Continue?")) {
+      setLoading(true);
+      try {
+        await seedDatabase();
+        setMessage("Database seeded successfully!");
+        setTimeout(() => setMessage(''), 3000);
+      } catch (error) {
+        console.error(error);
+        setMessage("Error seeding database.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const tabs = [
+    { id: 'hero', label: 'Hero Section', icon: LayoutTemplate },
+    { id: 'philosophy', label: 'About/Philosophy', icon: Info },
+    { id: 'trust', label: 'Trust Badges', icon: Shield },
+    { id: 'footer', label: 'Footer & Contact', icon: Phone },
+    { id: 'database', label: 'Database Ops', icon: Database },
+  ];
+
+  return (
+    <div className="p-8 max-w-4xl mx-auto animate-fade-in pb-20">
+      <header className="mb-10">
+         <h1 className="text-3xl font-medium tracking-tight">Site Control</h1>
+         <p className="text-muted-foreground mt-1">Customize global website content.</p>
+      </header>
+      
+      {/* Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-6 border-b border-border mb-8">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+              activeTab === tab.id 
+                ? "bg-primary text-primary-foreground" 
+                : "bg-secondary text-muted-foreground hover:bg-secondary/70"
+            }`}
+          >
+            <tab.icon size={16} />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="space-y-6">
+        
+        {/* HERO TAB */}
+        {activeTab === 'hero' && (
+          <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+             <div className="space-y-2">
+               <label className="text-sm font-medium">Main Halo Title</label>
+               <input value={hero.title} onChange={e => setHero({...hero, title: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="e.g. The Future of Sound" />
+             </div>
+
+             <div className="space-y-2">
+               <label className="text-sm font-medium">Subtitle</label>
+               <input value={hero.subtitle || ''} onChange={e => setHero({...hero, subtitle: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="e.g. Experience audio perfection..." />
+             </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                   <label className="text-sm font-medium">CTA Button Text</label>
+                   <input value={hero.ctaText || ''} onChange={e => setHero({...hero, ctaText: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="e.g. Discover Products" />
+                </div>
+                <div className="space-y-2">
+                   <label className="text-sm font-medium">CTA Button Link</label>
+                   <input value={hero.ctaLink || ''} onChange={e => setHero({...hero, ctaLink: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="e.g. /products" />
+                </div>
+             </div>
+             
+             <div className="space-y-2">
+               <label className="text-sm font-medium">Hero Background Image</label>
+               <div className="flex gap-4 items-start">
+                  <div className="w-32 h-20 bg-secondary rounded-lg overflow-hidden border border-border">
+                    {hero.imageUrl && <img src={hero.imageUrl} className="w-full h-full object-cover" />}
+                  </div>
+                  <label className="cursor-pointer bg-secondary px-4 py-2 rounded-lg text-sm font-medium hover:bg-secondary/70 flex items-center gap-2">
+                    <Upload size={16} /> Upload New
+                    <input type="file" className="hidden" accept="image/*" onChange={handleHeroImageUpload} />
+                  </label>
+               </div>
+             </div>
+
+             <button onClick={() => handleSave("hero", "main", hero)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
+               {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Changes
+             </button>
+          </div>
+        )}
+
+        {/* PHILOSOPHY TAB */}
+        {activeTab === 'philosophy' && (
+          <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+             <p className="text-sm text-muted-foreground mb-4">Edit text for specific site sections.</p>
+             
+             <div className="space-y-2">
+               <label className="text-sm font-medium">Section Title</label>
+               <input value={philosophy.title} onChange={e => setPhilosophy({...philosophy, title: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="Our Mission" />
+             </div>
+             <div className="space-y-2">
+               <label className="text-sm font-medium">Content Text</label>
+               <textarea value={philosophy.text} onChange={e => setPhilosophy({...philosophy, text: e.target.value})} rows={4} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="Text content..." />
+             </div>
+
+             <button onClick={() => handleSave("site_content", "philosophy", philosophy)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
+               {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Section
+             </button>
+          </div>
+        )}
+        
+        {/* TRUST BADGES TAB */}
+        {activeTab === 'trust' && (
+           <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+              <div className="flex justify-between items-center mb-4">
+                 <p className="text-sm text-muted-foreground">Edit the 4 key service highlights.</p>
+                 <button onClick={() => handleSave("site_content", "trust_badges", { items: trustBadges })} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
+                   {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save All
+                 </button>
+              </div>
+              
+              <div className="space-y-6">
+                {trustBadges.map((badge, idx) => (
+                  <div key={idx} className="p-4 bg-secondary/20 rounded-xl border border-border">
+                     <h3 className="font-medium mb-3 text-sm uppercase tracking-wider text-muted-foreground">Badge {idx + 1}</h3>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium">Icon Name (Lucide)</label>
+                          <input value={badge.icon} onChange={e => handleTrustChange(idx, 'icon', e.target.value)} className="w-full p-2 bg-background rounded border border-border text-sm" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium">Title</label>
+                          <input value={badge.title} onChange={e => handleTrustChange(idx, 'title', e.target.value)} className="w-full p-2 bg-background rounded border border-border text-sm" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium">Description</label>
+                          <input value={badge.description} onChange={e => handleTrustChange(idx, 'description', e.target.value)} className="w-full p-2 bg-background rounded border border-border text-sm" />
+                        </div>
+                     </div>
+                  </div>
+                ))}
+              </div>
+           </div>
+        )}
+
+        {/* FOOTER TAB */}
+        {activeTab === 'footer' && (
+          <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+             <div className="space-y-2">
+               <label className="text-sm font-medium">Showroom Address</label>
+               <input value={footer.address} onChange={e => setFooter({...footer, address: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="123 Audio Lane" />
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="space-y-3">
+                   <label className="text-sm font-medium">Phone Numbers</label>
+                   {(footer.phones || [footer.phone]).map((phone, idx) => (
+                     <div key={idx} className="flex gap-2">
+                       <input 
+                         value={phone} 
+                         onChange={e => {
+                           const newPhones = [...(footer.phones || [footer.phone])];
+                           newPhones[idx] = e.target.value;
+                           setFooter({...footer, phones: newPhones});
+                         }}
+                         className="w-full p-3 bg-secondary/30 rounded-lg border border-border" 
+                         placeholder="+1 555 123 4567" 
+                       />
+                       {idx > 0 && (
+                         <button onClick={() => {
+                            const newPhones = (footer.phones || [footer.phone]).filter((_, i) => i !== idx);
+                            setFooter({...footer, phones: newPhones});
+                         }} className="p-3 text-red-500 hover:bg-red-50 rounded-lg">
+                           <Trash2 size={18} />
+                         </button>
+                       )}
+                     </div>
+                   ))}
+                   <button onClick={() => setFooter(prev => ({ ...prev, phones: [...(prev.phones || [prev.phone]), ''] }))} className="text-sm text-primary hover:underline flex items-center gap-1">
+                     <Plus size={14} /> Add another number
+                   </button>
+                 </div>
+
+                 <div className="space-y-2">
+                   <label className="text-sm font-medium">Email Address</label>
+                   <input value={footer.email} onChange={e => setFooter({...footer, email: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="contact@example.com" />
+                 </div>
+
+                 <div className="space-y-2">
+                   <label className="text-sm font-medium">Working Hours</label>
+                   <textarea rows={3} value={footer.workingHours || ''} onChange={e => setFooter({...footer, workingHours: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="Mon - Fri: 10am - 7pm&#10;Sat: 11am - 5pm" />
+                 </div>
+             </div>
+             
+             <div className="pt-6 border-t border-border">
+                <h3 className="font-medium mb-4">Social Media Links</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                   <div className="space-y-2">
+                     <label className="text-sm font-medium">Facebook URL</label>
+                     <input value={footer.facebook || ''} onChange={e => setFooter({...footer, facebook: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="https://facebook.com/..." />
+                   </div>
+                   <div className="space-y-2">
+                     <label className="text-sm font-medium">Instagram URL</label>
+                     <input value={footer.instagram || ''} onChange={e => setFooter({...footer, instagram: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="https://instagram.com/..." />
+                   </div>
+                   <div className="space-y-2">
+                     <label className="text-sm font-medium">Twitter URL</label>
+                     <input value={footer.twitter || ''} onChange={e => setFooter({...footer, twitter: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="https://twitter.com/..." />
+                   </div>
+                </div>
+             </div>
+
+             <button onClick={() => handleSave("site_content", "footer", footer)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
+               {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Update Info
+             </button>
+          </div>
+        )}
+
+        {/* DATABASE TAB */}
+        {activeTab === 'database' && (
+          <div className="bg-background border border-border rounded-2xl p-8 space-y-4">
+             <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl text-orange-800">
+               <h3 className="font-medium flex items-center gap-2 alert-title"><Database size={16}/> Database Seeding</h3>
+               <p className="text-sm mt-1 opacity-90">
+                 Use this to reset your Products and Categories to the default demo data. 
+                 <br/><span className="font-bold">Warning: This deletes existing data.</span>
+               </p>
+             </div>
+             <button onClick={handleSeed} disabled={loading} className="px-6 py-2.5 bg-orange-600 text-white rounded-full font-medium hover:bg-orange-700 w-full md:w-auto">
+               {loading ? 'Seeding...' : 'Reset Database with Seed Data'}
+             </button>
+          </div>
+        )}
+        
+        {message && <div className="fixed bottom-8 right-8 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg animate-fade-in-up">{message}</div>}
+      </div>
+    </div>
+  );
+};
+
+export default SiteControl;
