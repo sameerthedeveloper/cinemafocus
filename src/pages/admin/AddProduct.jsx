@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../lib/firebase';
+// import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db /*, storage */ } from '../../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Plus, X, Upload, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -75,15 +75,21 @@ const AddProduct = () => {
     try {
       // 1. Upload Images
       let imageUrls = [];
-      if (imageFiles.length > 0) {
-        setUploading(true);
-        const uploadPromises = imageFiles.map(async (file) => {
-          const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
-          await uploadBytes(storageRef, file);
-          return await getDownloadURL(storageRef);
-        });
-        imageUrls = await Promise.all(uploadPromises);
-        setUploading(false);
+      // if (imageFiles.length > 0) {
+      //   setUploading(true);
+      //   const uploadPromises = imageFiles.map(async (file) => {
+      //     const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+      //     await uploadBytes(storageRef, file);
+      //     return await getDownloadURL(storageRef);
+      //   });
+      //   imageUrls = await Promise.all(uploadPromises);
+      //   setUploading(false);
+      // }
+      
+      // Temporary Supabase Transition: Use placeholders
+      if(imageFiles.length > 0) {
+         alert("Image upload is temporarily disabled for Supabase migration. Using placeholders.");
+         imageUrls = imageFiles.map(() => 'https://placehold.co/600x400?text=Supabase+Coming+Soon');
       }
 
       // 2. Prepare Data

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, deleteDoc, doc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../lib/firebase';
+// import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db /*, storage */ } from '../../lib/firebase';
 import { Loader2, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 
 const Projects = () => {
@@ -50,9 +50,11 @@ const Projects = () => {
     setSaving(true);
     try {
       // 1. Upload Image
-      const storageRef = ref(storage, `projects/${Date.now()}_${newProject.image.name}`);
-      await uploadBytes(storageRef, newProject.image);
-      const imageUrl = await getDownloadURL(storageRef);
+      // const storageRef = ref(storage, `projects/${Date.now()}_${newProject.image.name}`);
+      // await uploadBytes(storageRef, newProject.image);
+      // const imageUrl = await getDownloadURL(storageRef);
+      const imageUrl = "https://placehold.co/600x400?text=Supabase+Coming";
+      alert("Image upload paused for Supabase migration.");
 
       // 2. Save to Firestore
       await addDoc(collection(db, "projects"), {

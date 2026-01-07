@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../lib/firebase';
+// import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db /*, storage */ } from '../../lib/firebase';
 import { Loader2, Plus, Trash2, Upload, LayoutGrid, X } from 'lucide-react';
 
 const Categories = () => {
@@ -62,9 +62,11 @@ const Categories = () => {
       let finalImageUrl = formData.imageUrl;
 
       if (imageFile) {
-        const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
-        await uploadBytes(storageRef, imageFile);
-        finalImageUrl = await getDownloadURL(storageRef);
+        // const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
+        // await uploadBytes(storageRef, imageFile);
+        // finalImageUrl = await getDownloadURL(storageRef);
+        alert("Image upload paused for Supabase migration.");
+        finalImageUrl = "https://placehold.co/600x400?text=Supabase+Migration";
       } else if (!finalImageUrl) {
         finalImageUrl = "https://placehold.co/600x400?text=No+Image";
       }
