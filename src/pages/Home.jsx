@@ -10,6 +10,11 @@ import * as Icon from 'lucide-react';
 import { getHero, getCategories, getFeaturedProducts, getTrustBadges, getProjects } from '../lib/db';
 import { hero as fallbackHero, categories as seedCategories, products as seedProducts, trustBadges as seedTrustBadges } from '../lib/seed-data';
 
+// Local Assets for Fallback
+import imgSpeakers from '../assets/images/speakers.png';
+import imgTurntables from '../assets/images/turntables.png';
+import imgAmps from '../assets/images/amplifiers.png';
+
 const CustomIcon = ({ name, ...props }) => {
   const LucideIcon = Icon[name];
   return LucideIcon ? <LucideIcon {...props} /> : null;
@@ -153,9 +158,19 @@ const Home = () => {
                   </div>
                 </div>
               )) : (
-                 <div className="col-span-full text-center py-10 text-muted-foreground bg-secondary/10 rounded-xl">
-                    No projects to display yet.
-                 </div>
+                 // Fallback to local assets if no dynamic projects found
+                 [
+                   { img: imgSpeakers, title: "Custom Speakers" },
+                   { img: imgTurntables, title: "Vintage Turntables" },
+                   { img: imgAmps, title: "Hi-Fi Amplifiers" }
+                 ].map((item, i) => (
+                    <div key={i} className="relative aspect-video overflow-hidden rounded-2xl group cursor-pointer">
+                      <img src={item.img} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={item.title} />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                         <span className="text-white font-medium text-lg tracking-wide border border-white/30 px-6 py-2 rounded-full backdrop-blur-sm">View Project</span>
+                      </div>
+                    </div>
+                 ))
               )}
            </div>
        </Section>
