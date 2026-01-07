@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { useNavigate } from 'react-router-dom';
-import logo from '../../assets/logo.png';
+const logo = '/images/logo.png';
 
 const Login = () => {
   const [isRegistering, setIsRegistering] = useState(false);

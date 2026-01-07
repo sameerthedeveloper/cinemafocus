@@ -4,7 +4,7 @@ import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, LayoutGrid, User
 import { auth } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import clsx from 'clsx';
-import logo from '../assets/logo.png'; 
+const logo = '/images/logo.png'; 
 
 const AdminLayout = () => {
   const navigate = useNavigate();
