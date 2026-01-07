@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Clock } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import logo from '../assets/logo.png';
+const logo = '/images/logo.png';
 
 const Footer = () => {
   const [footerData, setFooterData] = useState({
