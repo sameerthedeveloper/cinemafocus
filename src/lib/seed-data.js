@@ -1,10 +1,10 @@
-import heroImg from '../assets/images/hero-light.png';
-import speakersImg from '../assets/images/speakers.png';
-import subwoofersImg from '../assets/images/speakers.png'; // Reusing speakers for now or could generate specific sub
-import amplifiersImg from '../assets/images/amplifiers.png';
-import turntablesImg from '../assets/images/turntables.png';
-import productSpeakersImg from '../assets/images/product-speakers.png';
-import productAmpImg from '../assets/images/product-amp.png';
+const heroImg = '/images/hero.png';
+const speakersImg = '/images/speakers.png';
+const subwoofersImg = '/images/speakers.png';
+const amplifiersImg = '/images/amplifiers.png';
+const turntablesImg = '/images/turntables.png';
+const productSpeakersImg = '/images/product-speakers.png';
+const productAmpImg = '/images/product-amp.png';
 
 export const categories = [
     {

@@ -11,9 +11,9 @@ import { getHero, getCategories, getFeaturedProducts, getTrustBadges, getProject
 import { hero as fallbackHero, categories as seedCategories, products as seedProducts, trustBadges as seedTrustBadges } from '../lib/seed-data';
 
 // Local Assets for Fallback
-import imgSpeakers from '../assets/images/speakers.png';
-import imgTurntables from '../assets/images/turntables.png';
-import imgAmps from '../assets/images/amplifiers.png';
+const imgSpeakers = '/images/speakers.png';
+const imgTurntables = '/images/turntables.png';
+const imgAmps = '/images/amplifiers.png';
 
 const CustomIcon = ({ name, ...props }) => {
   const LucideIcon = Icon[name];
