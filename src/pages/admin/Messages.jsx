@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, deleteDoc, doc, updateDoc, orderBy, query } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { collection, query, orderBy, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { Loader2, Trash2, Mail, CheckCircle } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -14,9 +14,16 @@ const Messages = () => {
 
   const fetchMessages = async () => {
     try {
-      const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-      setMessages(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        setMessages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } else {
+        // Fallback or empty
+         const simpleSnap = await getDocs(collection(db, 'messages'));
+         setMessages(simpleSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }
     } catch (error) {
       console.error("Error fetching messages:", error);
     } finally {
@@ -27,7 +34,8 @@ const Messages = () => {
   const handleMarkAsRead = async (id, currentStatus) => {
     if (currentStatus) return; // Already read
     try {
-      await updateDoc(doc(db, "messages", id), { read: true });
+      const docRef = doc(db, 'messages', id);
+      await updateDoc(docRef, { read: true });
       setMessages(messages.map(m => m.id === id ? { ...m, read: true } : m));
     } catch (error) {
       console.error("Error updating message:", error);
@@ -37,7 +45,7 @@ const Messages = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Delete this message?")) {
       try {
-        await deleteDoc(doc(db, "messages", id));
+        await deleteDoc(doc(db, 'messages', id));
         setMessages(messages.filter(m => m.id !== id));
       } catch (error) {
         console.error("Error deleting message:", error);
@@ -73,16 +81,17 @@ const Messages = () => {
                  <div className="flex-1 space-y-2">
                    <div className="flex items-center gap-3">
                      <span className={clsx("font-medium text-lg", !message.read && "text-primary")}>
-                       {message.firstName} {message.lastName}
+                       {message.name}
                      </span>
                      <span className="text-sm text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                       {message.subject}
+                       {/* Extract Subject from message if needed, or just show New Message */}
+                       {message.message.includes('[Subject:') ? message.message.split(']')[0].replace('[Subject: ', '') : 'New Message'}
                      </span>
                      {!message.read && <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>}
                    </div>
                    
                    <p className="text-muted-foreground text-sm flex items-center gap-2">
-                     <Mail size={14} /> {message.email} • {new Date(message.createdAt).toLocaleString()}
+                     <Mail size={14} /> {message.email} • {new Date(message.created_at).toLocaleString()}
                    </p>
                    
                    <p className="text-foreground mt-2 leading-relaxed">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, deleteDoc, doc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
-import { supabase, storageBucket } from '../../lib/supabase';
+import { db, storage } from '../../lib/firebase';
+import { collection, getDocs, deleteDoc, doc, addDoc, query, orderBy } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 
 const Projects = () => {
@@ -17,10 +17,22 @@ const Projects = () => {
 
   const fetchProjects = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "projects"));
-      setProjects(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) {
+          const simpleSnap = await getDocs(collection(db, 'projects'));
+          setProjects(simpleSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } else {
+          setProjects(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }
     } catch (error) {
       console.error("Error fetching projects:", error);
+      // Fallback
+       const simpleSnap = await getDocs(collection(db, 'projects'));
+       if(!simpleSnap.empty) {
+         setProjects(simpleSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+       }
     } finally {
       setLoading(false);
     }
@@ -29,10 +41,11 @@ const Projects = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Delete this project?")) {
       try {
-        await deleteDoc(doc(db, "projects", id));
+        await deleteDoc(doc(db, 'projects', id));
         setProjects(projects.filter(p => p.id !== id));
       } catch (error) {
         console.error("Error deleting project:", error);
+        alert("Failed to delete project: " + error.message);
       }
     }
   };
@@ -50,25 +63,23 @@ const Projects = () => {
     setSaving(true);
     try {
       // 1. Upload Image
-      const filePath = `projects/${Date.now()}_${newProject.image.name}`;
-      const { error } = await supabase.storage.from(storageBucket).upload(filePath, newProject.image);
-      if (error) throw error;
+      const storageRef = ref(storage, `projects/${Date.now()}_${newProject.image.name}`);
+      await uploadBytes(storageRef, newProject.image);
+      const imageUrl = await getDownloadURL(storageRef);
 
-      const { data } = supabase.storage.from(storageBucket).getPublicUrl(filePath);
-      const imageUrl = data.publicUrl;
-
-      // 2. Save to Firestore
-      await addDoc(collection(db, "projects"), {
+      // 2. Insert into Firestore
+      await addDoc(collection(db, 'projects'), {
         title: newProject.title,
-        imageUrl,
-        createdAt: serverTimestamp()
+        imageUrl: imageUrl, // CamelCase
+        createdAt: Date.now()
       });
-
+      
       fetchProjects();
       setShowModal(false);
       setNewProject({ title: '', image: null });
     } catch (error) {
       console.error("Error adding project:", error);
+      alert("Failed to add project.");
     } finally {
       setSaving(false);
     }

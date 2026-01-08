@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
-import { supabase, storageBucket } from '../../lib/supabase';
+import { db, storage } from '../../lib/firebase';
+import { collection, query, orderBy, getDocs, doc, deleteDoc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2, Plus, Trash2, Upload, LayoutGrid, X } from 'lucide-react';
 
 const Categories = () => {
@@ -24,14 +24,46 @@ const Categories = () => {
 
   const fetchCategories = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "categories"));
-      const data = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })).sort((a, b) => (a.order || 99) - (b.order || 99)); // Simple sort if order exists
-      setCategories(data);
+      const q = query(collection(db, 'categories'), orderBy('order', 'asc'));
+      const snapshot = await getDocs(q);
+      
+      let cats = [];
+      if (snapshot.empty) {
+          // If orderBy index is missing/fails, fallback to simple get and sort js
+          const simpleSnap = await getDocs(collection(db, 'categories'));
+          const data = simpleSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          cats = data.sort((a,b) => (a.order||0) - (b.order||0));
+      } else {
+          cats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+
+      // Fetch all products to calculate actual counts
+      const productsSnap = await getDocs(collection(db, 'products'));
+      const products = productsSnap.docs.map(doc => doc.data());
+
+      // Aggregate counts
+      const counts = {};
+      products.forEach(p => {
+        if (p.category) {
+          counts[p.category] = (counts[p.category] || 0) + 1;
+        }
+      });
+
+      // Merge counts into categories
+      const categoriesWithCounts = cats.map(cat => ({
+        ...cat,
+        productCount: counts[cat.slug] || 0
+      }));
+
+      setCategories(categoriesWithCounts);
+
     } catch (error) {
       console.error("Error fetching categories:", error);
+      // Fallback
+      const simpleSnap = await getDocs(collection(db, 'categories'));
+      if(!simpleSnap.empty) {
+         setCategories(simpleSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }
     } finally {
       setLoading(false);
     }
@@ -40,10 +72,11 @@ const Categories = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
-        await deleteDoc(doc(db, "categories", id));
+        await deleteDoc(doc(db, 'categories', id));
         setCategories(categories.filter(c => c.id !== id));
       } catch (error) {
         console.error("Error deleting category:", error);
+        alert("Failed to delete category: " + error.message);
       }
     }
   };
@@ -62,12 +95,9 @@ const Categories = () => {
       let finalImageUrl = formData.imageUrl;
 
       if (imageFile) {
-        const filePath = `categories/${Date.now()}_${imageFile.name}`;
-        const { error } = await supabase.storage.from(storageBucket).upload(filePath, imageFile);
-        if (error) throw error;
-
-        const { data } = supabase.storage.from(storageBucket).getPublicUrl(filePath);
-        finalImageUrl = data.publicUrl;
+        const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
+        await uploadBytes(storageRef, imageFile);
+        finalImageUrl = await getDownloadURL(storageRef);
       } else if (!finalImageUrl) {
         finalImageUrl = "https://placehold.co/600x400?text=No+Image";
       }
@@ -78,13 +108,13 @@ const Categories = () => {
         name: formData.name,
         slug: slug,
         description: formData.description,
-        imageUrl: finalImageUrl,
-        productCount: 0, // Initial count
-        createdAt: new Date().toISOString()
+        imageUrl: finalImageUrl, // CamelCase
+        productCount: 0, // CamelCase
+        order: 99
       };
 
-      // Use slug as document ID
-      await addDoc(collection(db, "categories"), newCategory); // Or setDoc with slug if we want strict ID
+      // Use slug as doc ID
+      await setDoc(doc(db, 'categories', slug), newCategory);
       
       // Refresh list
       fetchCategories();
@@ -96,7 +126,7 @@ const Categories = () => {
 
     } catch (error) {
       console.error("Error adding category:", error);
-      alert("Failed to add category.");
+      alert("Failed to add category: " + error.message);
     } finally {
       setSaving(false);
     }

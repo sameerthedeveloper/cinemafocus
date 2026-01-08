@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Layout from './components/Layout';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import ProductList from './pages/ProductList';
 import ProductDetail from './pages/ProductDetail';
@@ -63,6 +65,11 @@ const AppContent = () => {
 const App = () => {
   return (
     <Router>
+    <Helmet>
+      <title>Cinema Focus</title>
+      <meta name="description" content="Premium Audio & Home Cinema Systems" />
+    </Helmet>
+    <ScrollToTop />
       <AppContent />
     </Router>
   );

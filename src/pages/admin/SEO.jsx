@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Loader2, Save, Globe, Search, Share2 } from 'lucide-react';
 
 const SEO = () => {
@@ -22,9 +22,11 @@ const SEO = () => {
   const fetchSeoData = async () => {
     setLoading(true);
     try {
-      const snap = await getDoc(doc(db, "site_content", "seo"));
-      if (snap.exists()) {
-        setSeo(prev => ({ ...prev, ...snap.data() }));
+      const docRef = doc(db, 'site_content', 'seo');
+      const docSnap = await getDoc(docRef);
+        
+      if (docSnap.exists()) {
+        setSeo(prev => ({ ...prev, ...docSnap.data() }));
       }
     } catch (error) {
       console.error("Error fetching SEO data:", error);
@@ -37,7 +39,8 @@ const SEO = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await setDoc(doc(db, "site_content", "seo"), seo, { merge: true });
+      await setDoc(doc(db, 'site_content', 'seo'), seo);
+      
       setMessage('SEO settings updated!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {

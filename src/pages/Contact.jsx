@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import Section from '../components/Section';
 import Button from '../components/Button';
 import { Mail, Phone, MapPin, Clock, Loader2, CheckCircle } from 'lucide-react';
-import { collection, addDoc, doc, getDoc } from 'firebase/firestore'; 
 import { db } from '../lib/firebase';
+import { doc, getDoc, addDoc, collection } from 'firebase/firestore';
 
 const Contact = () => {
   const [contactInfo, setContactInfo] = useState({
@@ -17,9 +17,11 @@ const Contact = () => {
   React.useEffect(() => {
     const fetchInfo = async () => {
       try {
-        const snap = await getDoc(doc(db, "site_content", "footer"));
-        if (snap.exists()) {
-           setContactInfo(prev => ({ ...prev, ...snap.data() }));
+        const docRef = doc(db, 'site_content', 'footer');
+        const docSnap = await getDoc(docRef);
+          
+        if (docSnap.exists()) {
+           setContactInfo(prev => ({ ...prev, ...docSnap.data() }));
         }
       } catch (e) {
         console.error("Error fetching contact info", e);
@@ -43,11 +45,14 @@ const Contact = () => {
     setSubmitting(true);
     
     try {
-      await addDoc(collection(db, "messages"), {
-        ...formData,
+      await addDoc(collection(db, 'messages'), {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        message: `[Subject: ${formData.subject}]\n\n${formData.message}`,
         read: false,
-        createdAt: new Date().toISOString()
+        createdAt: Date.now()
       });
+      
       setSubmitted(true);
       setFormData({
         firstName: '',

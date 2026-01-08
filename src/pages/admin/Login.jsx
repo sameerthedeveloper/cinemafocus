@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 const logo = '/images/logo.png';
 
 const Login = () => {
-  const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,21 +14,11 @@ const Login = () => {
     e.preventDefault();
     setError('');
     try {
-      if (isRegistering) {
-        await createUserWithEmailAndPassword(auth, email, password);
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
-      }
+      await signInWithEmailAndPassword(auth, email, password);
       navigate('/admin/dashboard');
     } catch (err) {
       console.error(err);
-      if (err.code === 'auth/email-already-in-use') {
-        setError('Email already in use');
-      } else if (err.code === 'auth/weak-password') {
-        setError('Password should be at least 6 characters');
-      } else {
-        setError(isRegistering ? 'Registration failed' : 'Invalid credentials');
-      }
+      setError("Invalid login credentials");
     }
   };
 
@@ -39,7 +28,7 @@ const Login = () => {
         <div className="text-center space-y-4">
            <img src={logo} alt="Logo" className="h-8 mx-auto opacity-80" />
            <h1 className="text-2xl font-medium tracking-tight">
-             {isRegistering ? 'Create Admin Account' : 'Admin Portal'}
+             Admin Portal
            </h1>
         </div>
         
@@ -70,18 +59,9 @@ const Login = () => {
             type="submit" 
             className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
           >
-            {isRegistering ? 'Create Account' : 'Sign In'}
+            Sign In
           </button>
         </form>
-
-        <div className="text-center">
-          <button 
-            onClick={() => setIsRegistering(!isRegistering)}
-            className="text-sm text-muted-foreground hover:text-primary transition-colors underline"
-          >
-            {isRegistering ? 'Already have an account? Sign In' : 'Need an account? Register'}
-          </button>
-        </div>
       </div>
     </div>
   );

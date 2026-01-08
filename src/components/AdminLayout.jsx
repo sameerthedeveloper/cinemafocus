@@ -11,7 +11,7 @@ const AdminLayout = () => {
   const location = useLocation();
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await auth.signOut();
     navigate('/admin/login');
   };
 

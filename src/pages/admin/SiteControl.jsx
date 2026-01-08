@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { db, storage } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
-import { supabase, storageBucket } from '../../lib/supabase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2, Save, Upload, Database, LayoutTemplate, Info, Phone, Shield, Globe, Plus, Trash2 } from 'lucide-react';
 import { seedDatabase } from '../../lib/seeder';
 
@@ -23,39 +23,57 @@ const SiteControl = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      if (activeTab === 'hero') {
-         const snap = await getDoc(doc(db, "hero", "main"));
-         if (snap.exists()) setHero(snap.data());
-         else setHero({ title: 'Sound, unbound.', imageUrl: '' });
-      } else if (activeTab === 'philosophy') {
-         const snap = await getDoc(doc(db, "site_content", "philosophy"));
-         if (snap.exists()) setPhilosophy(snap.data());
-         else setPhilosophy({ title: 'Our Mission', text: 'To reveal the soul of music...' });
-      } else if (activeTab === 'footer') {
-         const snap = await getDoc(doc(db, "site_content", "footer"));
-         if (snap.exists()) setFooter(snap.data());
-         else setFooter({ address: '', phone: '', email: '', facebook: '', instagram: '', twitter: '' });
-      } else if (activeTab === 'trust') {
-         const snap = await getDoc(doc(db, "site_content", "trust_badges"));
-         if (snap.exists()) setTrustBadges(snap.data().items || []);
-         else {
-           // Default if empty
-           setTrustBadges([
+      let docRef = null;
+      if (activeTab === 'hero') docRef = doc(db, 'hero', 'main');
+      else if (activeTab === 'philosophy') docRef = doc(db, 'site_content', 'philosophy');
+      else if (activeTab === 'footer') docRef = doc(db, 'site_content', 'footer');
+      else if (activeTab === 'trust') docRef = doc(db, 'site_content', 'trust_badges');
+      else return; // database tab
+
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (activeTab === 'hero') setHero(prev => ({...prev, ...data}));
+        else if (activeTab === 'philosophy') setPhilosophy(prev => ({...prev, ...data}));
+        else if (activeTab === 'footer') setFooter(prev => ({...prev, ...data}));
+        else if (activeTab === 'trust') setTrustBadges(data.items || []);
+      } else {
+        // Defaults if empty
+        if (activeTab === 'trust') {
+            setTrustBadges([
              { icon: 'Globe', title: 'Global Shipping', description: 'Insured delivery worldwide' },
              { icon: 'ShieldCheck', title: '5-Year Warranty', description: 'On all premium components' },
              { icon: 'Headphones', title: 'Expert Support', description: 'Consult with audiophiles' },
              { icon: 'Award', title: 'Authorized Dealer', description: '100% Genuine Products' }
            ]);
-         }
+        }
       }
     } catch (e) { console.error(e); }
     setLoading(false);
   };
 
-  const handleSave = async (collection, docId, data) => {
+  const handleSave = async (sectionId, data) => {
     setLoading(true);
     try {
-      await setDoc(doc(db, collection, docId), data, { merge: true });
+       // Determine collection based on id is tricky if we pass generic ID. 
+       // We can infer or pass collection.
+       // Based on fetchData:
+       // 'hero_main' -> hero/main
+       // 'philosophy' -> site_content/philosophy
+       // 'footer' -> site_content/footer
+       // 'trust_badges' -> site_content/trust_badges
+       
+       let collectionName = 'site_content';
+       let docId = sectionId;
+
+       if (sectionId === 'hero_main') {
+           collectionName = 'hero';
+           docId = 'main';
+       }
+
+       await setDoc(doc(db, collectionName, docId), data, { merge: true });
+      
       setMessage('Saved successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (e) {
@@ -69,23 +87,30 @@ const SiteControl = () => {
   const handleHeroImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setLoading(true);
+
     try {
-      const filePath = `hero/${Date.now()}_${file.name}`;
-      const { error } = await supabase.storage.from(storageBucket).upload(filePath, file);
-      if (error) throw error;
+      setLoading(true);
+      const storageRef = ref(storage, `hero/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const publicUrl = await getDownloadURL(storageRef);
+
+      setHero(prev => ({ ...prev, imageUrl: publicUrl }));
+      setMessage("Image uploaded! Don't forget to save.");
       
-      const { data } = supabase.storage.from(storageBucket).getPublicUrl(filePath);
-      setHero({ ...hero, imageUrl: data.publicUrl });
-      setMessage('Image uploaded!');
-      setTimeout(() => setMessage(''), 3000);
-    } catch (error) { console.error(error); }
-    setLoading(false);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setMessage("Failed to upload image.");
+    } finally {
+      setLoading(false);
+    }
   };
-  
+
+  // Wrapper for handleSave
+  const saveSection = (id, data) => handleSave(id, data);
+
   const handleTrustChange = (index, field, value) => {
     const newBadges = [...trustBadges];
-    newBadges[index] = { ...newBadges[index], [field]: value };
+    newBadges[index][field] = value;
     setTrustBadges(newBadges);
   };
 
@@ -178,7 +203,7 @@ const SiteControl = () => {
                </div>
              </div>
 
-             <button onClick={() => handleSave("hero", "main", hero)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
+             <button onClick={() => saveSection("hero_main", hero)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
                {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Changes
              </button>
           </div>
@@ -198,7 +223,7 @@ const SiteControl = () => {
                <textarea value={philosophy.text} onChange={e => setPhilosophy({...philosophy, text: e.target.value})} rows={4} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="Text content..." />
              </div>
 
-             <button onClick={() => handleSave("site_content", "philosophy", philosophy)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
+             <button onClick={() => saveSection("philosophy", philosophy)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
                {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Section
              </button>
           </div>
@@ -209,7 +234,7 @@ const SiteControl = () => {
            <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
               <div className="flex justify-between items-center mb-4">
                  <p className="text-sm text-muted-foreground">Edit the 4 key service highlights.</p>
-                 <button onClick={() => handleSave("site_content", "trust_badges", { items: trustBadges })} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
+                 <button onClick={() => saveSection("trust_badges", { items: trustBadges })} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
                    {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save All
                  </button>
               </div>
@@ -304,7 +329,7 @@ const SiteControl = () => {
                 </div>
              </div>
 
-             <button onClick={() => handleSave("site_content", "footer", footer)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
+             <button onClick={() => saveSection("footer", footer)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
                {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Update Info
              </button>
           </div>
@@ -321,7 +346,7 @@ const SiteControl = () => {
                </p>
              </div>
              <button onClick={handleSeed} disabled={loading} className="px-6 py-2.5 bg-orange-600 text-white rounded-full font-medium hover:bg-orange-700 w-full md:w-auto">
-               {loading ? 'Migrating & Seeding...' : 'Reset Database with Seed Data'}
+               {loading ? 'Seeding Database...' : 'Seed Database'}
              </button>
           </div>
         )}

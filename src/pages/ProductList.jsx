@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import Section from '../components/Section';
 import { getProducts, getCategories } from '../lib/db';
+import { Helmet } from 'react-helmet-async';
 import clsx from 'clsx';
 
 const ProductList = () => {
@@ -33,9 +34,14 @@ const ProductList = () => {
   // Filtered logic is now handled by getProducts(slug) or we filter locally if getProducts returned all.
   // In our db.js getProducts(slug) handles filtering.
   const filteredProducts = products;
+  
+  const pageTitle = activeCategory === 'all' ? 'Our Collection' : categories.find(c => c.slug === activeCategory)?.name || 'Products';
 
   return (
     <Section className="py-32 min-h-screen">
+       <Helmet>
+         <title>{pageTitle} | Cinema Focus</title>
+       </Helmet>
        <div className="space-y-6 mb-24 text-center">
           <h1 className="text-5xl md:text-6xl font-medium tracking-tight">Our Collection.</h1>
           <p className="text-xl text-muted font-light max-w-2xl mx-auto">

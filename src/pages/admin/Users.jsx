@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, deleteDoc, doc, addDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { collection, getDocs, deleteDoc, doc, addDoc, query, orderBy } from 'firebase/firestore';
 import { Loader2, Plus, Trash2, Shield, User } from 'lucide-react';
 
 const Users = () => {
@@ -20,8 +20,15 @@ const Users = () => {
 
   const fetchAdmins = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "admins"));
-      setAdmins(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const q = query(collection(db, 'admins'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        setAdmins(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } else {
+        const simpleSnap = await getDocs(collection(db, 'admins'));
+        setAdmins(simpleSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }
     } catch (error) {
       console.error("Error fetching admins:", error);
     } finally {
@@ -32,7 +39,7 @@ const Users = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to remove this admin access? This does not delete their account, only their listing here.")) {
       try {
-        await deleteDoc(doc(db, "admins", id));
+        await deleteDoc(doc(db, 'admins', id));
         setAdmins(admins.filter(a => a.id !== id));
       } catch (error) {
         console.error("Error removing admin:", error);
@@ -44,11 +51,15 @@ const Users = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      await addDoc(collection(db, "admins"), {
+      // NOTE: This only adds to the 'admins' collection for record keeping.
+      // Actual Firebase Auth user creation should be done via Firebase Console or a secondary Admin App
+      // to avoid signing out the current user.
+      await addDoc(collection(db, 'admins'), {
         email: formData.email,
         role: formData.role,
-        createdAt: new Date().toISOString()
+        createdAt: Date.now()
       });
+      
       fetchAdmins();
       setShowModal(false);
       setFormData({ email: '', role: 'Admin' });

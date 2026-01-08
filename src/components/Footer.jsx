@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Clock } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 const logo = '/images/logo.png';
 
 const Footer = () => {
@@ -18,11 +18,12 @@ const Footer = () => {
   useEffect(() => {
     const fetchFooter = async () => {
       try {
-        const snap = await getDoc(doc(db, "site_content", "footer"));
-        if (snap.exists()) {
-          const data = snap.data();
+        const docRef = doc(db, 'site_content', 'footer');
+        const docSnap = await getDoc(docRef);
+          
+        if (docSnap.exists()) {
           // Merge with defaults to prevent missing fields issues
-          setFooterData(prev => ({ ...prev, ...data }));
+          setFooterData(prev => ({ ...prev, ...docSnap.data() }));
         }
       } catch (error) {
         console.error("Error fetching footer data:", error);

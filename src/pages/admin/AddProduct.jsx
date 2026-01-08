@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
-import { supabase, storageBucket } from '../../lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { db, storage } from '../../lib/firebase';
+import { doc, setDoc, getDocs, collection } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useNavigate, Link } from 'react-router-dom';
 import { Loader2, Plus, X, Upload, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -28,8 +27,10 @@ const AddProduct = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const snap = await getDocs(collection(db, 'categories'));
-      setCategories(snap.docs.map(d => d.data()));
+      const snapshot = await getDocs(collection(db, 'categories'));
+      if (!snapshot.empty) {
+        setCategories(snapshot.docs.map(d => d.data()));
+      }
     };
     fetchCategories();
   }, []);
@@ -78,12 +79,9 @@ const AddProduct = () => {
       if (imageFiles.length > 0) {
         setUploading(true);
         const uploadPromises = imageFiles.map(async (file) => {
-          const filePath = `products/${Date.now()}_${file.name}`;
-          const { error } = await supabase.storage.from(storageBucket).upload(filePath, file);
-          if (error) throw error;
-          
-          const { data } = supabase.storage.from(storageBucket).getPublicUrl(filePath);
-          return data.publicUrl;
+          const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+          await uploadBytes(storageRef, file);
+          return await getDownloadURL(storageRef);
         });
         imageUrls = await Promise.all(uploadPromises);
         setUploading(false);
@@ -92,20 +90,25 @@ const AddProduct = () => {
       // 2. Prepare Data
       const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const productData = {
-        ...formData,
+        name: formData.name,
+        slug: slug,
+        brand: formData.brand,
         price: Number(formData.price),
-        images: imageUrls.length > 0 ? imageUrls : ['https://placehold.co/600x400?text=No+Image'], // Fallback
-        slug, // Store slug in doc data too for easier querying matches
-        createdAt: new Date().toISOString()
+        category: formData.category,
+        shortDescription: formData.shortDescription, // CamelCase for Firestore
+        longDescription: formData.longDescription,   // CamelCase for Firestore
+        featured: formData.featured,
+        images: imageUrls.length > 0 ? imageUrls : ['https://placehold.co/600x400?text=No+Image'], 
+        specifications: formData.specifications.filter(s => s.key && s.value),
       };
 
-      // 3. Save to Firestore
-      await addDoc(collection(db, 'products'), productData);
+      // 3. Insert into Firestore (using slug as ID)
+      await setDoc(doc(db, 'products', slug), productData);
       
       navigate('/admin/products');
     } catch (error) {
       console.error("Error adding product: ", error);
-      alert("Failed to add product.");
+      alert("Failed to add product: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -138,10 +141,10 @@ const AddProduct = () => {
               <input required name="brand" value={formData.brand} onChange={handleChange} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" placeholder="e.g. KEF" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Price ($)</label>
+              <label className="text-sm font-medium">Price</label>
               <input required type="number" name="price" value={formData.price} onChange={handleChange} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" placeholder="2499.99" />
             </div>
-             <div className="space-y-2">
+             <div className="space-y-2 ">
               <label className="text-sm font-medium">Category</label>
               <select required name="category" value={formData.category} onChange={handleChange} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none">
                 <option value="">Select Category</option>

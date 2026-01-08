@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Section from '../components/Section';
-import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 
 const Gallery = () => {
@@ -11,9 +11,19 @@ const Gallery = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "projects"));
-        const fetchedProjects = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setProjects(fetchedProjects);
+        const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+        
+        let formatted = [];
+        if (!snapshot.empty) {
+            formatted = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } else {
+             // Fallback for missing index or empty
+             const simpleSnap = await getDocs(collection(db, 'projects'));
+             formatted = simpleSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        }
+
+        setProjects(formatted);
       } catch (error) {
         console.error("Error fetching projects:", error);
       } finally {

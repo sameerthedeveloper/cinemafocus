@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
@@ -14,12 +14,9 @@ const Products = () => {
 
   const fetchProducts = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "products"));
-      const productsData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setProducts(productsData);
+      const querySnapshot = await getDocs(collection(db, 'products'));
+      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setProducts(data);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -30,7 +27,7 @@ const Products = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        await deleteDoc(doc(db, "products", id));
+        await deleteDoc(doc(db, 'products', id));
         setProducts(products.filter(p => p.id !== id));
       } catch (error) {
         console.error("Error deleting product:", error);

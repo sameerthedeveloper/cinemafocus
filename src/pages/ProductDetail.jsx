@@ -1,9 +1,10 @@
 import { useParams, Link } from 'react-router-dom';
-import { getProduct } from '../lib/db';
 import React, { useState, useEffect } from 'react';
 import Section from '../components/Section';
 import Button from '../components/Button';
-import { ChevronRight, ArrowLeft } from 'lucide-react';
+import { getProduct, getProducts } from '../lib/db';
+import { Helmet } from 'react-helmet-async';
+import { ChevronRight, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -35,6 +36,10 @@ const ProductDetail = () => {
 
   return (
     <div className="animate-fade-in pt-6">
+      <Helmet>
+        <title>{product.name} | Cinema Focus</title>
+        <meta name="description" content={product.shortDescription || product.name} />
+      </Helmet>
       {/* Breadcrumb */}
       <div className="container px-4 mx-auto py-4 flex mt-15 items-center text-sm text-muted-foreground">
         <Link to="/products" className="hover:text-primary transition-colors">Products</Link>
