@@ -8,8 +8,9 @@ const ProductCard = ({ product }) => {
       {/* Image Container - Clean, no borders, gray background */}
       <div className="aspect-square bg-secondary/30 rounded-2xl overflow-hidden relative">
          <img
-          src={product.images[0]}
+          src={product.images?.[0] || '/images/placeholder.png'}
           alt={product.name}
+          onError={(e) => { e.target.src = '/images/placeholder.png'; }}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
       </div>
@@ -19,7 +20,7 @@ const ProductCard = ({ product }) => {
         <h3 className="text-xl md:text-2xl font-medium text-foreground group-hover:text-primary transition-colors">
           {product.name}
         </h3>
-        <p className="text-muted text-sm md:text-base font-medium">
+        <p className="text-muted text-sm md:text-base font-medium uppercase tracking-widest">
            {product.category.replace('-', ' ')}
         </p>
         

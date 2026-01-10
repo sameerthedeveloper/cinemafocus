@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Section from '../components/Section';
 import Button from '../components/Button';
 import { getProduct, getProducts } from '../lib/db';
-import { Helmet } from 'react-helmet-async';
+import SEO from '../components/SEO';
 import { ChevronRight, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 
 const ProductDetail = () => {
@@ -36,10 +36,7 @@ const ProductDetail = () => {
 
   return (
     <div className="animate-fade-in pt-6">
-      <Helmet>
-        <title>{product.name} | Cinema Focus</title>
-        <meta name="description" content={product.shortDescription || product.name} />
-      </Helmet>
+      <SEO title={product.name} description={product.shortDescription || product.name} />
       {/* Breadcrumb */}
       <div className="container px-4 mx-auto py-4 flex mt-15 items-center text-sm text-muted-foreground">
         <Link to="/products" className="hover:text-primary transition-colors">Products</Link>
@@ -77,7 +74,7 @@ const ProductDetail = () => {
            <div className="space-y-12 py-4">
              <div>
                <h3 className="text-primary font-medium text-sm mb-4 tracking-wide uppercase">{product.brand}</h3>
-               <h1 className="text-5xl md:text-6xl font-medium tracking-tight leading-[1] mb-6">{product.name}</h1>
+               <h1 className="text-3xl md:text-5xl lg:text-6xl font-medium tracking-tight leading-[1] mb-6">{product.name}</h1>
                <div className="h-0.5 w-12 bg-white" />
              </div>
 

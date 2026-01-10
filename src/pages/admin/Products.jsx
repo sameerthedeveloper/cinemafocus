@@ -77,7 +77,9 @@ const Products = () => {
                     <td className="p-4 font-medium">{product.name}</td>
                     <td className="p-4 text-muted-foreground">{product.brand}</td>
                     <td className="p-4 text-muted-foreground text-sm capitalize">{product.category?.replace('-', ' ')}</td>
-                    <td className="p-4 font-medium">${product.price?.toLocaleString()}</td>
+                    <td className="p-4 font-medium">
+                      {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.price || 0)}
+                    </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button className="p-2 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-colors">

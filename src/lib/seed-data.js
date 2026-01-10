@@ -1,10 +1,30 @@
-const heroImg = '/images/hero.png';
-const speakersImg = '/images/speakers.png';
-const subwoofersImg = '/images/speakers.png';
-const amplifiersImg = '/images/amplifiers.png';
-const turntablesImg = '/images/turntables.png';
-const productSpeakersImg = '/images/product-speakers.png';
-const productAmpImg = '/images/product-amp.png';
+import { storageBucket } from './supabase';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const bucketName = storageBucket;
+
+// Helper to get consistent image URL
+const getImageUrl = (filename) => {
+    // Check if we have Supabase config (minimal check)
+    if (supabaseUrl && bucketName) {
+        // Construct public URL
+        // Format: https://[project-ref].supabase.co/storage/v1/object/public/[bucket]/[filename]
+        return `${supabaseUrl}/storage/v1/object/public/${bucketName}/${filename}`;
+    }
+    // Fallback to local
+    return `/images/${filename}`;
+};
+
+// Map original local filenames to intended cloud filenames
+// For simplicity, we assume the cloud filenames match these or we hardcode specific ones if known.
+// Ideally, these files should exist in the bucket.
+const heroImg = getImageUrl('hero.png');
+const speakersImg = getImageUrl('speakers.png');
+const subwoofersImg = getImageUrl('speakers.png'); // Reusing speakers for demo
+const amplifiersImg = getImageUrl('amplifiers.png');
+const turntablesImg = getImageUrl('turntables.png');
+const productSpeakersImg = getImageUrl('product-speakers.png');
+const productAmpImg = getImageUrl('product-amp.png');
 
 export const categories = [
     {
@@ -174,5 +194,23 @@ export const trustBadges = [
         icon: "Award",
         title: "Authorized Dealer",
         description: "100% Genuine Products"
+    }
+];
+
+export const projects = [
+    {
+        title: "The Penthouse Suite",
+        imageUrl: getImageUrl('project1.jpg'), // Assuming you have project images or reuse others
+        createdAt: new Date().toISOString()
+    },
+    {
+        title: "Modern Minimalist Home",
+        imageUrl: getImageUrl('project2.jpg'),
+        createdAt: new Date().toISOString()
+    },
+    {
+        title: "Professional Studio Setup",
+        imageUrl: getImageUrl('project3.jpg'),
+        createdAt: new Date().toISOString()
     }
 ];

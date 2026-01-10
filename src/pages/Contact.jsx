@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Section from '../components/Section';
+import SEO from '../components/SEO';
 import Button from '../components/Button';
 import { Mail, Phone, MapPin, Clock, Loader2, CheckCircle } from 'lucide-react';
 import { db } from '../lib/firebase';
@@ -75,6 +76,7 @@ const Contact = () => {
 
   return (
     <div className="animate-fade-in">
+       <SEO title="Contact" description="Ready to elevate your home audio experience? Visit our showroom or send us a message." />
        <Section className="py-20 text-center">
         <h1 className="text-4xl md:text-5xl font-serif font-medium mb-4">Get in Touch</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { db, storage } from '../../lib/firebase';
+import { db } from '../../lib/firebase';
+import { supabase, storageBucket } from '../../lib/supabase';
 import { collection, getDocs, deleteDoc, doc, addDoc, query, orderBy } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 
 const Projects = () => {
@@ -62,10 +62,23 @@ const Projects = () => {
     
     setSaving(true);
     try {
-      // 1. Upload Image
-      const storageRef = ref(storage, `projects/${Date.now()}_${newProject.image.name}`);
-      await uploadBytes(storageRef, newProject.image);
-      const imageUrl = await getDownloadURL(storageRef);
+      // 1. Upload Image to Supabase
+      const fileExt = newProject.image.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+      const bucketName = storageBucket;
+
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .upload(fileName, newProject.image);
+
+      if (error) throw error;
+
+      // Get Public URL
+      const { data: publicUrlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(fileName);
+        
+      const imageUrl = publicUrlData.publicUrl;
 
       // 2. Insert into Firestore
       await addDoc(collection(db, 'projects'), {
@@ -89,7 +102,7 @@ const Projects = () => {
     <div className="p-8 max-w-6xl mx-auto animate-fade-in pb-20">
       <header className="flex justify-between items-center mb-10">
         <div>
-           <h1 className="text-3xl font-medium tracking-tight">Projects</h1>
+           <h1 className="text-3xl font-medium tracking-tight">Gallery</h1>
            <p className="text-muted-foreground mt-1">Manage gallery portfolio items.</p>
         </div>
         <button 
@@ -97,7 +110,7 @@ const Projects = () => {
           className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity"
         >
           <Plus size={18} />
-          Add Project
+          Add Image
         </button>
       </header>
 
@@ -121,7 +134,7 @@ const Projects = () => {
         ))}
         {projects.length === 0 && !loading && (
           <div className="col-span-full py-20 text-center text-muted-foreground bg-secondary/30 rounded-2xl border-dashed border-2 border-border">
-            No projects added yet.
+            No Images Uploaded yet.
           </div>
         )}
       </div>
@@ -130,10 +143,10 @@ const Projects = () => {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
            <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6">
-              <h2 className="text-xl font-medium">Add New Project</h2>
+              <h2 className="text-xl font-medium">Add New Image</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                  <div className="space-y-2">
-                   <label className="text-sm font-medium">Project Title</label>
+                   <label className="text-sm font-medium">Image Title</label>
                    <input 
                      type="text" 
                      required 
@@ -144,7 +157,7 @@ const Projects = () => {
                    />
                  </div>
                  <div className="space-y-2">
-                   <label className="text-sm font-medium">Project Image</label>
+                   <label className="text-sm font-medium">Image</label>
                    <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-secondary/20 transition-colors relative cursor-pointer">
                       <input type="file" required accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
                       {newProject.image ? (

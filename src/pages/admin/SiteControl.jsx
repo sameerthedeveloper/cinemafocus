@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { db, storage } from '../../lib/firebase';
+import { db } from '../../lib/firebase';
+import { supabase, storageBucket } from '../../lib/supabase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Loader2, Save, Upload, Database, LayoutTemplate, Info, Phone, Shield, Globe, Plus, Trash2 } from 'lucide-react';
 import { seedDatabase } from '../../lib/seeder';
+import BackupTools from '../../components/admin/BackupTools';
 
 const SiteControl = () => {
   const [activeTab, setActiveTab] = useState('hero');
@@ -28,7 +29,11 @@ const SiteControl = () => {
       else if (activeTab === 'philosophy') docRef = doc(db, 'site_content', 'philosophy');
       else if (activeTab === 'footer') docRef = doc(db, 'site_content', 'footer');
       else if (activeTab === 'trust') docRef = doc(db, 'site_content', 'trust_badges');
-      else return; // database tab
+      
+      if (!docRef) {
+        setLoading(false);
+        return;
+      }
 
       const docSnap = await getDoc(docRef);
 
@@ -90,11 +95,21 @@ const SiteControl = () => {
 
     try {
       setLoading(true);
-      const storageRef = ref(storage, `hero/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      const publicUrl = await getDownloadURL(storageRef);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `hero/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+      const bucketName = storageBucket;
 
-      setHero(prev => ({ ...prev, imageUrl: publicUrl }));
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      const { data: publicUrlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(fileName);
+
+      setHero(prev => ({ ...prev, imageUrl: publicUrlData.publicUrl }));
       setMessage("Image uploaded! Don't forget to save.");
       
     } catch (error) {
@@ -118,12 +133,26 @@ const SiteControl = () => {
     if (window.confirm("This will overwrite existing products and categories with sample data. Continue?")) {
       setLoading(true);
       try {
-        await seedDatabase();
+        // Create a timeout promise that rejects after 60 seconds
+        const timeout = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error("Request timed out. This might be due to slow network or firewall blocking connections.")), 60000);
+        });
+
+        // Race the seed operation against the timeout
+        await Promise.race([seedDatabase(), timeout]);
+
         setMessage("Database seeded successfully!");
         setTimeout(() => setMessage(''), 3000);
       } catch (error) {
-        console.error(error);
-        setMessage("Error seeding database.");
+        console.error("Seeding Error:", error);
+        
+        let msg = `Error: ${error.message}`;
+        if (error.message.includes("timed out")) {
+             msg = "Error: Operation timed out. Check your internet connection or Firebase Console > Authorized Domains.";
+        }
+            
+        setMessage(msg);
+        alert(msg); 
       } finally {
         setLoading(false);
       }
@@ -337,17 +366,42 @@ const SiteControl = () => {
 
         {/* DATABASE TAB */}
         {activeTab === 'database' && (
-          <div className="bg-background border border-border rounded-2xl p-8 space-y-4">
-             <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl text-orange-800">
-               <h3 className="font-medium flex items-center gap-2 alert-title"><Database size={16}/> Database Seeding</h3>
-               <p className="text-sm mt-1 opacity-90">
-                 Use this to reset your Products and Categories to the default demo data. 
-                 <br/><span className="font-bold">Warning: This deletes existing data.</span>
+          <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+             <div className="space-y-4">
+               <h3 className="font-medium text-lg">Database Management</h3>
+               <p className="text-sm text-muted-foreground">
+                 Manage your Firestore data. Use backups to save your current state before seeding or resetting.
                </p>
+               
+               {/* Backup & Restore Component */}
+               <BackupTools />
+
+               <div className="my-6 border-t border-border"></div>
+
+               {/* Seeding Section */}
+               <div className="p-5 bg-orange-50/50 border border-orange-100 rounded-xl space-y-4">
+                 <div className="flex items-start gap-4">
+                    <div className="p-2 bg-orange-100 text-orange-600 rounded-lg mt-1">
+                      <Database size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-orange-900">Reset & Seed Database</h4>
+                      <p className="text-sm text-orange-800/80 mt-1 mb-3">
+                         This will <strong>delete all existing products and categories</strong> and replace them with the default demo data.
+                         <br/>
+                         Images will be served from Supabase storage if configured.
+                      </p>
+                      <button 
+                        onClick={handleSeed} 
+                        disabled={loading} 
+                        className="px-5 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors shadow-sm"
+                      >
+                         {loading ? 'Processing...' : 'Reset to Default Seed Data'}
+                      </button>
+                    </div>
+                 </div>
+               </div>
              </div>
-             <button onClick={handleSeed} disabled={loading} className="px-6 py-2.5 bg-orange-600 text-white rounded-full font-medium hover:bg-orange-700 w-full md:w-auto">
-               {loading ? 'Seeding Database...' : 'Seed Database'}
-             </button>
           </div>
         )}
         

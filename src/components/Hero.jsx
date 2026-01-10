@@ -19,7 +19,7 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, imageUrl }) => {
       {/* Content - Centered for max impact */}
       <div className="container px-6 relative z-10 mx-auto text-center">
          <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
-           <h1 className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tight text-black leading-[1.1]">
+           <h1 className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-black leading-[1.1]">
              {title}
            </h1>
            <p className="text-xl md:text-2xl text-gray-700 font-light max-w-2xl mx-auto leading-relaxed">

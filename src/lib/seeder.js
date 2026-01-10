@@ -1,93 +1,102 @@
-import { db, storage, auth } from "./firebase";
-import { collection, doc, writeBatch } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db } from "./firebase";
+import { collection, doc, writeBatch, getDocs, setDoc } from "firebase/firestore";
 import { categories, products, hero, trustBadges } from "./seed-data";
+import { supabase, storageBucket } from "./supabase";
 
-// Helper to upload local public assets to Firebase Storage
-const uploadLocalAsset = async (path) => {
-    if (!path || !path.startsWith('/')) return path; // Skip if already URL or empty
+const ASSETS_TO_UPLOAD = [
+    'hero.png',
+    'speakers.png',
+    'amplifiers.png',
+    'turntables.png',
+    'product-speakers.png',
+    'product-amp.png'
+];
 
-    try {
-        console.log(`Fetching asset: ${path}`);
-        const response = await fetch(path);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
+const uploadAssetsToSupabase = async () => {
+    const bucketName = storageBucket;
+    console.log(`Starting Supabase asset upload to bucket: ${bucketName}...`);
+
+    const uploads = ASSETS_TO_UPLOAD.map(async (filename) => {
+        try {
+            // 1. Fetch local file
+            const response = await fetch(`/images/${filename}`);
+            if (!response.ok) throw new Error(`Missing local file: ${filename}`);
+            const blob = await response.blob();
+
+            // 2. Upload to Supabase (Upsert to overwrite)
+            const { error } = await supabase.storage
+                .from(bucketName)
+                .upload(filename, blob, { upsert: true });
+
+            if (error) throw error;
+            console.log(`Saved ${filename} to Supabase.`);
+        } catch (e) {
+            console.warn(`Failed to upload ${filename}:`, e.message);
         }
-        const blob = await response.blob();
-        console.log(`Blob size for ${path}: ${blob.size}`);
-        if (blob.size === 0) throw new Error("Empty blob");
+    });
 
-        const filename = path.split('/').pop();
-        const storageRef = ref(storage, `seeded_assets/${Date.now()}_${filename}`);
-
-        await uploadBytes(storageRef, blob);
-        const downloadURL = await getDownloadURL(storageRef);
-        console.log(`Uploaded ${path} to ${downloadURL}`);
-
-        return downloadURL;
-    } catch (error) {
-        console.warn(`Failed to upload asset to Firebase: ${path}`, error);
-        // Do not return original path if it failed, maybe return null or handle it? 
-        // For now, returning path ensures app doesn't crash but image will form 404 if it was local.
-        return path;
-    }
+    await Promise.all(uploads);
+    console.log("Asset upload complete.");
 };
 
 export const seedDatabase = async () => {
-    // Notify user via console/alert since this takes time
-    const batch = writeBatch(db);
+    console.log("Starting database reset...");
 
-    // Log auth state to debug potential permission issues
-    const user = auth.currentUser;
-    console.log("Starting database seed with Firebase...");
-    console.log("Current User:", user ? `Logged in as ${user.email}` : "Not logged in (Unauthenticated)");
-
-    if (!user) {
-        console.warn("WARNING: You are not logged in. If your Firestore Rules require authentication, this will fail.");
+    // 0. Ensure Assets exist in Supabase (The "Fetch from Supabase" requirement)
+    try {
+        await uploadAssetsToSupabase();
+    } catch (e) {
+        console.error("Asset upload failed, continuing with data reset...");
     }
 
+    // 1. Delete existing collections (The "Old Method" - Full Reset)
+    // We use a separate batch for deletes to ensure we clear the slate.
+    const batchDelete = writeBatch(db);
+    const collections = ['products', 'categories', 'hero', 'site_content', 'projects'];
 
-    // 1. Seed Categories
+    for (const colName of collections) {
+        const snapshot = await getDocs(collection(db, colName));
+        snapshot.docs.forEach((doc) => {
+            batchDelete.delete(doc.ref);
+        });
+    }
+    await batchDelete.commit();
+    console.log("Cleared existing data.");
+
+    // 2. Write Seed Data
+    const batch = writeBatch(db);
+
+    // Seed Categories
     for (const cat of categories) {
-        // Upload image if needed
-        if (cat.imageUrl && cat.imageUrl.startsWith('/')) {
-            cat.imageUrl = await uploadLocalAsset(cat.imageUrl);
-        }
-        const ref = doc(collection(db, "categories"), cat.slug);
+        const ref = doc(db, "categories", cat.slug);
         batch.set(ref, cat);
     }
 
-    // 2. Seed Products
+    // Seed Products
     for (const prod of products) {
-        // Handle images array
-        if (prod.images && Array.isArray(prod.images)) {
-            const newImages = [];
-            for (const img of prod.images) {
-                if (img.startsWith('/')) {
-                    newImages.push(await uploadLocalAsset(img));
-                } else {
-                    newImages.push(img);
-                }
-            }
-            prod.images = newImages;
-        }
-        const ref = doc(collection(db, "products"), prod.slug);
+        const ref = doc(db, "products", prod.slug);
         batch.set(ref, prod);
     }
 
-    // 3. Seed Hero
-    if (hero.imageUrl && hero.imageUrl.startsWith('/')) {
-        hero.imageUrl = await uploadLocalAsset(hero.imageUrl);
+    // Seed Projects (New)
+    const { projects } = await import('./seed-data'); // Dynamic import
+    if (projects) {
+        for (const proj of projects) {
+            const ref = doc(collection(db, "projects")); // Auto-ID for projects
+            batch.set(ref, proj);
+        }
     }
-    const heroRef = doc(collection(db, "hero"), "main");
+
+    // Seed Hero
+    const heroRef = doc(db, "hero", "main");
     batch.set(heroRef, hero);
 
-    // 4. Seed Trust Badges (Single Document in site_content)
-    const trustRef = doc(collection(db, "site_content"), "trust_badges");
+    // Seed Trust Badges
+    const trustRef = doc(db, "site_content", "trust_badges");
     batch.set(trustRef, { items: trustBadges });
 
-    // 5. SEO & Footer Defaults (for completeness)
-    const seoRef = doc(collection(db, "site_content"), "seo");
+    // Seed Defaults
+    const seoRef = doc(db, "site_content", "seo");
     batch.set(seoRef, {
         siteTitle: 'Cinema Focus',
         titleSuffix: '| Premium Audio',
@@ -95,7 +104,7 @@ export const seedDatabase = async () => {
         defaultKeywords: 'audio, hifi, speakers, home theater, cinema focus',
     });
 
-    const footerRef = doc(collection(db, "site_content"), "footer");
+    const footerRef = doc(db, "site_content", "footer");
     batch.set(footerRef, {
         address: '123 Audio Lane, Sound City, SC 90210',
         phone: '+1 (555) 123-4567',
@@ -104,14 +113,6 @@ export const seedDatabase = async () => {
         workingHours: "Mon - Fri: 10am - 7pm\nSat - Sun: 11am - 5pm"
     });
 
-
-    try {
-        await batch.commit();
-        console.log("Database seeded & Assets migrated to Firebase successfully!");
-        alert("Database seeded successfully!");
-    } catch (error) {
-        console.error("Error seeding database:", error);
-        alert(`Error seeding database: ${error.message}`);
-        throw error;
-    }
+    await batch.commit();
+    console.log("Database reset and seeded successfully.");
 };

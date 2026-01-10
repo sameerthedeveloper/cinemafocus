@@ -52,7 +52,7 @@ const AppContent = () => {
              <Route path="categories" element={<AdminCategories />} />
              <Route path="users" element={<AdminUsers />} />
              <Route path="messages" element={<AdminMessages />} />
-             <Route path="projects" element={<AdminProjects />} />
+             <Route path="gallery" element={<AdminProjects />} />
              <Route path="seo" element={<AdminSEO />} />
              <Route path="site-control" element={<SiteControl />} />
           </Route>

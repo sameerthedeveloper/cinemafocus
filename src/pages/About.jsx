@@ -1,11 +1,13 @@
 import React from 'react';
 import Section from '../components/Section';
+import SEO from '../components/SEO';
 const heroImg = '/images/hero-light.png';
 const speakersImg = '/images/speakers.png';
 
 const About = () => {
   return (
     <div className="animate-fade-in">
+      <SEO title="About" description="We are more than just a retailer; we are a destination for those who seek to experience music and film exactly as the artist intended." />
       <Section className="py-20 text-center">
         <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-6">About Cinema Focus</h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">

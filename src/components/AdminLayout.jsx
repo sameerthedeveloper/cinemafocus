@@ -19,7 +19,7 @@ const AdminLayout = () => {
     { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Products", path: "/admin/products", icon: Package },
     { label: "Categories", path: "/admin/categories", icon: LayoutGrid },
-    { label: "Projects", path: "/admin/projects", icon: Image },
+    { label: "Gallery", path: "/admin/gallery", icon: Image },
     { label: "Users", path: "/admin/users", icon: Users },
     { label: "Messages", path: "/admin/messages", icon: MessageSquare },
     { label: "SEO", path: "/admin/seo", icon: Search },

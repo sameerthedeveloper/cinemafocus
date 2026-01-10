@@ -47,9 +47,12 @@ const Dashboard = () => {
 
   return (
     <div className="p-8 max-w-7xl mx-auto animate-fade-in pb-20">
-      <header className="mb-10">
-           <h1 className="text-3xl font-medium tracking-tight">Dashboard</h1>
-           <p className="text-muted-foreground mt-1">Overview of your store performance.</p>
+      <header className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+           <div>
+               <h1 className="text-3xl font-medium tracking-tight">Dashboard</h1>
+               <p className="text-muted-foreground mt-1">Overview of your store performance.</p>
+           </div>
+           
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

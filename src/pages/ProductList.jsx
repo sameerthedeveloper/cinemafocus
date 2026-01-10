@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import Section from '../components/Section';
 import { getProducts, getCategories } from '../lib/db';
-import { Helmet } from 'react-helmet-async';
+import SEO from '../components/SEO';
 import clsx from 'clsx';
 
 const ProductList = () => {
@@ -39,9 +39,7 @@ const ProductList = () => {
 
   return (
     <Section className="py-32 min-h-screen">
-       <Helmet>
-         <title>{pageTitle} | Cinema Focus</title>
-       </Helmet>
+       <SEO title={pageTitle} />
        <div className="space-y-6 mb-24 text-center">
           <h1 className="text-5xl md:text-6xl font-medium tracking-tight">Our Collection.</h1>
           <p className="text-xl text-muted font-light max-w-2xl mx-auto">
@@ -75,7 +73,7 @@ const ProductList = () => {
        </div>
 
        {/* Grid */}
-       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-x-12 gap-y-24">
           {filteredProducts.map((product) => (
             <ProductCard key={product.slug} product={product} />
           ))}
