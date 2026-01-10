@@ -82,9 +82,9 @@ const Products = () => {
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-colors">
+                        <Link to={`/admin/products/edit/${product.id}`} className="p-2 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-colors">
                           <Edit size={16} />
-                        </button>
+                        </Link>
                         <button 
                           onClick={() => handleDelete(product.id)}
                           className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
