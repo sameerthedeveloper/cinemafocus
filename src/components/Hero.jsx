@@ -10,6 +10,8 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, imageUrl }) => {
         <img 
           src={imageUrl} 
           alt="Hero Background" 
+          fetchPriority="high"
+          loading="eager"
           className="w-full h-full object-cover"
         />
         {/* Subtle gradient overlay from bottom to blend */}

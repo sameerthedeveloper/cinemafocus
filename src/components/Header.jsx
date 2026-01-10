@@ -46,6 +46,8 @@ const Header = () => {
           <img 
             src={logo} 
             alt="Cinema Focus Logo" 
+            width="240"
+            height="71"
             className="h-10 md:h-12 w-auto object-contain" 
           />
         </Link>

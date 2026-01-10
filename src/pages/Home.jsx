@@ -22,12 +22,12 @@ const CustomIcon = ({ name, ...props }) => {
 };
 
 const Home = () => {
-  const [heroData, setHeroData] = useState(null);
-  const [categoriesData, setCategoriesData] = useState([]);
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [trustBadgesData, setTrustBadgesData] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [heroData, setHeroData] = useState(fallbackHero);
+  const [categoriesData, setCategoriesData] = useState(seedCategories);
+  const [featuredProducts, setFeaturedProducts] = useState(seedProducts.slice(0, 3));
+  const [trustBadgesData, setTrustBadgesData] = useState(seedTrustBadges);
+  const [projects, setProjects] = useState([]); // Projects don't have seed export in import list, check imports?
+  const [loading, setLoading] = useState(false); // No longer loading initially
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,11 +42,11 @@ const Home = () => {
         
         // db.js handles the fallback to seed data if DB is empty/fails
         // so we can blindly set whatever we receive.
-        setHeroData(h);
-        setCategoriesData(c || []);
-        setFeaturedProducts(f ? f.slice(0, 3) : []);
-        setTrustBadgesData(t || []);
-        setProjects(p || []);
+        if (h) setHeroData(h);
+        if (c) setCategoriesData(c);
+        if (f) setFeaturedProducts(f.slice(0, 3));
+        if (t) setTrustBadgesData(t);
+        if (p) setProjects(p);
         
       } catch (error) {
         console.error("Home Page Fetch Error:", error);
@@ -57,9 +57,8 @@ const Home = () => {
     fetchData();
   }, []);
 
-  if (loading || !heroData) {
-     return <div className="min-h-screen flex items-center justify-center bg-background"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
-  }
+  // Remove loading block
+
 
   return (
     <div className="animate-fade-in pb-20">
