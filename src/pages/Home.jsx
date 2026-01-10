@@ -7,7 +7,7 @@ import CategoryCard from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
 import SEO from '../components/SEO';
-import * as Icon from 'lucide-react';
+import { Globe, ShieldCheck, Headphones, Award } from 'lucide-react';
 import { getHero, getCategories, getFeaturedProducts, getTrustBadges, getProjects } from '../lib/db';
 import { hero as fallbackHero, categories as seedCategories, products as seedProducts, trustBadges as seedTrustBadges } from '../lib/seed-data';
 
@@ -16,8 +16,15 @@ const imgSpeakers = '/images/speakers.webp';
 const imgTurntables = '/images/turntables.webp';
 const imgAmps = '/images/amplifiers.webp';
 
+const iconMap = {
+  Globe,
+  ShieldCheck,
+  Headphones,
+  Award
+};
+
 const CustomIcon = ({ name, ...props }) => {
-  const LucideIcon = Icon[name];
+  const LucideIcon = iconMap[name];
   return LucideIcon ? <LucideIcon {...props} /> : null;
 };
 
