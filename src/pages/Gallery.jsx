@@ -61,6 +61,8 @@ const Gallery = () => {
                 <img 
                   src={project.imageUrl} 
                   alt={project.title} 
+                  loading="lazy"
+                  decoding="async"
                   className="absolute inset-0 w-full h-full object-contain"
                 />
                 
@@ -68,6 +70,8 @@ const Gallery = () => {
                 <img 
                   src={project.imageUrl} 
                   alt={project.title} 
+                  loading="lazy"
+                  decoding="async"
                   className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out group-hover:opacity-0"
                 />
 

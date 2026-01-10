@@ -42,10 +42,10 @@ const Header = () => {
     >
       <div className="container px-6 mx-auto flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="block hover:opacity-80 transition-opacity z-50">
+        <Link to="/" className="block hover:opacity-80 transition-opacity z-50" aria-label="Cinema Focus Home">
           <img 
             src={logo} 
-            alt="Cinema Focus" 
+            alt="Cinema Focus Logo" 
             className="h-10 md:h-12 w-auto object-contain" 
           />
         </Link>
@@ -75,21 +75,22 @@ const Header = () => {
         {/* Mobile Fullscreen Menu */}
         <div 
           className={clsx(
-            "fixed top-50  inset-0 bg-white backdrop-blur-2xl z-40 flex flex-col items-center justify-center transition-all duration-500 ease-in-out md:hidden",
+            "fixed inset-0 mt-49 bg-white backdrop-blur-2xl z-40 flex flex-col items-center justify-center transition-all duration-500 ease-in-out md:hidden",
             isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
         >
-          <nav className="flex  flex-col items-center gap-8">
+          <nav className="flex  flex-col items-start p-7 bg-white w-full gap-8">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
                 to={link.path} 
                 onClick={() => setIsMenuOpen(false)}
-                className="text-2xl font-medium text-foreground hover:text-primary transition-colors tracking-tight"
+                className="text-xl font-medium text-foreground hover:text-primary transition-colors tracking-tight"
               >
                 {link.name}
               </Link>
             ))}
+            
           </nav>
         </div>
       </div>

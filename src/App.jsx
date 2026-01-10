@@ -1,33 +1,46 @@
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { Loader2 } from 'lucide-react';
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
-import Home from './pages/Home';
-import ProductList from './pages/ProductList';
-import ProductDetail from './pages/ProductDetail';
-import CategoryPage from './pages/CategoryPage';
-import Gallery from './pages/Gallery';
-import About from './pages/About';
-import Contact from './pages/Contact';
 
-// Admin Components & Pages
-import AdminLayout from './components/AdminLayout';
-import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/admin/Login';
-import Dashboard from './pages/admin/Dashboard';
-import AdminProducts from './pages/admin/Products';
-import AdminAddProduct from './pages/admin/AddProduct';
-import SiteControl from './pages/admin/SiteControl';
-import AdminCategories from './pages/admin/Categories';
-import AdminUsers from './pages/admin/Users';
-import AdminMessages from './pages/admin/Messages';
-import AdminProjects from './pages/admin/Projects';
-import AdminSEO from './pages/admin/SEO';
+// Lazy Load Pages
+const Home = lazy(() => import('./pages/Home'));
+const ProductList = lazy(() => import('./pages/ProductList'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const CategoryPage = lazy(() => import('./pages/CategoryPage'));
+const Gallery = lazy(() => import('./pages/Gallery'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+
+// Admin Components & Pages  (Lazy Loaded)
+import AdminLayout from './components/AdminLayout'; // Layout can remain static or lazy, keeping static for sidebar
+import ProtectedRoute from './components/ProtectedRoute'; // Keep static for faster auth check
+
+const Login = lazy(() => import('./pages/admin/Login'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminProducts = lazy(() => import('./pages/admin/Products'));
+const AdminAddProduct = lazy(() => import('./pages/admin/AddProduct'));
+const SiteControl = lazy(() => import('./pages/admin/SiteControl'));
+const AdminCategories = lazy(() => import('./pages/admin/Categories'));
+const AdminUsers = lazy(() => import('./pages/admin/Users'));
+const AdminMessages = lazy(() => import('./pages/admin/Messages'));
+const AdminProjects = lazy(() => import('./pages/admin/Projects'));
+const AdminSEO = lazy(() => import('./pages/admin/SEO'));
+
 import { usePageTracking } from './lib/analytics';
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <Loader2 className="animate-spin text-primary" size={32} />
+  </div>
+);
 
 const AppContent = () => {
   usePageTracking();
   return (
+    <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Public Routes */}
         <Route element={<Layout />}>
@@ -59,6 +72,7 @@ const AppContent = () => {
         </Route>
         
       </Routes>
+    </Suspense>
   );
 };
 
