@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { Menu, X } from 'lucide-react';
-const logo = '/images/logo.png';
+const logo = '/images/logo.webp';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
