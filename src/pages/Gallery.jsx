@@ -83,7 +83,7 @@ const Gallery = () => {
           </div>
         ) : (
           <div className="text-center py-12 bg-secondary/20 rounded-lg">
-            <p className="text-muted-foreground">No projects uploaded yet.</p>
+            <p className="text-muted-foreground">No images uploaded yet.</p>
           </div>
         )}
       </div>

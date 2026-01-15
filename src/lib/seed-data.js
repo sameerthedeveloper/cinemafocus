@@ -18,13 +18,13 @@ const getImageUrl = (filename) => {
 // Map original local filenames to intended cloud filenames
 // For simplicity, we assume the cloud filenames match these or we hardcode specific ones if known.
 // Ideally, these files should exist in the bucket.
-const heroImg = getImageUrl('hero.webp');
-const speakersImg = getImageUrl('speakers.webp');
-const subwoofersImg = getImageUrl('speakers.webp'); // Reusing speakers for demo
-const amplifiersImg = getImageUrl('amplifiers.webp');
-const turntablesImg = getImageUrl('turntables.webp');
-const productSpeakersImg = getImageUrl('product-speakers.webp');
-const productAmpImg = getImageUrl('product-amp.webp');
+const heroImg = '/images/hero.webp';
+const speakersImg = '/images/speakers.webp';
+const subwoofersImg = '/images/speakers.webp'; // Reusing speakers for demo
+const amplifiersImg = '/images/amplifiers.webp';
+const turntablesImg = '/images/turntables.webp';
+const productSpeakersImg = '/images/product-speakers.webp';
+const productAmpImg = '/images/product-amp.webp';
 
 export const categories = [
     {
@@ -200,17 +200,17 @@ export const trustBadges = [
 export const projects = [
     {
         title: "The Penthouse Suite",
-        imageUrl: getImageUrl('project1.jpg'), // Assuming you have project images or reuse others
+        imageUrl: '/images/hero.webp',
         createdAt: new Date().toISOString()
     },
     {
         title: "Modern Minimalist Home",
-        imageUrl: getImageUrl('project2.jpg'),
+        imageUrl: '/images/speakers.webp',
         createdAt: new Date().toISOString()
     },
     {
         title: "Professional Studio Setup",
-        imageUrl: getImageUrl('project3.jpg'),
+        imageUrl: '/images/amplifiers.webp',
         createdAt: new Date().toISOString()
     }
 ];
