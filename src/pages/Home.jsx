@@ -9,7 +9,9 @@ import Button from '../components/Button';
 import SEO from '../components/SEO';
 import { Globe, ShieldCheck, Headphones, Award } from 'lucide-react';
 import { getHero, getCategories, getFeaturedProducts, getTrustBadges, getProjects } from '../lib/db';
-import { hero as fallbackHero, categories as seedCategories, products as seedProducts, trustBadges as seedTrustBadges } from '../lib/seed-data';
+import { hero as fallbackHero, categories as seedCategories, products as seedProducts, trustBadges as seedTrustBadges, newLaunches as seedNewLaunches, pressReleases as seedPressReleases } from '../lib/seed-data';
+import NewLaunches from '../components/NewLaunches';
+import PressReleases from '../components/PressReleases';
 
 // Local Assets for Fallback
 const imgSpeakers = '/images/speakers.webp';
@@ -32,6 +34,8 @@ const Home = () => {
   const [heroData, setHeroData] = useState(fallbackHero);
   const [categoriesData, setCategoriesData] = useState(seedCategories);
   const [featuredProducts, setFeaturedProducts] = useState(seedProducts.slice(0, 3));
+  const [newLaunchesData, setNewLaunchesData] = useState(seedNewLaunches);
+  const [pressReleasesData, setPressReleasesData] = useState(seedPressReleases);
   const [trustBadgesData, setTrustBadgesData] = useState(seedTrustBadges);
   const [projects, setProjects] = useState([]); // Projects don't have seed export in import list, check imports?
   const [loading, setLoading] = useState(false); // No longer loading initially
@@ -78,6 +82,12 @@ const Home = () => {
         ctaLink={heroData.ctaLink || "/products"}
         imageUrl={heroData.imageUrl}
       />
+
+      {/* 6.1.5 New Launches Section */}
+      <NewLaunches products={newLaunchesData} />
+
+      {/* 6.1.6 Press Release Section */}
+      <PressReleases releases={pressReleasesData} />
 
       {/* 6.2 Categories Section - Deduplicated, Grid */}
       <Section id="categories" className="bg-background">

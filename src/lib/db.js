@@ -1,6 +1,6 @@
 import { db } from "./firebase";
 import { collection, getDocs, getDoc, doc, query, where, orderBy, limit } from "firebase/firestore";
-import { products as seedProducts, categories as seedCategories, hero as seedHero, trustBadges as seedTrustBadges } from "./seed-data";
+import { products as seedProducts, categories as seedCategories, hero as seedHero, trustBadges as seedTrustBadges, newLaunches as seedNewLaunches } from "./seed-data";
 
 // Toggle to force mock data if needed (e.g. if env vars missing)
 const USE_MOCK = false;
@@ -114,4 +114,11 @@ export const getProjects = async () => {
         console.error("getProjects error:", e);
         return [];
     }
+};
+
+export const getNewLaunches = async () => {
+    // For now, just return seed data as we don't have a specific "new launches" flag in Firestore logic yet
+    // or we could query by date if we had a createdAt field on products.
+    // Given the prompt implies using the specific New Launches section data:
+    return seedNewLaunches;
 };

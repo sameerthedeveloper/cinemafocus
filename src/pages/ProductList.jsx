@@ -2,27 +2,53 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import Section from '../components/Section';
-import { getProducts, getCategories } from '../lib/db';
+import { getProducts, getCategories, getNewLaunches } from '../lib/db';
 import SEO from '../components/SEO';
 import clsx from 'clsx';
 
 const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get('category') || 'all';
+  const sortParam = searchParams.get('sort');
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Handle sort=newest by redirecting/setting category to new-arrivals if not already set
+  useEffect(() => {
+     if (sortParam === 'newest' && activeCategory !== 'new-arrivals') {
+         setSearchParams({ category: 'new-arrivals' });
+     }
+  }, [sortParam, activeCategory, setSearchParams]);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const [p, c] = await Promise.all([
-        getProducts(activeCategory === 'all' ? null : activeCategory),
-        getCategories()
-      ]);
-      setProducts(p);
-      setCategories(c);
-      setLoading(false);
+      
+      try {
+        let p, c;
+        
+        // Fetch Categories
+        c = await getCategories();
+        // Add "New Arrivals" as the first category
+        const newArrivalsCat = { name: "New Arrivals", slug: "new-arrivals" };
+        c = [newArrivalsCat, ...c];
+
+        // Fetch Products based on category
+        if (activeCategory === 'new-arrivals') {
+            p = await getNewLaunches();
+        } else {
+            p = await getProducts(activeCategory === 'all' ? null : activeCategory);
+        }
+
+        setProducts(p);
+        setCategories(c);
+      } catch (err) {
+          console.error("Failed to fetch products", err);
+      } finally {
+          setLoading(false);
+      }
     };
     fetchData();
   }, [activeCategory]);

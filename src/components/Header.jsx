@@ -22,8 +22,10 @@ const Header = () => {
   }, []);
 
   const navLinks = [
+    { name: 'New Launches', path: '/products?sort=newest' },
     { name: 'Products', path: '/products' },
     { name: 'Gallery', path: '/gallery' },
+    { name: 'Press Room', path: '/press' },
     { name: 'About', path: '/about' },
     { name: 'Contact', path: '/contact' },
   ];
@@ -77,7 +79,7 @@ const Header = () => {
         {/* Mobile Fullscreen Menu */}
         <div 
           className={clsx(
-            "fixed inset-0 mt-49 bg-white backdrop-blur-2xl z-40 flex flex-col items-center justify-center transition-all duration-500 ease-in-out md:hidden",
+            "fixed inset-0 mt-64 bg-white backdrop-blur-2xl z-40 flex flex-col items-center justify-center transition-all duration-500 ease-in-out md:hidden",
             isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
         >

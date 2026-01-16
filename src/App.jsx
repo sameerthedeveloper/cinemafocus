@@ -13,6 +13,8 @@ const CategoryPage = lazy(() => import('./pages/CategoryPage'));
 const Gallery = lazy(() => import('./pages/Gallery'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
+const PressReleases = lazy(() => import('./pages/PressReleases'));
+const PressReleaseDetail = lazy(() => import('./pages/PressReleaseDetail'));
 
 // Admin Components & Pages  (Lazy Loaded)
 import AdminLayout from './components/AdminLayout'; // Layout can remain static or lazy, keeping static for sidebar
@@ -52,6 +54,8 @@ const AppContent = () => {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/press" element={<PressReleases />} />
+          <Route path="/press/:id" element={<PressReleaseDetail />} />
         </Route>
 
         {/* Admin Routes */}

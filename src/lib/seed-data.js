@@ -214,3 +214,85 @@ export const projects = [
         createdAt: new Date().toISOString()
     }
 ];
+
+export const newLaunches = [
+    {
+        slug: "sonus-faber-lumina-v",
+        name: "Sonus faber Lumina V",
+        brand: "Sonus faber",
+        price: 2800,
+        category: "floorstanding-speakers",
+        shortDescription: "A compact floorstander that delivers a big sound.",
+        longDescription: "The Lumina collection by Sonus faber presents an exciting change, new to the typical Sonus faber product design portfolio but still able to embody the history and values of the brand.",
+        images: [
+            "/images/speakers.webp",
+            "https://images.unsplash.com/photo-1543512214-318c77a072d8?auto=format&fit=crop&q=80&w=800"
+        ],
+        featured: true,
+        specifications: [
+            { key: "Frequency Response", value: "38Hz - 24kHz" },
+            { key: "Sensitivity", value: "89dB" },
+            { key: "Impedance", value: "4 Ohms" }
+        ]
+    },
+    {
+        slug: "mcintosh-ma352",
+        name: "McIntosh MA352",
+        brand: "McIntosh",
+        price: 7000,
+        category: "tube-amplifiers",
+        shortDescription: "Hybrid drive integrated amplifier.",
+        longDescription: "The MA352 Integrated Amplifier is a hybrid design that combines the finest of vacuum tube and solid state audio design principles.",
+        images: [
+            "/images/amplifiers.webp",
+            "https://images.unsplash.com/photo-1558434446-c22cb1546872?auto=format&fit=crop&q=80&w=800"
+        ],
+        featured: true,
+        specifications: [
+            { key: "Power Output", value: "200 Watts per channel" },
+            { key: "Tubes", value: "12AX7A, 12AT7" }
+        ]
+    },
+    {
+        slug: "project-debut-pro",
+        name: "Pro-Ject Debut PRO",
+        brand: "Pro-Ject",
+        price: 999,
+        category: "turntables",
+        shortDescription: "The new standard for entry-level audiophile turntables.",
+        longDescription: "The Debut PRO brings an absolutely new design to Pro-Ject turntables. The audiophile turntable is convincing in all respects – not only visually, but also in terms of sound.",
+        images: [
+            "/images/turntables.webp",
+            "https://images.unsplash.com/photo-1543512214-318c77a072d8?auto=format&fit=crop&q=80&w=800"
+        ],
+        featured: true,
+        specifications: [
+            { key: "Speed", value: "33, 45, 78" },
+            { key: "Drive Principle", value: "Belt drive" }
+        ]
+    }
+];
+
+export const pressReleases = [
+    {
+        id: "pr-1",
+        title: "Cinema Focus Wins 'Best Home Theater Installer' Award 2024",
+        date: "October 15, 2024",
+        excerpt: "We are proud to announce that Cinema Focus has been recognized as the top installer in the region for our dedication to excellence and customer satisfaction.",
+        imageUrl: "/images/hero-light.webp" // Reusing hero for now
+    },
+    {
+        id: "pr-2",
+        title: "Partnership Announcement with Sonus faber",
+        date: "September 01, 2024",
+        excerpt: "Cinema Focus is now an official Diamond Dealer for Sonus faber, bringing the full range of Italian masterpieces to our showroom.",
+        imageUrl: "/images/speakers.webp"
+    },
+    {
+        id: "pr-3",
+        title: "Introducing Our New High-Fidelity Listening Room",
+        date: "August 20, 2024",
+        excerpt: "Experience audio like never before in our newly acoustically treated listening room, featuring the flagship KEF Blade One Meta.",
+        imageUrl: "/images/amplifiers.webp"
+    }
+];
