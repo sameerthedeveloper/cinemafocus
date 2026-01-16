@@ -22,7 +22,7 @@ const Header = () => {
   }, []);
 
   const navLinks = [
-    { name: 'New Launches', path: '/products?sort=newest' },
+    { name: 'New Launches', path: '/products?category=new-arrivals' },
     { name: 'Products', path: '/products' },
     { name: 'Gallery', path: '/gallery' },
     { name: 'Press Room', path: '/press' },
