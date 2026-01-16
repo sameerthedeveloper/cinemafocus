@@ -18,7 +18,7 @@ const getImageUrl = (filename) => {
 // Map original local filenames to intended cloud filenames
 // For simplicity, we assume the cloud filenames match these or we hardcode specific ones if known.
 // Ideally, these files should exist in the bucket.
-const heroImg = '/images/hero.webp';
+const heroImg = '/images/hero-light.webp';
 const speakersImg = '/images/speakers.webp';
 const subwoofersImg = '/images/speakers.webp'; // Reusing speakers for demo
 const amplifiersImg = '/images/amplifiers.webp';

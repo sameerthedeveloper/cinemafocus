@@ -86,7 +86,49 @@ const BackupTools = () => {
                     for (const colName of collections) {
                         if (data[colName] && Array.isArray(data[colName])) {
                             data[colName].forEach(item => {
-                                const { id, ...docData } = item;
+                                let { id, ...docData } = item;
+                                
+                                // NORMALIZATION LOGIC FOR PRODUCTS
+                                if (colName === 'products') {
+                                   try {
+                                       // 1. Slug & ID
+                                       if (!docData.slug && docData.name) {
+                                           docData.slug = docData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                                       }
+                                       
+                                       // If no ID, use slug or generate one
+                                       if (!id) {
+                                           id = docData.slug || doc(collection(db, 'products')).id;
+                                       }
+
+                                       // 2. Price Normalization (Handle "₹249,000.00" -> 249000)
+                                       if (typeof docData.price === 'string') {
+                                           const numericPrice = parseFloat(docData.price.replace(/[^0-9.]/g, ''));
+                                           docData.price = isNaN(numericPrice) ? 0 : numericPrice;
+                                       }
+
+                                       // 3. Image mapping (image -> images[])
+                                       if (docData.image && !docData.images) {
+                                           docData.images = [docData.image];
+                                           // delete docData.image; // Optional: keep raw data or clean it up. Keeping for now.
+                                       }
+                                       
+                                       // 4. Default Category
+                                       if (!docData.category) {
+                                           docData.category = 'uncategorized';
+                                       }
+
+                                   } catch (normErr) {
+                                       console.warn('Normalization error for item:', item, normErr);
+                                   }
+                                }
+
+                                if (!id) {
+                                    // Fallback if ID still missing after normalization attempts
+                                    console.warn(`Skipping item in ${colName} with missing ID:`, item);
+                                    return;
+                                }
+
                                 // Merge data: Updates existing fields, keeps others, adds new docs if missing.
                                 batch.set(doc(db, colName, id), docData, { merge: true });
                                 opCount++;

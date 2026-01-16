@@ -86,7 +86,7 @@ const ProductDetail = () => {
              <div className="border-t border-black/10 pt-8">
                <h4 className="font-medium text-lg text-foreground mb-8">Specifications</h4>
                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-                 {product.specifications.map((spec, idx) => (
+                 {(product.specifications || []).map((spec, idx) => (
                    <div key={idx} className="pb-4 border-b border-black/5 mx-2">
                      <dt className="text-sm font-medium text-muted mb-1">{spec.key}</dt>
                      <dd className="text-lg text-foreground font-medium">{spec.value}</dd>
