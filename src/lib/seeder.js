@@ -1,7 +1,7 @@
-import { db } from "./firebase";
+import { db } from "./firebase.js";
 import { collection, doc, writeBatch, getDocs, setDoc } from "firebase/firestore";
-import { categories, products, hero, trustBadges } from "./seed-data";
-import { supabase, storageBucket } from "./supabase";
+import { categories, products, hero, trustBadges, newLaunches, pressReleases } from "./seed-data.js";
+import { supabase, storageBucket } from "./supabase.js";
 
 const ASSETS_TO_UPLOAD = [
     'hero.png',
@@ -52,7 +52,7 @@ export const seedDatabase = async () => {
     // 1. Delete existing collections (The "Old Method" - Full Reset)
     // We use a separate batch for deletes to ensure we clear the slate.
     const batchDelete = writeBatch(db);
-    const collections = ['products', 'categories', 'hero', 'site_content', 'projects'];
+    const collections = ['products', 'categories', 'hero', 'site_content', 'projects', 'new_launches', 'press_releases'];
 
     for (const colName of collections) {
         const snapshot = await getDocs(collection(db, colName));
@@ -76,6 +76,23 @@ export const seedDatabase = async () => {
     for (const prod of products) {
         const ref = doc(db, "products", prod.slug);
         batch.set(ref, prod);
+    }
+
+    // Seed New Launches
+    for (const launch of newLaunches) {
+        // Auto-ID or Slug? Seed data uses slug, so let's use addDoc-like approach or specific doc ID.
+        // Let's use auto-ID for these usually, but for seed consistency we can try to use slug if available or just unique ref.
+        // The seed data has 'slug' which is the product slug, not necessarily distinct ID. 
+        // But for admin usage we just use addDoc. For seeding let's use auto-ID.
+        const ref = doc(collection(db, "new_launches"));
+        batch.set(ref, launch);
+    }
+
+    // Seed Press Releases
+    for (const pr of pressReleases) {
+        // Seed data has 'id' (e.g. pr-1)
+        const ref = doc(db, "press_releases", pr.id);
+        batch.set(ref, pr);
     }
 
     // Seed Projects (New)

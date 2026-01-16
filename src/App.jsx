@@ -31,6 +31,10 @@ const AdminUsers = lazy(() => import('./pages/admin/Users'));
 const AdminMessages = lazy(() => import('./pages/admin/Messages'));
 const AdminProjects = lazy(() => import('./pages/admin/Projects'));
 const AdminSEO = lazy(() => import('./pages/admin/SEO'));
+const AdminPressReleases = lazy(() => import('./pages/admin/PressReleases'));
+const AdminAddPressRelease = lazy(() => import('./pages/admin/AddPressRelease'));
+const AdminNewLaunches = lazy(() => import('./pages/admin/NewLaunches'));
+const AdminAddNewLaunch = lazy(() => import('./pages/admin/AddNewLaunch'));
 
 import { usePageTracking } from './lib/analytics';
 
@@ -60,7 +64,7 @@ const AppContent = () => {
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<Login />} />
-        
+
         <Route element={<ProtectedRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
              <Route index element={<Navigate to="/admin/dashboard" replace />} />
@@ -68,6 +72,13 @@ const AppContent = () => {
              <Route path="products" element={<AdminProducts />} />
              <Route path="products/new" element={<AdminAddProduct />} />
              <Route path="products/edit/:id" element={<AdminEditProduct />} />
+             
+             {/* New Sections */}
+             <Route path="new-launches" element={<AdminNewLaunches />} />
+             <Route path="new-launches/new" element={<AdminAddNewLaunch />} />
+             <Route path="press-releases" element={<AdminPressReleases />} />
+             <Route path="press-releases/new" element={<AdminAddPressRelease />} />
+
              <Route path="categories" element={<AdminCategories />} />
              <Route path="users" element={<AdminUsers />} />
              <Route path="messages" element={<AdminMessages />} />

@@ -21,7 +21,7 @@ const ProductCard = ({ product }) => {
           {product.name}
         </h3>
         <p className="text-muted text-sm md:text-base font-medium uppercase tracking-widest">
-           {product.category.replace('-', ' ')}
+           {product.category ? product.category.replace(/-/g, ' ') : 'New Arrival'}
         </p>
         
         {/* Optional: "Shop >" link that appears or is always there */}

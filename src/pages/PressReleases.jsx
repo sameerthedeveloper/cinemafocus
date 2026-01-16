@@ -1,13 +1,29 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Section from '../components/Section';
 import SEO from '../components/SEO';
 import PressReleaseCard from '../components/PressReleaseCard';
-import { pressReleases } from '../lib/seed-data';
+import { getPressReleases } from '../lib/db';
+import { pressReleases as seedPressReleases } from '../lib/seed-data';
 
 const PressReleases = () => {
-    // In a real app, we might fetch this or paginate
-    const [releases] = useState(pressReleases);
+    const [releases, setReleases] = useState(seedPressReleases);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchReleases = async () => {
+            try {
+                const data = await getPressReleases();
+                if (data) setReleases(data);
+            } catch (error) {
+                console.error("Error fetching press releases:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchReleases();
+    }, []);
+
     const featuredRelease = releases[0];
     const otherReleases = releases.slice(1);
 

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, LayoutGrid, Users, MessageSquare, Image, Search } from 'lucide-react';
+import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, LayoutGrid, Users, MessageSquare, Image, Search, Newspaper, Sparkles } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import clsx from 'clsx';
-const logo = '/images/logo.webp'; 
+const logo = '/images/logo.webp';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -18,6 +18,8 @@ const AdminLayout = () => {
   const navItems = [
     { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Products", path: "/admin/products", icon: Package },
+    { label: "New Launches", path: "/admin/new-launches", icon: Sparkles },
+    { label: "Press Releases", path: "/admin/press-releases", icon: Newspaper },
     { label: "Categories", path: "/admin/categories", icon: LayoutGrid },
     { label: "Gallery", path: "/admin/gallery", icon: Image },
     { label: "Users", path: "/admin/users", icon: Users },

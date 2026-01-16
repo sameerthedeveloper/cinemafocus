@@ -8,7 +8,7 @@ import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
 import SEO from '../components/SEO';
 import { Globe, ShieldCheck, Headphones, Award } from 'lucide-react';
-import { getHero, getCategories, getFeaturedProducts, getTrustBadges, getProjects } from '../lib/db';
+import { getHero, getCategories, getFeaturedProducts, getTrustBadges, getProjects, getNewLaunches, getPressReleases } from '../lib/db';
 import { hero as fallbackHero, categories as seedCategories, products as seedProducts, trustBadges as seedTrustBadges, newLaunches as seedNewLaunches, pressReleases as seedPressReleases } from '../lib/seed-data';
 import NewLaunches from '../components/NewLaunches';
 import PressReleases from '../components/PressReleases';
@@ -43,12 +43,14 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [h, c, f, t, p] = await Promise.all([
+        const [h, c, f, t, p, nl, pr] = await Promise.all([
           getHero(),
           getCategories(),
           getFeaturedProducts(),
           getTrustBadges(),
-          getProjects()
+          getProjects(),
+          getNewLaunches(),
+          getPressReleases()
         ]);
         
         // db.js handles the fallback to seed data if DB is empty/fails
@@ -58,6 +60,8 @@ const Home = () => {
         if (f) setFeaturedProducts(f.slice(0, 3));
         if (t) setTrustBadgesData(t);
         if (p) setProjects(p);
+        if (nl) setNewLaunchesData(nl);
+        if (pr) setPressReleasesData(pr);
         
       } catch (error) {
         console.error("Home Page Fetch Error:", error);

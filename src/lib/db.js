@@ -1,6 +1,6 @@
 import { db } from "./firebase";
 import { collection, getDocs, getDoc, doc, query, where, orderBy, limit } from "firebase/firestore";
-import { products as seedProducts, categories as seedCategories, hero as seedHero, trustBadges as seedTrustBadges, newLaunches as seedNewLaunches } from "./seed-data";
+import { products as seedProducts, categories as seedCategories, hero as seedHero, trustBadges as seedTrustBadges, newLaunches as seedNewLaunches, pressReleases as seedPressReleases } from "./seed-data";
 
 // Toggle to force mock data if needed (e.g. if env vars missing)
 const USE_MOCK = false;
@@ -116,9 +116,54 @@ export const getProjects = async () => {
     }
 };
 
+// ... existing code ...
+
+// ... existing code ...
+
 export const getNewLaunches = async () => {
-    // For now, just return seed data as we don't have a specific "new launches" flag in Firestore logic yet
-    // or we could query by date if we had a createdAt field on products.
-    // Given the prompt implies using the specific New Launches section data:
-    return seedNewLaunches;
+    try {
+        const q = query(collection(db, "new_launches")); // Can order by createdAt if added
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            return [];
+        }
+
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (e) {
+        console.warn("getNewLaunches fetch failed", e);
+        return [];
+    }
+};
+
+export const getPressReleases = async () => {
+    try {
+        const q = query(collection(db, "press_releases"), orderBy("date", "desc"));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            return seedPressReleases;
+        }
+
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (e) {
+        console.warn("getPressReleases fetch failed", e);
+        return seedPressReleases;
+    }
+};
+
+export const getPressRelease = async (id) => {
+    try {
+        const docRef = doc(db, "press_releases", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+        }
+
+        // Fallback
+        return seedPressReleases.find(pr => pr.id === id);
+    } catch (e) {
+        return seedPressReleases.find(pr => pr.id === id);
+    }
 };

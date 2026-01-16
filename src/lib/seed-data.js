@@ -1,4 +1,4 @@
-import { storageBucket } from './supabase';
+import { storageBucket } from './supabase.js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const bucketName = storageBucket;

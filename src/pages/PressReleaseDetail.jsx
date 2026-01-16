@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, Share2 } from 'lucide-react';
 import Section from '../components/Section';
 import SEO from '../components/SEO';
+import { getPressRelease } from '../lib/db';
 import { pressReleases } from '../lib/seed-data';
 
 const PressReleaseDetail = () => {
@@ -12,10 +13,17 @@ const PressReleaseDetail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetch
-    const found = pressReleases.find(pr => pr.id === id);
-    setRelease(found);
-    setLoading(false);
+    const fetchData = async () => {
+      try {
+        const data = await getPressRelease(id);
+        setRelease(data);
+      } catch (error) {
+        console.error("Error fetching press release:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, [id]);
 
   if (loading) return <div className="text-center py-20">Loading...</div>;
