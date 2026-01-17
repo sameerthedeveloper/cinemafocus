@@ -5,10 +5,23 @@ import { products as seedProducts, categories as seedCategories, hero as seedHer
 // Toggle to force mock data if needed (e.g. if env vars missing)
 const USE_MOCK = false;
 
-export const getProducts = async (categorySlug = null) => {
+export const getProducts = async (filter = null) => {
+    // Handle legacy string argument (category slug) or new object filter
+    let categorySlug = null;
+    let brandName = null;
+
+    if (typeof filter === 'string') {
+        categorySlug = filter;
+    } else if (typeof filter === 'object' && filter !== null) {
+        categorySlug = filter.category;
+        brandName = filter.brand;
+    }
+
     if (USE_MOCK) {
-        if (categorySlug) return seedProducts.filter(p => p.category === categorySlug);
-        return seedProducts;
+        let results = seedProducts;
+        if (categorySlug) results = results.filter(p => p.category === categorySlug);
+        if (brandName) results = results.filter(p => p.brand === brandName);
+        return results;
     }
 
     try {
@@ -16,19 +29,65 @@ export const getProducts = async (categorySlug = null) => {
         if (categorySlug) {
             q = query(q, where("category", "==", categorySlug));
         }
+        if (brandName) {
+            // Note: Compound queries might require index
+            q = query(q, where("brand", "==", brandName));
+        }
 
         const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {
             console.warn("Firestore empty, returning seed data");
-            if (categorySlug) return seedProducts.filter(p => p.category === categorySlug);
-            return seedProducts;
+            let results = seedProducts;
+            if (categorySlug) results = results.filter(p => p.category === categorySlug);
+            if (brandName) results = results.filter(p => p.brand === brandName);
+            return results;
         }
 
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Client-side filtering if multiple where clauses (to avoid index issues during dev)
+        // If we used composite query above, this is redundant but safe.
+        if (categorySlug) docs = docs.filter(p => p.category === categorySlug);
+        if (brandName) docs = docs.filter(p => p.brand === brandName);
+
+        return docs;
     } catch (error) {
         console.warn("Firestore fetch failed", error);
-        if (categorySlug) return seedProducts.filter(p => p.category === categorySlug);
-        return seedProducts;
+        let results = seedProducts;
+        if (categorySlug) results = results.filter(p => p.category === categorySlug);
+        if (brandName) results = results.filter(p => p.brand === brandName);
+        return results;
+    }
+};
+
+export const getBrands = async () => {
+    if (USE_MOCK) {
+        const brands = [...new Set(seedProducts.map(p => p.brand))];
+        return brands.sort();
+    }
+
+    try {
+        // Firestore doesn't support "distinct" natively easily without separate collection
+        // For now, we'll fetch all products (or use a separate 'brands' collection if exists)
+        // Optimization: Create a 'brands' collection or a 'metadata' doc.
+        // For this scale, fetching properties is okay, or we just fallback to seed if empty.
+
+        const q = query(collection(db, "products"));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            const brands = [...new Set(seedProducts.map(p => p.brand))];
+            return brands.sort();
+        }
+
+        const products = querySnapshot.docs.map(doc => doc.data());
+        const brands = [...new Set(products.map(p => p.brand))].filter(Boolean);
+        return brands.sort();
+
+    } catch (error) {
+        console.warn("Firestore fetch brands failed", error);
+        const brands = [...new Set(seedProducts.map(p => p.brand))];
+        return brands.sort();
     }
 };
 

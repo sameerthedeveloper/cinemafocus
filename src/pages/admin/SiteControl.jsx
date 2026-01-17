@@ -5,11 +5,14 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Loader2, Save, Upload, Database, LayoutTemplate, Info, Phone, Shield, Globe, Plus, Trash2 } from 'lucide-react';
 import { seedDatabase } from '../../lib/seeder';
 import BackupTools from '../../components/admin/BackupTools';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
+import clsx from 'clsx';
 
 const SiteControl = () => {
   const [activeTab, setActiveTab] = useState('hero');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const themeContext = useSiteSettings();
   
   // States
   const [hero, setHero] = useState({ title: '', imageUrl: '' });
@@ -161,6 +164,7 @@ const SiteControl = () => {
 
   const tabs = [
     { id: 'hero', label: 'Hero Section', icon: LayoutTemplate },
+    { id: 'navigation', label: 'Navigation', icon: Globe },
     { id: 'philosophy', label: 'About/Philosophy', icon: Info },
     { id: 'trust', label: 'Trust Badges', icon: Shield },
     { id: 'footer', label: 'Footer & Contact', icon: Phone },
@@ -405,6 +409,45 @@ const SiteControl = () => {
           </div>
         )}
         
+
+        {/* NAVIGATION TAB */}
+        {activeTab === 'navigation' && (
+           <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+               <div className="flex items-center gap-3 mb-6">
+                   <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                     <LayoutTemplate size={24} />
+                   </div>
+                   <div>
+                     <h3 className="font-medium text-lg">Navigation Settings</h3>
+                     <p className="text-sm text-muted-foreground">Manage site navigation visibility.</p>
+                   </div>
+               </div>
+
+               <div className="flex items-center justify-between p-6 border border-border rounded-xl bg-card">
+                  <div>
+                    <div className="font-medium text-lg">Show Desktop Menu</div>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Toggle the visibility of the navigation links in the header on desktop screens.
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => themeContext.updateSettings({ showDesktopMenu: !themeContext.showDesktopMenu })}
+                    className={clsx(
+                      "relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                      themeContext.showDesktopMenu ? "bg-blue-600" : "bg-zinc-200"
+                    )}
+                  >
+                    <span
+                      className={clsx(
+                        "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-sm",
+                        themeContext.showDesktopMenu ? "translate-x-7" : "translate-x-1"
+                      )}
+                    />
+                  </button>
+               </div>
+            </div>
+        )}
+
         {message && <div className="fixed bottom-8 right-8 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg animate-fade-in-up">{message}</div>}
       </div>
     </div>

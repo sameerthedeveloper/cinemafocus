@@ -12,6 +12,7 @@ import { getHero, getCategories, getFeaturedProducts, getTrustBadges, getProject
 import { hero as fallbackHero, categories as seedCategories, products as seedProducts, trustBadges as seedTrustBadges, newLaunches as seedNewLaunches, pressReleases as seedPressReleases } from '../lib/seed-data';
 import NewLaunches from '../components/NewLaunches';
 import PressReleases from '../components/PressReleases';
+import HomeSkeleton from '../components/HomeSkeleton';
 
 // Local Assets for Fallback
 const imgSpeakers = '/images/speakers.webp';
@@ -38,7 +39,7 @@ const Home = () => {
   const [pressReleasesData, setPressReleasesData] = useState(seedPressReleases);
   const [trustBadgesData, setTrustBadgesData] = useState(seedTrustBadges);
   const [projects, setProjects] = useState([]); // Projects don't have seed export in import list, check imports?
-  const [loading, setLoading] = useState(false); // No longer loading initially
+  const [loading, setLoading] = useState(true); // Start loading immediately
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,8 +54,7 @@ const Home = () => {
           getPressReleases()
         ]);
         
-        // db.js handles the fallback to seed data if DB is empty/fails
-        // so we can blindly set whatever we receive.
+        // Update state with fetched data
         if (h) setHeroData(h);
         if (c) setCategoriesData(c);
         if (f) setFeaturedProducts(f.slice(0, 3));
@@ -66,29 +66,35 @@ const Home = () => {
       } catch (error) {
         console.error("Home Page Fetch Error:", error);
       } finally {
-        setLoading(false);
+        // Add a small artificial delay to ensure smooth exit of loader
+        setTimeout(() => setLoading(false), 800);
       }
     };
     fetchData();
   }, []);
 
-  // Remove loading block
+  if (loading) {
+    return <HomeSkeleton />;
+  }
 
 
   return (
     <div className="animate-fade-in pb-20">
       <SEO title="Home" />
-      {/* 6.1 Hero Section - Already using Refactored Component */}
-      <Hero 
-        title={heroData.title === 'CINEMA FOUCS' ? 'Cinema Focus' : heroData.title}
-        subtitle={heroData.subtitle || "Experience audio perfection with our curated collection."}
-        ctaText={heroData.ctaText || "Discover Products"}
-        ctaLink={heroData.ctaLink || "/products"}
-        imageUrl={heroData.imageUrl}
-      />
-
-      {/* 6.1.5 New Launches Section */}
-      <NewLaunches products={newLaunchesData} />
+      
+      {/* 1. New Launches Section (Apple Style Hero) */}
+      {/* 1. New Launches Section (Apple Style Hero) OR Standard Hero Fallback */}
+      {newLaunchesData && newLaunchesData.length > 0 ? (
+        <NewLaunches products={newLaunchesData} /> 
+      ) : (
+        <Hero 
+          title={heroData.title === 'CINEMA FOUCS' ? 'Cinema Focus' : heroData.title}
+          subtitle={heroData.subtitle || "Experience audio perfection with our curated collection."}
+          ctaText={heroData.ctaText || "Discover Products"}
+          ctaLink={heroData.ctaLink || "/products"}
+          imageUrl={heroData.imageUrl}
+        />
+      )}
 
       {/* 6.1.6 Press Release Section */}
       <PressReleases releases={pressReleasesData} />

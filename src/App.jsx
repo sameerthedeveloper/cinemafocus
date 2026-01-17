@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Loader2 } from 'lucide-react';
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
+import { SiteSettingsProvider } from './context/SiteSettingsContext';
 
 // Lazy Load Pages
 const Home = lazy(() => import('./pages/Home'));
@@ -37,11 +38,11 @@ const AdminNewLaunches = lazy(() => import('./pages/admin/NewLaunches'));
 const AdminAddNewLaunch = lazy(() => import('./pages/admin/AddNewLaunch'));
 
 import { usePageTracking } from './lib/analytics';
+import AppleLoader from './components/AppleLoader';
+import HomeSkeleton from './components/HomeSkeleton';
 
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-[60vh]">
-    <Loader2 className="animate-spin text-primary" size={32} />
-  </div>
+  <HomeSkeleton />
 );
 
 const AppContent = () => {
@@ -100,8 +101,10 @@ const App = () => {
       <title>Cinema Focus</title>
       <meta name="description" content="Premium Audio & Home Cinema Systems" />
     </Helmet>
-    <ScrollToTop />
+    <SiteSettingsProvider>
+      <ScrollToTop />
       <AppContent />
+    </SiteSettingsProvider>
     </Router>
   );
 };
