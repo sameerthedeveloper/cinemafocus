@@ -9,6 +9,7 @@ export const useSiteSettings = () => useContext(SiteSettingsContext);
 export const SiteSettingsProvider = ({ children }) => {
   const [theme] = useState('light'); // Hardcoded as per agreement
   const [showDesktopMenu, setShowDesktopMenu] = useState(true);
+  const [showPrice, setShowPrice] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const [seoSettings, setSeoSettings] = useState({
@@ -25,8 +26,9 @@ export const SiteSettingsProvider = ({ children }) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.showDesktopMenu !== undefined) setShowDesktopMenu(data.showDesktopMenu);
+        if (data.showPrice !== undefined) setShowPrice(data.showPrice);
       } else {
-        setDoc(settingsRef, { showDesktopMenu: true }, { merge: true });
+        setDoc(settingsRef, { showDesktopMenu: true, showPrice: true }, { merge: true });
       }
     });
 
@@ -61,7 +63,7 @@ export const SiteSettingsProvider = ({ children }) => {
   const updateTheme = async () => {};
 
   return (
-    <SiteSettingsContext.Provider value={{ theme, showDesktopMenu, seoSettings, updateSettings, updateTheme, loading }}>
+    <SiteSettingsContext.Provider value={{ theme, showDesktopMenu, showPrice, seoSettings, updateSettings, updateTheme, loading }}>
       {children}
     </SiteSettingsContext.Provider>
   );

@@ -1,34 +1,24 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Section from '../components/Section';
 import SEO from '../components/SEO';
-import { db } from '../lib/firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { Loader2, X } from 'lucide-react';
+import { getProjects } from '../lib/db';
+import { Loader2, X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
+import clsx from 'clsx';
+import ScrollToTop from '../components/ScrollToTop';
 
 const Gallery = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // Try to fetch with ordering first (requires compound index)
-        const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
-        const snapshot = await getDocs(q);
-        
-        const formatted = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setProjects(formatted);
+        const data = await getProjects();
+        setProjects(data);
       } catch (error) {
-        console.warn("Ordered fetch failed (likely missing index), attempting fallback:", error);
-        try {
-            // Fallback to simple unordered fetch
-            const simpleSnap = await getDocs(collection(db, 'projects'));
-            const formatted = simpleSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Optional: Client-side sort if needed, though simple fallback is often enough for "just working"
-            setProjects(formatted);
-        } catch (fallbackError) {
-            console.error("Error fetching projects:", fallbackError);
-        }
+        console.error("Error fetching projects:", error);
       } finally {
         setLoading(false);
       }
@@ -37,56 +27,144 @@ const Gallery = () => {
     fetchProjects();
   }, []);
 
+  const openLightbox = (index) => setLightboxIndex(index);
+  const closeLightbox = () => setLightboxIndex(null);
+  
+  const nextImage = (e) => {
+    e.stopPropagation();
+    setLightboxIndex((prev) => (prev + 1) % projects.length);
+  };
+  
+  const prevImage = (e) => {
+    e.stopPropagation();
+    setLightboxIndex((prev) => (prev - 1 + projects.length) % projects.length);
+  };
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (lightboxIndex === null) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') nextImage(e);
+      if (e.key === 'ArrowLeft') prevImage(e);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxIndex, projects.length]);
+
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in min-h-screen bg-background">
+      <ScrollToTop />
       <SEO title="Gallery" description="A visual journey through some of our most exquisite home cinema and audio installations." />
-      <Section className="text-center pt-20 pb-12">
-        <h1 className="text-4xl md:text-5xl font-serif font-medium mb-4">Our Clients</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          A visual journey through some of our most exquisite home cinema and audio installations.
-        </p>
+      
+      {/* Header Section */}
+      <Section className="text-center pt-32 pb-16">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <span className="text-secondary-foreground/60 uppercase tracking-[0.2em] text-sm font-medium">Gallery</span>
+          <h1 className="text-5xl md:text-7xl font-sans font-medium tracking-tight text-foreground">
+            Visual Harmony.
+          </h1>
+          <p className="text-xl text-muted-foreground font-light leading-relaxed max-w-2xl mx-auto">
+             Where technology meets design. Explore our curated selection of bespoke installations.
+          </p>
+        </div>
       </Section>
 
-      <div className="container px-4 mx-auto pb-24">
+      <div className="container px-4 mx-auto pb-32">
         {loading ? (
-           <div className="flex justify-center py-20"><Loader2 className="animate-spin text-primary" size={32} /></div>
+           <div className="flex justify-center py-32">
+             <div className="flex flex-col items-center gap-4">
+               <Loader2 className="animate-spin text-primary opacity-50" size={32} />
+               <p className="text-sm font-medium text-muted-foreground animate-pulse">Loading Collection...</p>
+             </div>
+           </div>
         ) : projects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          /* Masonry Layout using CSS Columns */
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
              {projects.map((project, idx) => (
               <div 
-                key={project.id} 
-                className="relative overflow-hidden rounded-xl aspect-[4/3] group shadow-sm hover:shadow-md transition-all bg-black"
+                key={project.id || idx} 
+                className="break-inside-avoid relative overflow-hidden rounded-xl group cursor-pointer bg-secondary/10"
+                onClick={() => openLightbox(idx)}
               >
-                {/* Full revealed image (Bottom layer) */}
+                {/* Image */}
                 <img 
                   src={project.imageUrl} 
                   alt={project.title} 
                   loading="lazy"
-                  decoding="async"
-                  className="absolute inset-0 w-full h-full object-contain"
+                  className="w-full h-auto object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
                 
-                {/* Cropped cover image (Top layer) - Fades out on hover */}
-                <img 
-                  src={project.imageUrl} 
-                  alt={project.title} 
-                  loading="lazy"
-                  decoding="async"
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out group-hover:opacity-0"
-                />
-
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pointer-events-none z-10">
-                   <p className="text-white font-medium text-lg tracking-wide">{project.title}</p>
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                   <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex flex-col items-center gap-3">
+                      <ZoomIn className="text-white/80" size={32} strokeWidth={1.5} />
+                      <span className="text-white font-medium text-sm tracking-widest uppercase border border-white/30 px-4 py-1.5 rounded-full">
+                        View Project
+                      </span>
+                   </div>
                 </div>
+                
+                {/* Title (Always visible bottom label styling option, or keep it clean? Keeping clean for premium feel, title on hover or lightbox) */}
+                 <div className="absolute inset-x-0 bottom-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 to-transparent">
+                    <p className="text-white font-medium text-lg">{project.title}</p>
+                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-secondary/20 rounded-lg">
-            <p className="text-muted-foreground">No images uploaded yet.</p>
+          <div className="text-center py-32 bg-secondary/5 rounded-3xl border border-dashed border-secondary">
+            <p className="text-muted-foreground text-lg">Our gallery is currently being curated. Check back soon.</p>
           </div>
         )}
       </div>
+
+      {/* Lightbox Modal - Portal to Body to escape stacking contexts */}
+      {lightboxIndex !== null && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center animate-in fade-in duration-300">
+           {/* Close Button */}
+           <button 
+             onClick={closeLightbox}
+             className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors p-2 z-50 rounded-full hover:bg-white/10"
+           >
+             <X size={32} strokeWidth={1.5} />
+           </button>
+
+           {/* Navigation */}
+           <button 
+              onClick={prevImage}
+              className="absolute left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all z-50 hidden md:block"
+           >
+              <ChevronLeft size={40} strokeWidth={1} />
+           </button>
+
+           <button 
+              onClick={nextImage}
+              className="absolute right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all z-50 hidden md:block"
+           >
+              <ChevronRight size={40} strokeWidth={1} />
+           </button>
+
+           {/* Image Container */}
+           <div 
+             className="relative max-w-7xl max-h-[90vh] w-full p-4 flex flex-col items-center justify-center"
+             onClick={(e) => e.stopPropagation()} 
+           >
+              <img 
+                src={projects[lightboxIndex].imageUrl} 
+                alt={projects[lightboxIndex].title}
+                className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-sm"
+              />
+              <div className="mt-6 text-center">
+                 <h3 className="text-white text-xl md:text-2xl font-light tracking-wide">{projects[lightboxIndex].title}</h3>
+                 <p className="text-white/40 text-sm mt-2 font-mono">
+                   {lightboxIndex + 1} / {projects.length}
+                 </p>
+              </div>
+           </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

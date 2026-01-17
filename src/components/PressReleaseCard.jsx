@@ -1,6 +1,7 @@
 
 import { Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom'; 
+import { formatDate } from '../lib/utils'; 
 // Note: User profile said clsx & tailwind-merge are used. 
 // I'll stick to standard template literals if utils not verified, but usually it's in lib/utils.
 // Let's check lib/utils existence first? No, I'll just use template literals to be safe or check imports.
@@ -31,7 +32,7 @@ const PressReleaseCard = ({ release, variant = 'vertical', className }) => {
          <div className="flex flex-col justify-center h-full space-y-6">
             <div className="flex items-center gap-2 text-sm text-muted uppercase tracking-wider">
               <Calendar size={16} />
-              <span>{release.date}</span>
+              <span>{formatDate(release.date)}</span>
             </div>
             
             <p className="text-muted text-lg leading-relaxed line-clamp-6">
@@ -61,7 +62,7 @@ const PressReleaseCard = ({ release, variant = 'vertical', className }) => {
       <div className="flex flex-col flex-grow">
         <div className="flex items-center gap-2 text-sm text-muted mb-3">
           <Calendar size={14} />
-          <span>{release.date}</span>
+          <span>{formatDate(release.date)}</span>
         </div>
         
         <h3 className="text-xl font-medium text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2">

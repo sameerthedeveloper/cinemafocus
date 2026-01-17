@@ -172,19 +172,19 @@ const SiteControl = () => {
   ];
 
   return (
-    <div className="p-8 max-w-4xl mx-auto animate-fade-in pb-20">
-      <header className="mb-10">
-         <h1 className="text-3xl font-medium tracking-tight">Site Control</h1>
-         <p className="text-muted-foreground mt-1">Customize global website content.</p>
+    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20 md:pb-8">
+      <header className="mb-8 md:mb-10">
+         <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Site Control</h1>
+         <p className="text-muted-foreground mt-1 text-sm md:text-base">Customize global website content.</p>
       </header>
       
       {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-6 border-b border-border mb-8">
+      <div className="flex gap-2 overflow-x-auto pb-6 border-b border-border mb-8 scrollbar-hide">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               activeTab === tab.id 
                 ? "bg-primary text-primary-foreground" 
                 : "bg-secondary text-muted-foreground hover:bg-secondary/70"
@@ -201,7 +201,7 @@ const SiteControl = () => {
         
         {/* HERO TAB */}
         {activeTab === 'hero' && (
-          <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+          <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
              <div className="space-y-2">
                <label className="text-sm font-medium">Main Halo Title</label>
                <input value={hero.title} onChange={e => setHero({...hero, title: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="e.g. The Future of Sound" />
@@ -244,7 +244,7 @@ const SiteControl = () => {
 
         {/* PHILOSOPHY TAB */}
         {activeTab === 'philosophy' && (
-          <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+          <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
              <p className="text-sm text-muted-foreground mb-4">Edit text for specific site sections.</p>
              
              <div className="space-y-2">
@@ -264,7 +264,7 @@ const SiteControl = () => {
         
         {/* TRUST BADGES TAB */}
         {activeTab === 'trust' && (
-           <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+           <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
               <div className="flex justify-between items-center mb-4">
                  <p className="text-sm text-muted-foreground">Edit the 4 key service highlights.</p>
                  <button onClick={() => saveSection("trust_badges", { items: trustBadges })} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2">
@@ -298,7 +298,7 @@ const SiteControl = () => {
 
         {/* FOOTER TAB */}
         {activeTab === 'footer' && (
-          <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+          <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
              <div className="space-y-2">
                <label className="text-sm font-medium">Showroom Address</label>
                <input value={footer.address} onChange={e => setFooter({...footer, address: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border" placeholder="123 Audio Lane" />
@@ -370,7 +370,7 @@ const SiteControl = () => {
 
         {/* DATABASE TAB */}
         {activeTab === 'database' && (
-          <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+          <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
              <div className="space-y-4">
                <h3 className="font-medium text-lg">Database Management</h3>
                <p className="text-sm text-muted-foreground">
@@ -412,7 +412,7 @@ const SiteControl = () => {
 
         {/* NAVIGATION TAB */}
         {activeTab === 'navigation' && (
-           <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
+           <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
                <div className="flex items-center gap-3 mb-6">
                    <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
                      <LayoutTemplate size={24} />
@@ -423,7 +423,7 @@ const SiteControl = () => {
                    </div>
                </div>
 
-               <div className="flex items-center justify-between p-6 border border-border rounded-xl bg-card">
+               <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-6 border border-border rounded-xl bg-card gap-4 md:gap-0">
                   <div>
                     <div className="font-medium text-lg">Show Desktop Menu</div>
                     <div className="text-sm text-muted-foreground mt-1">
@@ -441,6 +441,29 @@ const SiteControl = () => {
                       className={clsx(
                         "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-sm",
                         themeContext.showDesktopMenu ? "translate-x-7" : "translate-x-1"
+                      )}
+                    />
+                  </button>
+               </div>
+               
+               <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-6 border border-border rounded-xl bg-card gap-4 md:gap-0">
+                  <div>
+                    <div className="font-medium text-lg">Price Visibility</div>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Toggle the visibility of product prices across the public site. (Admin always sees prices)
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => themeContext.updateSettings({ showPrice: !themeContext.showPrice })}
+                    className={clsx(
+                      "relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                      themeContext.showPrice ? "bg-blue-600" : "bg-zinc-200"
+                    )}
+                  >
+                    <span
+                      className={clsx(
+                        "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-sm",
+                        themeContext.showPrice ? "translate-x-7" : "translate-x-1"
                       )}
                     />
                   </button>

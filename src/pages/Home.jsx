@@ -129,7 +129,7 @@ const Home = () => {
       </Section>
 
       {/* 6.4 Explore / Philosophy - Simplified text */}
-      <Section id="philosophy" className="py-32">
+      <Section id="philosophy">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-24 text-center md:text-left">
           <div className="space-y-4">
             <h3 className="text-2xl font-medium text-foreground">Who We Are.</h3>

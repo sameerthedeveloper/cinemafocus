@@ -57,17 +57,17 @@ const SEO = () => {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto animate-fade-in pb-20">
-      <header className="mb-10">
-         <h1 className="text-3xl font-medium tracking-tight">SEO Settings</h1>
-         <p className="text-muted-foreground mt-1">Manage search engine optimization preferences.</p>
+    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20 md:pb-8">
+      <header className="mb-8 md:mb-10">
+         <h1 className="text-2xl md:text-3xl font-medium tracking-tight">SEO Settings</h1>
+         <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage search engine optimization preferences.</p>
       </header>
 
       <form onSubmit={handleSave} className="space-y-6">
         
         {/* General Settings */}
-        <div className="bg-background border border-border rounded-2xl p-8 space-y-6">
-           <h2 className="text-xl font-medium flex items-center gap-2">
+        <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
+           <h2 className="text-lg md:text-xl font-medium flex items-center gap-2">
              <Globe size={20} className="text-primary"/> 
              General Settings
            </h2>
@@ -128,7 +128,7 @@ const SEO = () => {
            <button 
              type="submit" 
              disabled={loading}
-             className="px-8 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+             className="w-full md:w-auto px-8 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
            >
              {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
              Save SEO Settings

@@ -34,6 +34,7 @@ const AdminProjects = lazy(() => import('./pages/admin/Projects'));
 const AdminSEO = lazy(() => import('./pages/admin/SEO'));
 const AdminPressReleases = lazy(() => import('./pages/admin/PressReleases'));
 const AdminAddPressRelease = lazy(() => import('./pages/admin/AddPressRelease'));
+const AdminEditPressRelease = lazy(() => import('./pages/admin/EditPressRelease'));
 const AdminNewLaunches = lazy(() => import('./pages/admin/NewLaunches'));
 const AdminAddNewLaunch = lazy(() => import('./pages/admin/AddNewLaunch'));
 
@@ -79,6 +80,7 @@ const AppContent = () => {
              <Route path="new-launches/new" element={<AdminAddNewLaunch />} />
              <Route path="press-releases" element={<AdminPressReleases />} />
              <Route path="press-releases/new" element={<AdminAddPressRelease />} />
+             <Route path="press-releases/edit/:id" element={<AdminEditPressRelease />} />
 
              <Route path="categories" element={<AdminCategories />} />
              <Route path="users" element={<AdminUsers />} />

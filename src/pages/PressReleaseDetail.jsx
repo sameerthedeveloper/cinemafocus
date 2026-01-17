@@ -6,6 +6,7 @@ import Section from '../components/Section';
 import SEO from '../components/SEO';
 import { getPressRelease } from '../lib/db';
 import { pressReleases } from '../lib/seed-data';
+import { formatDate } from '../lib/utils';
 
 const PressReleaseDetail = () => {
   const { id } = useParams();
@@ -64,7 +65,7 @@ const PressReleaseDetail = () => {
               <div className="flex items-center gap-4 text-sm text-muted mb-8 md:mb-10 border-b border-border/50 pb-6 md:pb-8">
                  <span className="flex items-center gap-2 font-medium">
                     <Calendar size={16} />
-                    {release.date}
+                    {formatDate(release.date)}
                  </span>
                  <span className="w-1 h-1 bg-muted rounded-full" />
                  <span className="uppercase tracking-widest text-xs font-semibold text-primary">Press Release</span>

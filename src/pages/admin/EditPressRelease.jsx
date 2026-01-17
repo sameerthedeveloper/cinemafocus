@@ -1,33 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../../lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
-import { useNavigate, Link } from 'react-router-dom';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 
-const AddPressRelease = () => {
+const EditPressRelease = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
-    date: new Date().toISOString().split('T')[0],
+    date: '',
     excerpt: '',
-    imageUrl: '', // For now, manual URL or we can integrate upload later
-    content: ''   // Future proofing
+    imageUrl: '',
+    content: ''
   });
+
+  useEffect(() => {
+    const fetchRelease = async () => {
+      try {
+        const docRef = doc(db, "press_releases", id);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          setFormData({ ...docSnap.data() });
+        } else {
+          alert("Press release not found!");
+          navigate('/admin/press-releases');
+        }
+      } catch (error) {
+        console.error("Error fetching press release:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRelease();
+  }, [id, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     try {
-      await addDoc(collection(db, "press_releases"), formData);
+      const docRef = doc(db, "press_releases", id);
+      await updateDoc(docRef, formData);
       navigate('/admin/press-releases');
     } catch (error) {
-      console.error("Error adding press release:", error);
+      console.error("Error updating press release:", error);
+      alert("Failed to update press release");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto pb-20 md:pb-8 animate-fade-in">
@@ -36,7 +64,7 @@ const AddPressRelease = () => {
         Back to Press Releases
       </Link>
       
-      <h1 className="text-2xl md:text-3xl font-medium tracking-tight mb-8">Add New Press Release</h1>
+      <h1 className="text-2xl md:text-3xl font-medium tracking-tight mb-8">Edit Press Release</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6 bg-white p-4 md:p-8 rounded-xl border border-border shadow-sm">
         <div>
@@ -60,8 +88,6 @@ const AddPressRelease = () => {
             onChange={(e) => setFormData({...formData, date: e.target.value})}
           />
         </div>
-
-
 
         <div>
            <label className="block text-sm font-medium mb-2">Cover Image</label>
@@ -97,11 +123,11 @@ const AddPressRelease = () => {
         <div className="pt-4">
           <button 
             type="submit" 
-            disabled={loading}
+            disabled={saving}
             className="bg-primary text-primary-foreground px-6 py-2 rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             <Save size={18} />
-            {loading ? 'Saving...' : 'Publish Release'}
+            {saving ? 'Saving...' : 'Update Release'}
           </button>
         </div>
       </form>
@@ -109,4 +135,4 @@ const AddPressRelease = () => {
   );
 };
 
-export default AddPressRelease;
+export default EditPressRelease;

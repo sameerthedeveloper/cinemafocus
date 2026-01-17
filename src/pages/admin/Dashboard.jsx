@@ -46,16 +46,16 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto animate-fade-in pb-20">
-      <header className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in pb-20 md:pb-8">
+      <header className="mb-8 md:mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
            <div>
-               <h1 className="text-3xl font-medium tracking-tight">Dashboard</h1>
-               <p className="text-muted-foreground mt-1">Overview of your store performance.</p>
+               <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Dashboard</h1>
+               <p className="text-muted-foreground mt-1 text-sm md:text-base">Overview of your store performance.</p>
            </div>
            
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           {/* Card render logic same as before... */}
@@ -80,13 +80,13 @@ const Dashboard = () => {
         })}
       </div>
 
-      <div className="mt-12 bg-background p-8 rounded-2xl border border-border shadow-sm">
+      <div className="mt-8 md:mt-12 bg-background p-4 md:p-8 rounded-2xl border border-border shadow-sm">
          <div className="flex items-center justify-between mb-8">
             <h2 className="text-lg font-medium">Site Activity (Last 7 Days)</h2>
             <div className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">Real-time Visits</div>
          </div>
          
-         <div className="h-[300px] w-full flex items-end justify-between gap-2 px-4 border-b border-border pb-4">
+         <div className="h-[300px] w-full flex items-end justify-between gap-2 px-2 md:px-4 border-b border-border pb-4">
             {chartData.map((data, i) => {
               // Calculate relative height (max 100%)
               const maxVal = Math.max(...chartData.map(d => d.count), 10); // Minimum scale of 10
@@ -108,7 +108,7 @@ const Dashboard = () => {
               </div>
             )})}
             {chartData.length === 0 && (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
                     Loading analytics...
                 </div>
             )}

@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import Section from '../components/Section';
-import { getProducts, getBrands } from '../lib/db';
+import { getProducts, getCategories, getNewLaunches } from '../lib/db';
 import SEO from '../components/SEO';
 import clsx from 'clsx';
 
 const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeBrand = searchParams.get('brand') || 'all';
+  const activeCategory = searchParams.get('category') || 'all';
   
   const [products, setProducts] = useState([]);
-  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [newLaunches, setNewLaunches] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,21 +20,27 @@ const ProductList = () => {
       setLoading(true);
       
       try {
-        let p, b;
-        
-        // Fetch Brands
-        b = await getBrands();
+        const [cats, nl] = await Promise.all([
+          getCategories(),
+          getNewLaunches()
+        ]);
 
-        // Fetch Products based on brand
-        // Note: passing null or 'all' results in all products
-        if (activeBrand === 'all') {
+        setCategories(cats);
+        setNewLaunches(nl);
+
+        let p = [];
+
+        if (activeCategory === 'all') {
              p = await getProducts();
+        } else if (activeCategory === 'new-arrivals') {
+             // Use new launches data, ensure they match product structure
+             p = nl;
         } else {
-             p = await getProducts({ brand: activeBrand });
+             // Filter by category slug
+             p = await getProducts({ category: activeCategory });
         }
 
         setProducts(p);
-        setBrands(b);
       } catch (err) {
           console.error("Failed to fetch products", err);
       } finally {
@@ -41,7 +48,7 @@ const ProductList = () => {
       }
     };
     fetchData();
-  }, [activeBrand]);
+  }, [activeCategory]);
   
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
@@ -49,11 +56,16 @@ const ProductList = () => {
 
   const filteredProducts = products;
   
-  const pageTitle = activeBrand === 'all' ? 'Our Collection' : activeBrand;
+  const getPageTitle = () => {
+    if (activeCategory === 'all') return 'Our Collection';
+    if (activeCategory === 'new-arrivals') return 'New Arrivals';
+    const cat = categories.find(c => c.slug === activeCategory);
+    return cat ? cat.name : activeCategory;
+  };
 
   return (
     <Section className="py-32 min-h-screen">
-       <SEO title={pageTitle} />
+       <SEO title={getPageTitle()} />
        <div className="space-y-6 mb-24 text-center">
           <h1 className="text-5xl md:text-6xl font-medium tracking-tight">Our Collection.</h1>
           <p className="text-xl text-muted-foreground font-light max-w-2xl mx-auto">
@@ -62,26 +74,37 @@ const ProductList = () => {
        </div>
 
        {/* Filters */}
-       <div className="flex flex-wrap justify-center gap-4 mb-20">
+       <div className="flex overflow-x-auto md:flex-wrap md:justify-center gap-3 md:gap-4 mb-16 md:mb-20 px-4 pb-4 md:pb-0 scrollbar-hide touch-pan-x">
           <button
              onClick={() => setSearchParams({})}
              className={clsx(
-               "px-6 py-2 text-sm rounded-full transition-all duration-300 font-medium",
-               activeBrand === 'all' ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-primary/5 hover:text-primary"
+               "px-6 py-2 text-sm rounded-full transition-all duration-300 font-medium whitespace-nowrap flex-shrink-0",
+               activeCategory === 'all' ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-primary/5 hover:text-primary"
              )}
           >
             All
           </button>
-          {brands.map((brand) => (
+          
+          <button
+             onClick={() => setSearchParams({ category: 'new-arrivals' })}
+             className={clsx(
+               "px-6 py-2 text-sm rounded-full transition-all duration-300 font-medium whitespace-nowrap flex-shrink-0",
+               activeCategory === 'new-arrivals' ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-primary/5 hover:text-primary"
+             )}
+          >
+            New Arrivals
+          </button>
+
+          {categories.map((category) => (
              <button
-               key={brand}
-               onClick={() => setSearchParams({ brand: brand })}
+               key={category.slug}
+               onClick={() => setSearchParams({ category: category.slug })}
                className={clsx(
-                 "px-6 py-2 text-sm rounded-full transition-all duration-300 font-medium",
-                 activeBrand === brand ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-primary/5 hover:text-primary"
+                 "px-6 py-2 text-sm rounded-full transition-all duration-300 font-medium whitespace-nowrap flex-shrink-0",
+                 activeCategory === category.slug ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:bg-primary/5 hover:text-primary"
                )}
              >
-               {brand}
+               {category.name}
              </button>
           ))}
        </div>
@@ -95,7 +118,7 @@ const ProductList = () => {
        
        {filteredProducts.length === 0 && (
          <div className="text-center py-20 text-muted-foreground">
-           No products found for this brand.
+           No products found in this category.
          </div>
        )}
     </Section>

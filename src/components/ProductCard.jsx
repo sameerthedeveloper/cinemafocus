@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
+import { useCurrency } from '../hooks/useCurrency';
 
 const ProductCard = ({ product }) => {
+  const { formatPrice, showPrice } = useCurrency();
   return (
     <Link to={`/products/${product.slug}`} className="group block space-y-6">
       {/* Image Container - Clean, no borders, gray background */}
@@ -23,6 +25,11 @@ const ProductCard = ({ product }) => {
         <p className="text-muted text-sm md:text-base font-medium uppercase tracking-widest">
            {product.category ? product.category.replace(/-/g, ' ') : 'New Arrival'}
         </p>
+        {showPrice && product.price && (
+          <p className="text-foreground font-medium mt-1">
+            {formatPrice(product.price)}
+          </p>
+        )}
         
         {/* Optional: "Shop >" link that appears or is always there */}
         <div className="pt-2 text-primary text-sm font-medium opacity-0 transform translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">

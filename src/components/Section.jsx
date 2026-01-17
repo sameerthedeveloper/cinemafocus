@@ -12,13 +12,13 @@ const Section = ({
     <section 
       id={id} 
       className={clsx(
-        "py-24 md:py-32", // Increased vertical rhythm
+        "py-16 md:py-24", // Standardized vertical rhythm
         background,
         className
       )}
     >
       {container ? (
-        <div className="container px-6 mx-auto">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
           {children}
         </div>
       ) : (

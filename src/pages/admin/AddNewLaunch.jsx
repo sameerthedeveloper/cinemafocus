@@ -165,7 +165,7 @@ const AddNewLaunch = () => {
                     </div>
                     <div>
                       <h3 className="font-medium text-foreground">{formData.name}</h3>
-                      <p className="text-sm text-muted-foreground">{formData.brand} • Original Price: ${formData.price}</p>
+                      <p className="text-sm text-muted-foreground">{formData.brand} • Original Price: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(formData.price || 0)}</p>
                     </div>
                  </div>
                  <button 
@@ -206,7 +206,7 @@ const AddNewLaunch = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                    <label className="block text-sm font-medium mb-2">Price ($)</label>
+                    <label className="block text-sm font-medium mb-2">Price (INR)</label>
                     <input 
                         required
                         type="number" 

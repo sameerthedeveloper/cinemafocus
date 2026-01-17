@@ -71,15 +71,15 @@ const Users = () => {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto animate-fade-in">
-      <header className="flex justify-between items-center mb-10">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto animate-fade-in pb-20 md:pb-8">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-8 md:mb-10">
         <div>
-           <h1 className="text-3xl font-medium tracking-tight">User Settings</h1>
-           <p className="text-muted-foreground mt-1">Manage admin access and roles.</p>
+           <h1 className="text-2xl md:text-3xl font-medium tracking-tight">User Settings</h1>
+           <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage admin access and roles.</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity w-full md:w-auto justify-center"
         >
           <Plus size={18} />
           Add Admin
@@ -87,7 +87,7 @@ const Users = () => {
       </header>
 
       {/* Admins List */}
-      <div className="bg-background rounded-2xl border border-border overflow-hidden">
+      <div className="bg-background rounded-2xl border border-border overflow-hidden overflow-x-auto">
         <table className="w-full text-left">
           <thead className="bg-secondary/50 border-b border-border">
             <tr>

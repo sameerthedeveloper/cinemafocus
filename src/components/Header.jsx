@@ -87,10 +87,10 @@ const Header = () => {
                 key={link.name} 
                 to={link.path} 
                 className={clsx(
-                  "text-sm font-bold transition-colors uppercase tracking-widest",
+                  "text-sm font-bold transition-all uppercase tracking-widest border-b-2 border-transparent",
                   useLightContent 
-                    ? "text-white hover:text-white/80" 
-                    : "text-foreground hover:text-primary"
+                    ? "text-white hover:text-red-500 hover:border-red-500" 
+                    : "text-foreground hover:text-red-600 hover:border-red-600"
                 )}
               >
                 {link.name}
@@ -129,7 +129,6 @@ const Header = () => {
                 {link.name}
               </Link>
             ))}
-            
           </nav>
         </div>
       </div>

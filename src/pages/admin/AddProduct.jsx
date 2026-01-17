@@ -115,14 +115,15 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto animate-fade-in pb-20">
+  return (
+    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20 md:pb-8">
       <header className="flex items-center gap-4 mb-8">
-        <Link to="/admin/products" className="p-2 hover:bg-secondary rounded-full transition-colors">
+        <Link to="/admin/products" className="p-2 hover:bg-secondary rounded-full transition-colors flex-shrink-0">
           <ArrowLeft size={20} />
         </Link>
         <div>
-           <h1 className="text-3xl font-medium tracking-tight">Add Product</h1>
-           <p className="text-muted-foreground mt-1">Create a new item in your inventory.</p>
+           <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Add Product</h1>
+           <p className="text-muted-foreground mt-1 text-sm md:text-base">Create a new item in your inventory.</p>
         </div>
       </header>
 
@@ -193,20 +194,20 @@ const AddProduct = () => {
           </div>
           <div className="space-y-4">
             {formData.specifications.map((spec, index) => (
-              <div key={index} className="flex gap-4 items-start">
+              <div key={index} className="flex flex-col md:flex-row gap-2 md:gap-4 items-stretch md:items-start p-2 bg-secondary/10 rounded-lg md:bg-transparent md:p-0">
                 <input 
                   placeholder="Key (e.g. Frequency Response)" 
                   value={spec.key} 
                   onChange={(e) => handleSpecChange(index, 'key', e.target.value)} 
-                  className="flex-1 p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" 
+                  className="w-full flex-1 p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" 
                 />
                 <input 
                   placeholder="Value (e.g. 20Hz - 20kHz)" 
                   value={spec.value} 
                   onChange={(e) => handleSpecChange(index, 'value', e.target.value)} 
-                  className="flex-1 p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" 
+                  className="w-full flex-1 p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" 
                 />
-                <button type="button" onClick={() => removeSpec(index)} className="p-3 text-red-500 hover:bg-red-50 rounded-lg">
+                <button type="button" onClick={() => removeSpec(index)} className="p-3 text-red-500 hover:bg-red-50 rounded-lg self-end md:self-auto">
                   <X size={20} />
                 </button>
               </div>

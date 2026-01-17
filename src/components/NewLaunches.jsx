@@ -2,8 +2,10 @@ import React from 'react';
 import clsx from 'clsx';
 import Button from './Button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { useCurrency } from '../hooks/useCurrency';
 
 const NewLaunches = ({ products }) => {
+  const { formatPrice, showPrice } = useCurrency();
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [isTransitioning, setIsTransitioning] = React.useState(false);
   
@@ -101,7 +103,7 @@ const NewLaunches = ({ products }) => {
             >
               {/* Eyebrow / Label */}
               <span className="mb-4 inline-block px-3 py-1 rounded-full border border-white/20 bg-white/5 text-xs font-semibold tracking-wider uppercase backdrop-blur-md animate-fade-in-up">
-                 New Generation
+                 NEWLY LAUNCH
               </span>
 
               <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-semibold tracking-tighter leading-[0.95] whitespace-pre-line mb-6 md:mb-8 drop-shadow-sm bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-zinc-500">
@@ -110,6 +112,12 @@ const NewLaunches = ({ products }) => {
               <p className="text-lg md:text-xl lg:text-2xl font-normal text-zinc-400 max-w-lg tracking-tight mb-8 md:mb-10 leading-relaxed line-clamp-3 md:line-clamp-none">
                 {currentProduct.shortDescription}
               </p>
+              
+              {showPrice && currentProduct.price && (
+                <div className="text-xl md:text-2xl font-light tracking-wide opacity-90 mb-6">
+                   {formatPrice(currentProduct.price)}
+                </div>
+              )}
               
               {/* Apple-style Pill Button - Blur backdrop */}
               <Button 

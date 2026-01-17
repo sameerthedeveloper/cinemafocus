@@ -54,11 +54,11 @@ const Messages = () => {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto animate-fade-in pb-20">
-      <header className="mb-10 flex justify-between items-end">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in pb-20 md:pb-8">
+      <header className="mb-8 md:mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
          <div>
-           <h1 className="text-3xl font-medium tracking-tight">Messages</h1>
-           <p className="text-muted-foreground mt-1">Customer inquiries and contact form submissions.</p>
+           <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Messages</h1>
+           <p className="text-muted-foreground mt-1 text-sm md:text-base">Customer inquiries and contact form submissions.</p>
          </div>
       </header>
 
