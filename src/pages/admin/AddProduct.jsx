@@ -115,7 +115,6 @@ const AddProduct = () => {
   };
 
   return (
-  return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20 md:pb-8">
       <header className="flex items-center gap-4 mb-8">
         <Link to="/admin/products" className="p-2 hover:bg-secondary rounded-full transition-colors flex-shrink-0">

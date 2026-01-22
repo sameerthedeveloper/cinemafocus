@@ -80,8 +80,9 @@ const Header = () => {
         </Link>
 
         {/* Desktop Nav */}
+        {/* Desktop Nav - Hidden by default as per user request */}
         {showDesktopMenu && (
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden items-center gap-8">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
@@ -99,7 +100,7 @@ const Header = () => {
           </nav>
         )}
 
-        {/* Mobile Menu Toggle */}
+        {/* Mobile Menu Toggle - Hidden on Desktop */}
         <button 
           className={clsx(
             "md:hidden z-50 p-2 -mr-2 transition-colors",
@@ -111,7 +112,7 @@ const Header = () => {
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        {/* Mobile Fullscreen Menu */}
+        {/* Fullscreen Menu - Hidden on Desktop */}
         <div 
           className={clsx(
             "fixed inset-0 mt-64 bg-background backdrop-blur-2xl z-40 flex flex-col items-center justify-center transition-all duration-500 ease-in-out md:hidden",

@@ -113,11 +113,11 @@ const NewLaunches = ({ products }) => {
                 {currentProduct.shortDescription}
               </p>
               
-              {showPrice && currentProduct.price && (
+              {/* {showPrice && currentProduct.price && (
                 <div className="text-xl md:text-2xl font-light tracking-wide opacity-90 mb-6">
                    {formatPrice(currentProduct.price)}
                 </div>
-              )}
+              )} */}
               
               {/* Apple-style Pill Button - Blur backdrop */}
               <Button 

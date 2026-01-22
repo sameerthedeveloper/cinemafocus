@@ -47,7 +47,7 @@ const ProductDetail = () => {
           {product.category.replace('-', ' ')}
         </Link>
         <ChevronRight size={14} className="mx-2" />
-        <span className="text-foreground font-medium">{product.name}</span>
+        <span className="text-foreground font-medium" aria-current="page">{product.name}</span>
       </div>
 
       <Section className="py-12 md:py-20" container={false}>
@@ -66,7 +66,7 @@ const ProductDetail = () => {
                  <div className="grid grid-cols-4 gap-4">
                    {product.images.map((img, idx) => (
                      <div key={idx} className="aspect-square bg-secondary/20 overflow-hidden rounded-xl cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center">
-                       <img src={img} alt={`${product.name} ${idx}`} className="w-full h-full object-contain p-2 mix-blend-multiply" />
+                       <img src={img} alt={`${product.name} ${idx}`} loading="lazy" className="w-full h-full object-contain p-2 mix-blend-multiply" />
                      </div>
                    ))}
                  </div>

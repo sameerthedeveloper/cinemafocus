@@ -10,6 +10,7 @@ const CategoryCard = ({ category }) => {
       <img
         src={category.imageUrl}
         alt={category.name}
+        loading="lazy"
         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-60"
       />
       

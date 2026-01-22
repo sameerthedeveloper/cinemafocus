@@ -13,6 +13,7 @@ const ProductCard = ({ product }) => {
           src={product.images?.[0] || '/images/placeholder.png'}
           alt={product.name}
           onError={(e) => { e.target.src = '/images/placeholder.png'; }}
+          loading="lazy"
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
       </div>

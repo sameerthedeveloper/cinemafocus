@@ -50,12 +50,8 @@ const ProductList = () => {
     fetchData();
   }, [activeCategory]);
   
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
-  }
-
   const filteredProducts = products;
-  
+
   const getPageTitle = () => {
     if (activeCategory === 'all') return 'Our Collection';
     if (activeCategory === 'new-arrivals') return 'New Arrivals';
@@ -111,12 +107,25 @@ const ProductList = () => {
 
        {/* Grid */}
        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-x-12 gap-y-24">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.slug} product={product} />
-          ))}
+          {loading ? (
+            // Skeleton Loading State
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="animate-pulse space-y-4">
+                <div className="aspect-[4/3] bg-secondary/50 rounded-2xl" />
+                <div className="space-y-2">
+                  <div className="h-4 w-2/3 bg-secondary/50 rounded" />
+                  <div className="h-4 w-1/3 bg-secondary/50 rounded" />
+                </div>
+              </div>
+            ))
+          ) : (
+            filteredProducts.map((product) => (
+              <ProductCard key={product.slug} product={product} />
+            ))
+          )}
        </div>
        
-       {filteredProducts.length === 0 && (
+       {!loading && filteredProducts.length === 0 && (
          <div className="text-center py-20 text-muted-foreground">
            No products found in this category.
          </div>

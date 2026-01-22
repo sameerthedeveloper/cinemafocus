@@ -22,6 +22,7 @@ const PressReleaseCard = ({ release, variant = 'vertical', className }) => {
               <img 
                 src={release.imageUrl} 
                 alt={release.title} 
+                loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
@@ -54,6 +55,7 @@ const PressReleaseCard = ({ release, variant = 'vertical', className }) => {
         <img 
           src={release.imageUrl} 
           alt={release.title} 
+          loading="lazy"
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
