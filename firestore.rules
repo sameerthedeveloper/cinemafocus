@@ -2,57 +2,89 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper function to get user role
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function isAdmin() {
+      return request.auth != null && getUserRole() == 'admin';
+    }
+    
+    function isDealer() {
+      return request.auth != null && (getUserRole() == 'dealer' || getUserRole() == 'admin');
+    }
+    
+    // Users Collection: Admin only
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+    
     // Products: Public read, Admin write
     match /products/{product} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
     
     // Categories: Public read, Admin write
     match /categories/{category} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     // Hero Section: Public read, Admin write
     match /hero/{doc} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     // Trust Badges: Public read, Admin write
     match /trust_badges/{badge} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
-    // Generic Site Content (Footer, Philosophy, Trust Badges): Public read, Admin write
+    // Generic Site Content (Footer, Philosophy, Trust Badges, SEO): Public read, Admin write
     match /site_content/{doc} {
        allow read: if true;
-       allow write: if request.auth != null;
+       allow write: if isAdmin();
     }
 
-    // Contact Messages: Public create (everyone can send messages), Admin read/delete
+    // Contact Messages: Public create, Dealer+ read, Admin delete
     match /messages/{message} {
       allow create: if true;
-      allow read, delete, update: if request.auth != null;
+      allow read: if isDealer();
+      allow delete, update: if isAdmin();
     }
 
-    // Analytics/Stats: Public create/update (everyone can increment stats), Admin read
+    // Press Releases: Public read, Admin write
+    match /press_releases/{release} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // New Launches: Public read, Admin write
+    match /new_launches/{launch} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Analytics/Stats: Public create/update, Admin read
     match /stats/{stat} {
       allow create, update: if true;
-      allow read: if request.auth != null;
+      allow read: if isAdmin();
     }
 
-    // Admins Collection: Admin read/write
+    // Admins Collection (Legacy): Admin read/write
     match /admins/{admin} {
-      allow read, write: if request.auth != null;
+      allow read, write: if isAdmin();
     }
 
     // Projects Gallery: Public read, Admin write
     match /projects/{project} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     // Default deny for everything else
