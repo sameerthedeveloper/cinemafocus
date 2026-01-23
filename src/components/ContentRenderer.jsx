@@ -50,6 +50,31 @@ const ContentRenderer = ({ blocks, className }) => {
               </figure>
             );
 
+          case 'gallery':
+            return (
+              <div key={block.id} className="my-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {block.data.images?.map((img, idx) => (
+                    <figure key={idx} className="group relative">
+                      <div className="aspect-square rounded-xl overflow-hidden bg-secondary/10">
+                        <img 
+                          src={img.url} 
+                          alt={img.caption || `Gallery image ${idx + 1}`} 
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          loading="lazy"
+                        />
+                      </div>
+                      {img.caption && (
+                        <div className="absolute inset-0 bg-black/60 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                           <p className="text-white text-xs font-medium">{img.caption}</p>
+                        </div>
+                      )}
+                    </figure>
+                  ))}
+                </div>
+              </div>
+            );
+
           default:
             return null;
         }
