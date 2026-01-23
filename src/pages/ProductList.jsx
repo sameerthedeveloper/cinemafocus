@@ -61,7 +61,15 @@ const ProductList = () => {
 
   return (
     <Section className="py-32 min-h-screen">
-       <SEO title={getPageTitle()} />
+       <SEO 
+         title={getPageTitle()} 
+         description={activeCategory === 'all' 
+           ? 'Browse our complete collection of high-fidelity audio equipment.'
+           : activeCategory === 'new-arrivals' 
+             ? 'Check out the latest additions to our premium audio collection.'
+             : `Explore our premium range of ${categories.find(c => c.slug === activeCategory)?.name || 'audio equipment'}.`
+         }
+       />
        <div className="space-y-6 mb-24 text-center">
           <h1 className="text-5xl md:text-6xl font-medium tracking-tight">Our Collection.</h1>
           <p className="text-xl text-muted-foreground font-light max-w-2xl mx-auto">

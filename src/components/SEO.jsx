@@ -1,37 +1,67 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-
+import { useLocation } from 'react-router-dom';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 
-const SEO = ({ title, description, image, keywords }) => {
+const SEO = ({ 
+  title, 
+  description, 
+  image, 
+  type = 'website', 
+  schema, 
+  path,
+  keywords
+}) => {
   const { seoSettings } = useSiteSettings();
+  const location = useLocation();
+  
+  // Construct the canonical URL
+  const siteUrl = 'https://cinemafocus.in';
+  const currentPath = path || location.pathname;
+  // Ensure no double slashes if path starts with /
+  const canonicalUrl = `${siteUrl}${currentPath.startsWith('/') ? currentPath : '/' + currentPath}`;
 
-  const siteTitle = seoSettings?.siteTitle || 'Cinema Focus';
-  const titleSuffix = seoSettings?.titleSuffix || ' | Premium Audio';
-  const metaDescription = description || seoSettings?.defaultDescription || 'Experience the ultimate in high-fidelity audio.';
-  const metaKeywords = keywords || seoSettings?.defaultKeywords || 'audio, hifi, speakers';
-  const metaImage = image || seoSettings?.ogImage || '/images/og-default.jpg';
-
-  const fullTitle = title ? `${title} ${titleSuffix}` : `${siteTitle}${titleSuffix}`;
+  // Fallbacks using global settings
+  const metaTitle = title 
+    ? `${title} ${seoSettings?.titleSuffix || ''}`
+    : seoSettings?.siteTitle;
+    
+  const metaDescription = description || seoSettings?.defaultDescription;
+  const metaKeywords = keywords || seoSettings?.defaultKeywords;
+  
+  // Open Graph Image
+  const ogImage = image || seoSettings?.ogImage || '/images/default-og.jpg'; // Assuming access to default image
+  const fullOgImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
 
   return (
     <Helmet>
-      {/* Basic */}
-      <title>{fullTitle}</title>
+      {/* Standard Metadata */}
+      <title>{metaTitle}</title>
       <meta name="description" content={metaDescription} />
-      <meta name="keywords" content={metaKeywords} />
+      {metaKeywords && <meta name="keywords" content={metaKeywords} />}
+      <link rel="canonical" href={canonicalUrl} />
 
       {/* Open Graph / Facebook */}
-      <meta property="og:type" content="website" />
-      <meta property="og:title" content={fullTitle} />
+      <meta property="og:type" content={type} />
+      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:title" content={title || seoSettings?.siteTitle} />
       <meta property="og:description" content={metaDescription} />
-      <meta property="og:image" content={metaImage} />
+      <meta property="og:image" content={fullOgImage} />
+      <meta property="og:site_name" content={seoSettings?.siteTitle || 'Cinema Focus'} />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={fullTitle} />
+      <meta name="twitter:url" content={canonicalUrl} />
+      <meta name="twitter:title" content={title || seoSettings?.siteTitle} />
       <meta name="twitter:description" content={metaDescription} />
-      <meta name="twitter:image" content={metaImage} />
+      <meta name="twitter:image" content={fullOgImage} />
+
+      {/* Structured Data (JSON-LD) */}
+      {schema && (
+        <script type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      )}
     </Helmet>
   );
 };

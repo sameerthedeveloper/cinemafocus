@@ -80,7 +80,21 @@ const Home = () => {
 
   return (
     <div className="animate-fade-in pb-20">
-      <SEO title="Home" />
+      <SEO 
+        title="Home" 
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Cinema Focus",
+          "url": "https://cinemafocus.in",
+          "logo": "https://cinemafocus.in/logo.png",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+91-9876543210",
+            "contactType": "customer service"
+          }
+        }}
+      />
       
       {/* 1. New Launches Section (Apple Style Hero) */}
       {/* 1. New Launches Section (Apple Style Hero) OR Standard Hero Fallback */}

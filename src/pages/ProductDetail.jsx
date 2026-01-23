@@ -38,7 +38,29 @@ const ProductDetail = () => {
 
   return (
     <div className="animate-fade-in pt-6">
-      <SEO title={product.name} description={product.shortDescription || product.name} />
+      <SEO 
+        title={product.name} 
+        description={product.shortDescription || product.name}
+        image={product.images?.[0]}
+        path={`/products/${slug}`}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": product.name,
+          "image": product.images,
+          "description": product.shortDescription || product.longDescription?.substring(0, 150),
+          "brand": {
+            "@type": "Brand",
+            "name": product.brand || "Cinema Focus"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": product.price,
+            "priceCurrency": "INR",
+            "availability": "https://schema.org/InStock"
+          }
+        }}
+      />
       {/* Breadcrumb */}
       <div className="max-w-[1400px] px-4 md:px-8 mx-auto py-4 flex mt-15 items-center text-sm text-muted-foreground">
         <Link to="/products" className="hover:text-primary transition-colors">Products</Link>

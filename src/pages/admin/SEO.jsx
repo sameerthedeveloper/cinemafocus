@@ -121,6 +121,38 @@ const SEO = () => {
              />
              <p className="text-xs text-muted-foreground">Comma separated keywords.</p>
            </div>
+            </div>
+        </div>
+
+        {/* Open Graph / Social Media */}
+        <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
+           <h2 className="text-lg md:text-xl font-medium flex items-center gap-2">
+             <Share2 size={20} className="text-primary"/> 
+             Social Media (Open Graph)
+           </h2>
+           
+           <div className="space-y-4">
+             <div className="space-y-2">
+               <label className="text-sm font-medium">Default Share Image (OG Image)</label>
+               <input 
+                 name="ogImage"
+                 value={seo.ogImage} 
+                 onChange={handleChange} 
+                 className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" 
+                 placeholder="https://cinemafocus.in/images/og-default.jpg" 
+               />
+               <p className="text-xs text-muted-foreground">URL of the image used when sharing on Facebook, Twitter, etc. Must be absolute URL.</p>
+             </div>
+             
+             {seo.ogImage && (
+               <div className="mt-4">
+                 <p className="text-sm font-medium mb-2">Preview:</p>
+                 <div className="aspect-[1.91/1] w-full max-w-sm bg-secondary/20 rounded-lg overflow-hidden border border-border">
+                   <img src={seo.ogImage} alt="OG Preview" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
+                 </div>
+               </div>
+             )}
+           </div>
         </div>
 
         {/* Action Bar */}

@@ -15,7 +15,7 @@ const BackupTools = () => {
         setMessage('Generating backup...');
 
         try {
-            const collectionsToBackup = ['products', 'categories', 'hero', 'site_content'];
+            const collectionsToBackup = ['products', 'categories', 'hero', 'site_content', 'projects', 'new_launches', 'press_releases'];
             const backupData = {};
 
             for (const colName of collectionsToBackup) {
@@ -70,10 +70,49 @@ const BackupTools = () => {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
-                    const data = JSON.parse(e.target.result);
+                    // Sanitize content: Replace NaN with null (fixing invalid JSON from some external tools)
+                    const rawContent = e.target.result;
+                    const sanitizedContent = rawContent.replace(/:\s*NaN\s*([,}])/g, ': null$1');
+                    let data = JSON.parse(sanitizedContent);
+                    
+                    // Handle Array Input (Raw List)
+                    if (Array.isArray(data)) {
+                        if (data.length === 0) throw new Error("File is an empty array.");
+                        
+                        const item = data[0];
+                        let inferredCollection = null;
+                        
+                        // Heuristics to guess collection
+                        if (item.price !== undefined || item.specifications) inferredCollection = 'products';
+                        else if (item.productCount !== undefined) inferredCollection = 'categories';
+                        else if (item.date && item.excerpt) inferredCollection = 'press_releases';
+                        else if (item.title && item.imageUrl && item.createdAt) inferredCollection = 'projects';
+                        
+                        if (!inferredCollection) {
+                             // Fallback or generic error
+                             throw new Error("Detected JSON Array, but could not automatically infer the collection type (products, categories, etc). Please ensure items have recognizable fields.");
+                        }
+                        
+                        console.log(`Inferred collection type: ${inferredCollection} for ${data.length} items.`);
+                        
+                        // Wrap in standard format
+                        data = {
+                            [inferredCollection]: data,
+                            _meta: { inferred: true, timestamp: new Date().toISOString() }
+                        };
+                    }
+                    
+                    const collections = ['products', 'categories', 'hero', 'site_content', 'projects', 'new_launches', 'press_releases'];
                     
                     if (!data._meta) {
-                        throw new Error("Invalid backup file: Missing metadata.");
+                        // Allow file if it contains at least one known collection
+                        const hasValidData = collections.some(col => Array.isArray(data[col]));
+                        
+                        if (!hasValidData) {
+                             const foundKeys = Object.keys(data).join(', ');
+                             throw new Error(`Invalid backup file: Missing metadata and no recognizable collections found. Found keys: [${foundKeys}]`);
+                        }
+                        console.warn("Backup file missing metadata, proceeding with restore...");
                     }
 
                     setMessage('Merging data...');
@@ -82,7 +121,6 @@ const BackupTools = () => {
                     const batch = writeBatch(db);
                     let opCount = 0;
                     
-                    const collections = ['products', 'categories', 'hero', 'site_content'];
                     for (const colName of collections) {
                         if (data[colName] && Array.isArray(data[colName])) {
                             data[colName].forEach(item => {

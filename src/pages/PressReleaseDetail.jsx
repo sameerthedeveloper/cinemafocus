@@ -40,7 +40,25 @@ const PressReleaseDetail = () => {
 
   return (
     <div className="animate-fade-in pt-24 pb-20">
-      <SEO title={release.title} description={release.excerpt} />
+      <SEO 
+        title={release.title} 
+        description={release.excerpt}
+        image={release.imageUrl}
+        type="article"
+        path={`/press/${id}`}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "NewsArticle",
+          "headline": release.title,
+          "image": [release.imageUrl],
+          "datePublished": release.date,
+          "dateModified": release.date,
+          "author": {
+            "@type": "Person",
+            "name": "Cinema Focus Team"
+          }
+        }}
+      />
       
       <div className="max-w-7xl mx-auto px-6">
         <Link to="/press" className="group inline-flex items-center text-muted hover:text-foreground mb-12 transition-colors">

@@ -3,6 +3,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import Section from '../components/Section';
 import { getProducts, getCategories } from '../lib/db';
+import SEO from '../components/SEO';
 
 const CategoryPage = () => {
   const { slug } = useParams();
@@ -36,6 +37,11 @@ const CategoryPage = () => {
   return (
     <Section className="py-20 min-h-screen">
        <div className="space-y-4 mb-12 text-center">
+          <SEO 
+            title={category.name} 
+            description={`Explore our premium selection of ${category.name.toLowerCase()}.`}
+            path={`/category/${slug}`}
+          />
           <h1 className="text-4xl md:text-5xl font-serif font-medium">{category.name}</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
              Explore our premium selection of {category.name.toLowerCase()}.
