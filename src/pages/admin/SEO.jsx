@@ -122,7 +122,7 @@ const SEO = () => {
              <p className="text-xs text-muted-foreground">Comma separated keywords.</p>
            </div>
             </div>
-        </div>
+
 
         {/* Open Graph / Social Media */}
         <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
