@@ -4,6 +4,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
+import ContentBlockBuilder from '../../components/admin/ContentBlockBuilder';
 
 const AddPressRelease = () => {
   const navigate = useNavigate();
@@ -12,8 +13,9 @@ const AddPressRelease = () => {
     title: '',
     date: new Date().toISOString().split('T')[0],
     excerpt: '',
-    imageUrl: '', // For now, manual URL or we can integrate upload later
-    content: ''   // Future proofing
+    imageUrl: '', 
+    pdfUrl: '',
+    contentBlocks: [] 
   });
 
   const handleSubmit = async (e) => {
@@ -61,8 +63,6 @@ const AddPressRelease = () => {
           />
         </div>
 
-
-
         <div>
            <label className="block text-sm font-medium mb-2">Cover Image</label>
            <ImageUpload 
@@ -94,17 +94,12 @@ const AddPressRelease = () => {
            <p className="text-xs text-muted-foreground mt-1">Direct link to a PDF file.</p>
         </div>
 
-        {/* 
-        <div>
-           <label className="block text-sm font-medium mb-2">Full Content</label>
-           <textarea 
-             rows="6"
-             className="w-full px-4 py-2 rounded-lg border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-             value={formData.content}
-             onChange={(e) => setFormData({...formData, content: e.target.value})}
+        <div className="pt-4 border-t border-border">
+           <ContentBlockBuilder 
+             blocks={formData.contentBlocks || []} 
+             onChange={(blocks) => setFormData({...formData, contentBlocks: blocks})} 
            />
         </div>
-        */}
 
         <div className="pt-4">
           <button 

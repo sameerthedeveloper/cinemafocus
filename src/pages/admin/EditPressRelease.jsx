@@ -5,6 +5,8 @@ import { useNavigate, Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 
+import ContentBlockBuilder from '../../components/admin/ContentBlockBuilder';
+
 const EditPressRelease = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -15,7 +17,8 @@ const EditPressRelease = () => {
     date: '',
     excerpt: '',
     imageUrl: '',
-    content: ''
+    pdfUrl: '',
+    contentBlocks: []
   });
 
   useEffect(() => {
@@ -25,7 +28,21 @@ const EditPressRelease = () => {
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
-          setFormData({ ...docSnap.data() });
+          const data = docSnap.data();
+          
+          // Migration Logic: Convert legacy 'content' to blocks if blocks are missing
+          let contentBlocks = data.contentBlocks || [];
+          if (contentBlocks.length === 0 && data.content) {
+            contentBlocks = [
+              { 
+                id: crypto.randomUUID(), 
+                type: 'text', 
+                data: { text: data.content } 
+              }
+            ];
+          }
+
+          setFormData({ ...data, contentBlocks });
         } else {
           alert("Press release not found!");
           navigate('/admin/press-releases');
@@ -120,17 +137,12 @@ const EditPressRelease = () => {
            <p className="text-xs text-muted-foreground mt-1">Direct link to a PDF file.</p>
         </div>
 
-        {/* 
-        <div>
-           <label className="block text-sm font-medium mb-2">Full Content</label>
-           <textarea 
-             rows="6"
-             className="w-full px-4 py-2 rounded-lg border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-             value={formData.content}
-             onChange={(e) => setFormData({...formData, content: e.target.value})}
+        <div className="pt-4 border-t border-border">
+           <ContentBlockBuilder 
+             blocks={formData.contentBlocks || []} 
+             onChange={(blocks) => setFormData({...formData, contentBlocks: blocks})} 
            />
         </div>
-        */}
 
         <div className="pt-4">
           <button 

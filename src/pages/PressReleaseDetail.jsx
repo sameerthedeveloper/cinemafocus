@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, Share2, FileText, ExternalLink } from 'lucide-react';
 import Section from '../components/Section';
+import ContentRenderer from '../components/ContentRenderer';
 import SEO from '../components/SEO';
 import { getPressRelease } from '../lib/db';
 import { pressReleases } from '../lib/seed-data';
@@ -92,21 +93,30 @@ const PressReleaseDetail = () => {
               <div className="prose prose-base md:prose-lg dark:prose-invert max-w-none text-muted-foreground">
                 <p className="lead text-2xl text-foreground font-light leading-relaxed mb-8">{release.excerpt}</p>
                 
-                <div className="space-y-6 text-lg leading-relaxed">
-                   <p>
-                      {/* Using seed data placeholder or content if available */}
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                   </p>
-                   <p>
-                      Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                   </p>
-                   <blockquote className="border-l-4 border-primary pl-6 italic text-foreground my-8">
-                      "True high-fidelity is about emotion, texture, and presence. This new release embodies our commitment to that philosophy."
-                   </blockquote>
-                   <p>
-                      Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
-                   </p>
-                </div>
+                {release.contentBlocks && release.contentBlocks.length > 0 ? (
+                   <ContentRenderer blocks={release.contentBlocks} />
+                ) : (
+                   <div className="space-y-6 text-lg leading-relaxed">
+                      {release.content ? (
+                         <p>{release.content}</p>
+                      ) : (
+                         <>
+                            <p>
+                               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+                            </p>
+                            <p>
+                               Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                            </p>
+                            <blockquote className="border-l-4 border-primary pl-6 italic text-foreground my-8">
+                               "True high-fidelity is about emotion, texture, and presence. This new release embodies our commitment to that philosophy."
+                            </blockquote>
+                            <p>
+                               Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+                            </p>
+                         </>
+                      )}
+                   </div>
+                )}
                </div>
               
               {release.pdfUrl && (
