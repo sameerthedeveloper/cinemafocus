@@ -71,7 +71,7 @@ const AddPressRelease = () => {
            />
         </div>
 
-        <div>
+       <div>
            <label className="block text-sm font-medium mb-2">Excerpt</label>
            <textarea 
              required
@@ -80,6 +80,18 @@ const AddPressRelease = () => {
              value={formData.excerpt}
              onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
            />
+        </div>
+
+        <div>
+           <label className="block text-sm font-medium mb-2">PDF Document URL (Optional)</label>
+           <input 
+             type="url" 
+             className="w-full px-4 py-2 rounded-lg border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+             value={formData.pdfUrl || ''}
+             onChange={(e) => setFormData({...formData, pdfUrl: e.target.value})}
+             placeholder="https://example.com/file.pdf"
+           />
+           <p className="text-xs text-muted-foreground mt-1">Direct link to a PDF file.</p>
         </div>
 
         {/* 

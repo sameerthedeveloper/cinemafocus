@@ -1,7 +1,7 @@
 
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, Share2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Share2, FileText, ExternalLink } from 'lucide-react';
 import Section from '../components/Section';
 import SEO from '../components/SEO';
 import { getPressRelease } from '../lib/db';
@@ -107,7 +107,22 @@ const PressReleaseDetail = () => {
                       Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
                    </p>
                 </div>
-              </div>
+               </div>
+              
+              {release.pdfUrl && (
+                  <div className="mt-8">
+                     <a 
+                       href={release.pdfUrl} 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       className="inline-flex items-center gap-2 px-6 py-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
+                     >
+                        <FileText size={20} />
+                        Download Press Release (PDF)
+                        <ExternalLink size={16} className="ml-1 opacity-70" />
+                     </a>
+                  </div>
+              )}
               
                <div className="pt-12 flex flex-col sm:flex-row justify-between items-start sm:items-center border-t border-border/50 mt-16 gap-6">
                   <div className="text-sm text-muted">
