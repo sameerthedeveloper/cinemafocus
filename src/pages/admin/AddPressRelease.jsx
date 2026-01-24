@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { db } from '../../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Save, Trash2, ImageIcon } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 import ContentBlockBuilder from '../../components/admin/ContentBlockBuilder';
 
 const AddPressRelease = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isPortal = location.pathname.includes('/portal');
+  const basePath = isPortal ? '/portal' : '/admin';
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -42,7 +46,7 @@ const AddPressRelease = () => {
         imageUrl: formData.coverImages?.[0] || ''
       };
       await addDoc(collection(db, "press_releases"), dataToSave);
-      navigate('/admin/press-releases');
+      navigate(`${basePath}/press-releases`);
     } catch (error) {
       console.error("Error adding press release:", error);
     } finally {
@@ -52,7 +56,7 @@ const AddPressRelease = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto pb-20 md:pb-8 animate-fade-in">
-      <Link to="/admin/press-releases" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
+      <Link to={`${basePath}/press-releases`} className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
         <ArrowLeft size={18} className="mr-2" />
         Back to Press Releases
       </Link>

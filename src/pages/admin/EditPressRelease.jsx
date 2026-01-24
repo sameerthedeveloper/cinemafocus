@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { useNavigate, Link, useParams } from 'react-router-dom';
+import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 import ContentBlockBuilder from '../../components/admin/ContentBlockBuilder';
@@ -9,6 +9,10 @@ import ContentBlockBuilder from '../../components/admin/ContentBlockBuilder';
 const EditPressRelease = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isPortal = location.pathname.includes('/portal');
+  const basePath = isPortal ? '/portal' : '/admin';
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -51,7 +55,7 @@ const EditPressRelease = () => {
           setFormData({ ...data, contentBlocks, coverImages });
         } else {
           alert("Press release not found!");
-          navigate('/admin/press-releases');
+          navigate(`${basePath}/press-releases`);
         }
       } catch (error) {
         console.error("Error fetching press release:", error);
@@ -87,7 +91,7 @@ const EditPressRelease = () => {
         imageUrl: formData.coverImages?.[0] || '' // Sync legacy field
       };
       await updateDoc(docRef, dataToSave);
-      navigate('/admin/press-releases');
+      navigate(`${basePath}/press-releases`);
     } catch (error) {
       console.error("Error updating press release:", error);
       alert("Failed to update press release");
@@ -100,7 +104,7 @@ const EditPressRelease = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto pb-20 md:pb-8 animate-fade-in">
-      <Link to="/admin/press-releases" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
+      <Link to={`${basePath}/press-releases`} className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
         <ArrowLeft size={18} className="mr-2" />
         Back to Press Releases
       </Link>

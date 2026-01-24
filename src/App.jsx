@@ -36,9 +36,13 @@ const AdminProjects = lazy(() => import('./pages/admin/Projects'));
 const AdminSEO = lazy(() => import('./pages/admin/SEO'));
 const AdminPressReleases = lazy(() => import('./pages/admin/PressReleases'));
 const AdminAddPressRelease = lazy(() => import('./pages/admin/AddPressRelease'));
-const AdminEditPressRelease = lazy(() => import('./pages/admin/EditPressRelease'));
+// const AdminEditPressRelease = lazy(() => import('./pages/admin/EditPressRelease'));
 const AdminNewLaunches = lazy(() => import('./pages/admin/NewLaunches'));
 const AdminAddNewLaunch = lazy(() => import('./pages/admin/AddNewLaunch'));
+
+// Reuse Admin Components for Portal (they are now dynamic)
+const AdminAddPressRelease = lazy(() => import('./pages/admin/AddPressRelease'));
+const AdminEditPressRelease = lazy(() => import('./pages/admin/EditPressRelease'));
 
 // Portal Pages (Lazy Loaded)
 const PortalLogin = lazy(() => import('./pages/portal/Login'));
@@ -108,6 +112,8 @@ const AppContent = () => {
             <Route path="dashboard" element={<PortalDashboard />} />
             <Route path="messages" element={<PortalMessages />} />
             <Route path="press-releases" element={<PortalPressReleases />} />
+            <Route path="press-releases/new" element={<AdminAddPressRelease />} />
+            <Route path="press-releases/edit/:id" element={<AdminEditPressRelease />} />
             <Route path="new-launches" element={<PortalNewLaunches />} />
           </Route>
         </Route>

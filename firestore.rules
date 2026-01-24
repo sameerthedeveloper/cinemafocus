@@ -83,10 +83,10 @@ service cloud.firestore {
       allow delete, update: if isAuthenticated();
     }
 
-    // Press Releases: Public read, Admin write
+    // Press Releases: Public read, Dealer+ write
     match /press_releases/{release} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isDealer();
     }
 
     // New Launches: Public read, Admin write
