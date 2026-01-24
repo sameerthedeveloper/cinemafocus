@@ -13,6 +13,7 @@ const PressReleaseDetail = () => {
   const { id } = useParams();
   const [release, setRelease] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,9 +75,46 @@ const PressReleaseDetail = () => {
                 {release.title}
               </h1>
 
-              <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-secondary/5 shadow-2xl shadow-black/5 animate-fade-in-up delay-100">
-                 <img src={release.imageUrl} alt={release.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
-              </div>
+              {release.coverImages && release.coverImages.length > 1 ? (
+                 <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-secondary/5 shadow-2xl shadow-black/5 animate-fade-in-up delay-100 group">
+                    <img 
+                      src={release.coverImages[currentImageIndex]} 
+                      alt={release.title} 
+                      className="w-full h-full object-cover transition-opacity duration-500" 
+                    />
+                    
+                    {/* Navigation Buttons */}
+                    <button 
+                      onClick={() => setCurrentImageIndex(prev => prev === 0 ? release.coverImages.length - 1 : prev - 1)}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                    >
+                      <ArrowLeft size={20} />
+                    </button>
+                    <button 
+                      onClick={() => setCurrentImageIndex(prev => prev === release.coverImages.length - 1 ? 0 : prev + 1)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 rotate-180"
+                    >
+                      <ArrowLeft size={20} />
+                    </button>
+
+                    {/* Dots */}
+                    <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                       {release.coverImages.map((_, idx) => (
+                         <button
+                           key={idx}
+                           onClick={() => setCurrentImageIndex(idx)}
+                           className={`w-2 h-2 rounded-full transition-all ${
+                             currentImageIndex === idx ? 'bg-white w-4' : 'bg-white/50 hover:bg-white/80'
+                           }`}
+                         />
+                       ))}
+                    </div>
+                 </div>
+              ) : (
+                <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-secondary/5 shadow-2xl shadow-black/5 animate-fade-in-up delay-100">
+                   <img src={release.imageUrl || release.coverImages?.[0]} alt={release.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
+                </div>
+              )}
            </div>
 
            {/* Right Column: Content */}

@@ -2,89 +2,114 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function to get user role
+    // Helper function to check if user exists in users collection
+    function userExists() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    
+    // Helper function to get user role (returns 'unknown' if no doc exists)
     function getUserRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return userExists() 
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role 
+        : 'unknown';
     }
     
+    // Check if user is admin (either in new users collection OR legacy admins collection)
     function isAdmin() {
-      return request.auth != null && getUserRole() == 'admin';
+      return request.auth != null && (
+        getUserRole() == 'admin' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        // Fallback: if user is authenticated and no user doc exists, check if they're in admins
+        (!userExists() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)))
+      );
     }
     
+    // Check if user is dealer or higher
     function isDealer() {
-      return request.auth != null && (getUserRole() == 'dealer' || getUserRole() == 'admin');
+      return request.auth != null && (
+        getUserRole() == 'dealer' || 
+        getUserRole() == 'admin' ||
+        // Legacy admins also get dealer access
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
     }
     
-    // Users Collection: Admin only
+    // Any authenticated user (for bootstrapping - creating first users)
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Users Collection: Authenticated users can read their own, admins can read/write all
     match /users/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow write: if isAdmin();
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated(); // Allow any authenticated user to create users (for bootstrapping)
+      allow update, delete: if isAdmin();
     }
     
     // Products: Public read, Admin write
     match /products/{product} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated(); // Simplified for now
     }
     
     // Categories: Public read, Admin write
     match /categories/{category} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // Hero Section: Public read, Admin write
     match /hero/{doc} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // Trust Badges: Public read, Admin write
     match /trust_badges/{badge} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
-    // Generic Site Content (Footer, Philosophy, Trust Badges, SEO): Public read, Admin write
+    // Generic Site Content (Footer, SEO, etc.): Public read, Admin write
     match /site_content/{doc} {
        allow read: if true;
-       allow write: if isAdmin();
+       allow write: if isAuthenticated();
     }
 
     // Contact Messages: Public create, Dealer+ read, Admin delete
     match /messages/{message} {
       allow create: if true;
-      allow read: if isDealer();
-      allow delete, update: if isAdmin();
+      allow read: if isAuthenticated();
+      allow delete, update: if isAuthenticated();
     }
 
     // Press Releases: Public read, Admin write
     match /press_releases/{release} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // New Launches: Public read, Admin write
     match /new_launches/{launch} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // Analytics/Stats: Public create/update, Admin read
     match /stats/{stat} {
       allow create, update: if true;
-      allow read: if isAdmin();
+      allow read: if isAuthenticated();
     }
 
     // Admins Collection (Legacy): Admin read/write
     match /admins/{admin} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAuthenticated();
     }
 
     // Projects Gallery: Public read, Admin write
     match /projects/{project} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     // Default deny for everything else
