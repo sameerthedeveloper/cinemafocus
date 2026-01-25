@@ -56,6 +56,21 @@ const SEO = ({
       <meta name="twitter:description" content={metaDescription} />
       <meta name="twitter:image" content={fullOgImage} />
 
+      {/* Custom Verification Tags */}
+      {seoSettings?.googleVerification && (
+        <meta name="google-site-verification" content={seoSettings.googleVerification} />
+      )}
+      {seoSettings?.bingVerification && (
+        <meta name="msvalidate.01" content={seoSettings.bingVerification} />
+      )}
+
+      {/* Custom Head Scripts (Inject Raw HTML) */}
+      {seoSettings?.headScripts && (
+        <script type="text/javascript">
+          {seoSettings.headScripts.replace(/<script>|<\/script>/g, '')}
+        </script>
+      )}
+
       {/* Structured Data (JSON-LD) */}
       {schema && (
         <script type="application/ld+json">

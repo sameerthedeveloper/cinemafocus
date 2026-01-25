@@ -155,6 +155,52 @@ const SEO = () => {
            </div>
         </div>
 
+        {/* Advanced & Custom Ops */}
+        <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
+           <h2 className="text-lg md:text-xl font-medium flex items-center gap-2">
+             <Search size={20} className="text-primary"/> 
+             Advanced & Custom Ops
+           </h2>
+           
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="space-y-2">
+               <label className="text-sm font-medium">Google Site Verification</label>
+               <input 
+                 name="googleVerification"
+                 value={seo.googleVerification || ''} 
+                 onChange={handleChange} 
+                 className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none font-mono text-sm" 
+                 placeholder="verification_code_here" 
+               />
+               <p className="text-xs text-muted-foreground">The code from Google Search Console.</p>
+             </div>
+             <div className="space-y-2">
+               <label className="text-sm font-medium">Bing Webmaster Verification</label>
+               <input 
+                 name="bingVerification"
+                 value={seo.bingVerification || ''} 
+                 onChange={handleChange} 
+                 className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none font-mono text-sm" 
+                 placeholder="verification_code_here" 
+               />
+               <p className="text-xs text-muted-foreground">The code from Bing Webmaster Tools.</p>
+             </div>
+           </div>
+
+           <div className="space-y-2">
+             <label className="text-sm font-medium">Custom Head Scripts</label>
+             <textarea 
+               name="headScripts"
+               rows={4}
+               value={seo.headScripts || ''} 
+               onChange={handleChange} 
+               className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none font-mono text-xs" 
+               placeholder={`<script>\n  // Google Analytics or custom tracking\n</script>`}
+             />
+             <p className="text-xs text-muted-foreground">Scripts to inject into the {`<head>`} tag.</p>
+           </div>
+        </div>
+
         {/* Action Bar */}
         <div className="flex justify-end pt-4">
            <button 
