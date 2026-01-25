@@ -79,12 +79,12 @@ const Gallery = () => {
              </div>
            </div>
         ) : galleryItems.length > 0 ? (
-          /* Masonry Layout using CSS Columns */
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          /* Standard Grid Layout */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
              {galleryItems.map((item, idx) => (
               <div 
                 key={item.id || idx} 
-                className="break-inside-avoid relative overflow-hidden rounded-xl group cursor-pointer bg-secondary/10"
+                className="relative overflow-hidden rounded-xl group cursor-pointer bg-secondary/10 aspect-[4/3]"
                 onClick={() => openLightbox(idx)}
               >
                 {/* Image */}
@@ -92,7 +92,7 @@ const Gallery = () => {
                   src={item.imageUrl} 
                   alt={item.title} 
                   loading="lazy"
-                  className="w-full h-auto object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                 />
                 
                 {/* Overlay */}

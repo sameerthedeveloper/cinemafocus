@@ -194,7 +194,7 @@ const Home = () => {
               {/* Dynamic Project Grid - eventually fetched from Firestore */}
               {projects.length > 0 ? projects.slice(0, 3).map((project, i) => (
                 <div key={project.id || i} className="relative aspect-video overflow-hidden rounded-2xl group cursor-pointer">
-                  <img src={project.imageUrl} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={project.title} />
+                  <img src={project.imageUrl} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={project.title} />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                      <span className="text-white font-medium text-lg tracking-wide border border-white/30 px-6 py-2 rounded-full backdrop-blur-sm">View Photo</span>
                   </div>
