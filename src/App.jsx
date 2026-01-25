@@ -35,8 +35,6 @@ const AdminMessages = lazy(() => import('./pages/admin/Messages'));
 const AdminProjects = lazy(() => import('./pages/admin/Projects'));
 const AdminSEO = lazy(() => import('./pages/admin/SEO'));
 const AdminPressReleases = lazy(() => import('./pages/admin/PressReleases'));
-const AdminAddPressRelease = lazy(() => import('./pages/admin/AddPressRelease'));
-// const AdminEditPressRelease = lazy(() => import('./pages/admin/EditPressRelease'));
 const AdminNewLaunches = lazy(() => import('./pages/admin/NewLaunches'));
 const AdminAddNewLaunch = lazy(() => import('./pages/admin/AddNewLaunch'));
 
