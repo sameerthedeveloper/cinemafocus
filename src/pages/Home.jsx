@@ -184,10 +184,10 @@ const Home = () => {
       </Section>
 
        {/* 6.6 Gallery Preview - Clean Grid */}
-       <Section id="projects">
+       <Section id="gallery">
           <div className="mb-16 text-center">
-             <h2 className="text-4xl md:text-5xl font-medium tracking-tight mb-4">Our Clients</h2>
-             <Link to="/gallery" className="text-primary hover:underline text-lg">See All Our Clients ›</Link>
+             <h2 className="text-4xl md:text-5xl font-medium tracking-tight mb-4">Gallery</h2>
+             <Link to="/gallery" className="text-primary hover:underline text-lg">View Full Gallery ›</Link>
           </div>
            
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -196,7 +196,7 @@ const Home = () => {
                 <div key={project.id || i} className="relative aspect-video overflow-hidden rounded-2xl group cursor-pointer">
                   <img src={project.imageUrl} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={project.title} />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                     <span className="text-white font-medium text-lg tracking-wide border border-white/30 px-6 py-2 rounded-full backdrop-blur-sm">View Project</span>
+                     <span className="text-white font-medium text-lg tracking-wide border border-white/30 px-6 py-2 rounded-full backdrop-blur-sm">View Photo</span>
                   </div>
                 </div>
               )) : (
@@ -209,7 +209,7 @@ const Home = () => {
                     <div key={i} className="relative aspect-video overflow-hidden rounded-2xl group cursor-pointer">
                       <img src={item.img} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt={item.title} />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                         <span className="text-white font-medium text-lg tracking-wide border border-white/30 px-6 py-2 rounded-full backdrop-blur-sm">View Project</span>
+                         <span className="text-white font-medium text-lg tracking-wide border border-white/30 px-6 py-2 rounded-full backdrop-blur-sm">View Photo</span>
                       </div>
                     </div>
                  ))
