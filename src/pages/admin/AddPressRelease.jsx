@@ -15,6 +15,7 @@ const AddPressRelease = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
+    slug: '',
     date: new Date().toISOString().split('T')[0],
     excerpt: '',
     coverImages: [], // Multiple cover images
@@ -71,8 +72,36 @@ const AddPressRelease = () => {
             type="text" 
             className="w-full px-4 py-2 rounded-lg border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
             value={formData.title}
-            onChange={(e) => setFormData({...formData, title: e.target.value})}
+            onChange={(e) => {
+              const title = e.target.value;
+              // Auto-generate slug if slug is empty or matches old title slugified
+              const oldSlug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+              const currentSlug = formData.slug;
+              
+              if (!currentSlug || currentSlug === oldSlug) {
+                const newSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+                setFormData({...formData, title, slug: newSlug});
+              } else {
+                setFormData({...formData, title});
+              }
+            }}
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Slug (URL)</label>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-sm">/press/</span>
+            <input 
+              required
+              type="text" 
+              className="w-full px-4 py-2 rounded-lg border border-border focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+              value={formData.slug}
+              onChange={(e) => setFormData({...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-')})}
+              placeholder="my-press-release"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">Unique identifier for the URL (e.g. pr-01)</p>
         </div>
 
         <div>

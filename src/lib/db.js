@@ -211,18 +211,34 @@ export const getPressReleases = async () => {
     }
 };
 
-export const getPressRelease = async (id) => {
+export const getPressRelease = async (idOrSlug) => {
     try {
-        const docRef = doc(db, "press_releases", id);
+        // First try to fetch as a direct ID (legacy)
+        const docRef = doc(db, "press_releases", idOrSlug);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
             return { id: docSnap.id, ...docSnap.data() };
         }
 
-        // Fallback
-        return seedPressReleases.find(pr => pr.id === id);
+        // If not found by ID, try querying by slug
+        const q = query(collection(db, "press_releases"), where("slug", "==", idOrSlug));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const doc = querySnapshot.docs[0];
+            return { id: doc.id, ...doc.data() };
+        }
+
+        // Fallback to seed data
+        return seedPressReleases.find(pr => pr.id === idOrSlug || pr.slug === idOrSlug);
     } catch (e) {
-        return seedPressReleases.find(pr => pr.id === id);
+        console.warn("getPressRelease fetch failed", e);
+        return seedPressReleases.find(pr => pr.id === idOrSlug || pr.slug === idOrSlug);
     }
+};
+
+export const getPressReleaseBySlug = async (slug) => {
+    // Alias for clarity, but getPressRelease handles both now
+    return getPressRelease(slug);
 };

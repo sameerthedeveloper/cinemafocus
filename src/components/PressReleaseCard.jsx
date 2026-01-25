@@ -40,7 +40,7 @@ const PressReleaseCard = ({ release, variant = 'vertical', className }) => {
               {release.excerpt}
             </p>
             
-            <Link to={`/press/${release.id}`} className="text-primary font-medium hover:underline inline-flex items-center text-lg">
+            <Link to={`/press/${release.slug || release.id}`} className="text-primary font-medium hover:underline inline-flex items-center text-lg">
               Read Full Story &rarr;
             </Link>
          </div>
@@ -75,7 +75,7 @@ const PressReleaseCard = ({ release, variant = 'vertical', className }) => {
           {release.excerpt}
         </p>
         
-        <Link to={`/press/${release.id}`} className="text-primary text-sm font-medium hover:underline mt-auto inline-flex items-center">
+        <Link to={`/press/${release.slug || release.id}`} className="text-primary text-sm font-medium hover:underline mt-auto inline-flex items-center">
           Read Full Story &rarr;
         </Link>
       </div>
