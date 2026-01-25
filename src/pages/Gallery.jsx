@@ -8,7 +8,7 @@ import clsx from 'clsx';
 import ScrollToTop from '../components/ScrollToTop';
 
 const Gallery = () => {
-  const [projects, setProjects] = useState([]);
+  const [galleryItems, setGalleryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
@@ -16,9 +16,9 @@ const Gallery = () => {
     const fetchProjects = async () => {
       try {
         const data = await getProjects();
-        setProjects(data);
+        setGalleryItems(data);
       } catch (error) {
-        console.error("Error fetching projects:", error);
+        console.error("Error fetching gallery items:", error);
       } finally {
         setLoading(false);
       }
@@ -32,12 +32,12 @@ const Gallery = () => {
   
   const nextImage = (e) => {
     e.stopPropagation();
-    setLightboxIndex((prev) => (prev + 1) % projects.length);
+    setLightboxIndex((prev) => (prev + 1) % galleryItems.length);
   };
   
   const prevImage = (e) => {
     e.stopPropagation();
-    setLightboxIndex((prev) => (prev - 1 + projects.length) % projects.length);
+    setLightboxIndex((prev) => (prev - 1 + galleryItems.length) % galleryItems.length);
   };
 
   // Keyboard navigation for lightbox
@@ -50,7 +50,7 @@ const Gallery = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [lightboxIndex, projects.length]);
+  }, [lightboxIndex, galleryItems.length]);
 
   return (
     <div className="animate-fade-in min-h-screen bg-background">
@@ -78,19 +78,19 @@ const Gallery = () => {
                <p className="text-sm font-medium text-muted-foreground animate-pulse">Loading Collection...</p>
              </div>
            </div>
-        ) : projects.length > 0 ? (
+        ) : galleryItems.length > 0 ? (
           /* Masonry Layout using CSS Columns */
           <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-             {projects.map((project, idx) => (
+             {galleryItems.map((item, idx) => (
               <div 
-                key={project.id || idx} 
+                key={item.id || idx} 
                 className="break-inside-avoid relative overflow-hidden rounded-xl group cursor-pointer bg-secondary/10"
                 onClick={() => openLightbox(idx)}
               >
                 {/* Image */}
                 <img 
-                  src={project.imageUrl} 
-                  alt={project.title} 
+                  src={item.imageUrl} 
+                  alt={item.title} 
                   loading="lazy"
                   className="w-full h-auto object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
@@ -100,14 +100,14 @@ const Gallery = () => {
                    <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex flex-col items-center gap-3">
                       <ZoomIn className="text-white/80" size={32} strokeWidth={1.5} />
                       <span className="text-white font-medium text-sm tracking-widest uppercase border border-white/30 px-4 py-1.5 rounded-full">
-                        View Project
+                        View Photo
                       </span>
                    </div>
                 </div>
                 
                 {/* Title (Always visible bottom label styling option, or keep it clean? Keeping clean for premium feel, title on hover or lightbox) */}
                  <div className="absolute inset-x-0 bottom-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 to-transparent">
-                    <p className="text-white font-medium text-lg">{project.title}</p>
+                    <p className="text-white font-medium text-lg">{item.title}</p>
                  </div>
               </div>
             ))}
@@ -145,23 +145,22 @@ const Gallery = () => {
               <ChevronRight size={40} strokeWidth={1} />
            </button>
 
-           {/* Image Container */}
-           <div 
-             className="relative max-w-7xl max-h-[90vh] w-full p-4 flex flex-col items-center justify-center"
-             onClick={(e) => e.stopPropagation()} 
-           >
-              <img 
-                src={projects[lightboxIndex].imageUrl} 
-                alt={projects[lightboxIndex].title}
-                className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-sm"
-              />
-              <div className="mt-6 text-center">
-                 <h3 className="text-white text-xl md:text-2xl font-light tracking-wide">{projects[lightboxIndex].title}</h3>
-                 <p className="text-white/40 text-sm mt-2 font-mono">
-                   {lightboxIndex + 1} / {projects.length}
-                 </p>
-              </div>
-           </div>
+             <div 
+               className="relative max-w-7xl max-h-[90vh] w-full p-4 flex flex-col items-center justify-center"
+               onClick={(e) => e.stopPropagation()} 
+             >
+                <img 
+                  src={galleryItems[lightboxIndex].imageUrl} 
+                  alt={galleryItems[lightboxIndex].title}
+                  className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-sm"
+                />
+                <div className="mt-6 text-center">
+                   <h3 className="text-white text-xl md:text-2xl font-light tracking-wide">{galleryItems[lightboxIndex].title}</h3>
+                   <p className="text-white/40 text-sm mt-2 font-mono">
+                     {lightboxIndex + 1} / {galleryItems.length}
+                   </p>
+                </div>
+             </div>
         </div>,
         document.body
       )}
