@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, ArrowUp, ArrowDown, Type, Heading as HeadingIcon, ImageIcon, GripVertical, GalleryHorizontal } from 'lucide-react';
+import { Plus, Trash2, ArrowUp, ArrowDown, Type, Heading as HeadingIcon, ImageIcon, GripVertical, GalleryHorizontal, Link as LinkIcon, ExternalLink } from 'lucide-react';
 import ImageUpload from '../ImageUpload';
 
 const ContentBlockBuilder = ({ blocks, onChange }) => {
@@ -10,6 +10,7 @@ const ContentBlockBuilder = ({ blocks, onChange }) => {
       type,
       data: type === 'text' ? { text: '' } 
             : type === 'heading' ? { text: '', level: 2 }
+            : type === 'link' ? { text: '', url: '', style: 'button' } 
             : type === 'image' ? { url: '', caption: '' }
             : { images: [] } // gallery
     };
@@ -72,6 +73,13 @@ const ContentBlockBuilder = ({ blocks, onChange }) => {
              >
                 <GalleryHorizontal size={14} /> Gallery
              </button>
+             <button 
+               type="button"
+               onClick={() => addBlock('link')}
+               className="px-3 py-1.5 text-xs font-medium border border-border rounded-md hover:bg-secondary flex items-center gap-1.5"
+             >
+                <LinkIcon size={14} /> Link
+             </button>
           </div>
        </div>
 
@@ -86,7 +94,7 @@ const ContentBlockBuilder = ({ blocks, onChange }) => {
          {blocks.map((block, index) => (
            <div key={block.id} className="relative group bg-secondary/10 border border-border rounded-lg p-4 transition-all hover:border-primary/20">
               {/* Controls */}
-              <div className="absolute right-2 top-2 flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+              <div className="absolute right-2 top-2 flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity z-10">
                  <button 
                    type="button"
                    disabled={index === 0}
@@ -122,6 +130,7 @@ const ContentBlockBuilder = ({ blocks, onChange }) => {
                     {block.type === 'text' && <Type size={14} />}
                     {block.type === 'image' && <ImageIcon size={14} />}
                     {block.type === 'gallery' && <GalleryHorizontal size={14} />}
+                    {block.type === 'link' && <LinkIcon size={14} />}
                     {block.type} Block
                  </div>
 
@@ -165,6 +174,69 @@ const ContentBlockBuilder = ({ blocks, onChange }) => {
                       value={block.data.text}
                       onChange={(e) => updateBlock(block.id, { text: e.target.value })}
                     />
+                 )}
+
+                 {block.type === 'link' && (
+                    <div className="space-y-3 bg-background p-3 rounded-lg border border-border/50">
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                         <div>
+                            <label className="block text-xs font-medium mb-1">Display Text</label>
+                            <input 
+                              type="text" 
+                              className="w-full bg-background border border-border rounded px-3 py-2 text-sm outline-none focus:border-primary transition-colors"
+                              placeholder="e.g. Visit Website"
+                              value={block.data.text}
+                              onChange={(e) => updateBlock(block.id, { text: e.target.value })}
+                            />
+                         </div>
+                         <div>
+                            <label className="block text-xs font-medium mb-1">URL</label>
+                            <input 
+                              type="text" 
+                              className="w-full bg-background border border-border rounded px-3 py-2 text-sm outline-none focus:border-primary transition-colors"
+                              placeholder="https://..."
+                              value={block.data.url}
+                              onChange={(e) => updateBlock(block.id, { url: e.target.value })}
+                            />
+                         </div>
+                       </div>
+                       <div className="flex gap-4 pt-1">
+                          <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                            <input 
+                              type="radio" 
+                              name={`style-${block.id}`} 
+                              checked={block.data.style === 'button'}
+                              onChange={() => updateBlock(block.id, { style: 'button' })}
+                            />
+                            Button Style
+                          </label>
+                          <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                            <input 
+                              type="radio" 
+                              name={`style-${block.id}`} 
+                              checked={block.data.style === 'text'}
+                              onChange={() => updateBlock(block.id, { style: 'text' })}
+                            />
+                            Text Link
+                          </label>
+                       </div>
+                       
+                       {/* Preview */}
+                       {block.data.text && (
+                         <div className="pt-2 mt-2 border-t border-dashed border-border">
+                           <span className="text-xs text-muted-foreground block mb-2">Preview:</span>
+                           {block.data.style === 'button' ? (
+                             <span className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm">
+                               {block.data.text} <ExternalLink size={14} />
+                             </span>
+                           ) : (
+                             <span className="text-primary hover:underline font-medium inline-flex items-center gap-1">
+                               {block.data.text} <ExternalLink size={14} />
+                             </span>
+                           )}
+                         </div>
+                       )}
+                    </div>
                  )}
 
                  {block.type === 'image' && (
@@ -261,6 +333,14 @@ const ContentBlockBuilder = ({ blocks, onChange }) => {
                title="Add Paragraph"
              >
                 <Type size={18} />
+             </button>
+             <button 
+               type="button"
+               onClick={() => addBlock('link')}
+               className="p-2 bg-secondary hover:bg-secondary/80 rounded-full text-foreground transition-colors"
+               title="Add Link"
+             >
+                <LinkIcon size={18} />
              </button>
              <button 
                type="button"

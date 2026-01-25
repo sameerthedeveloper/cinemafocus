@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+import { ExternalLink } from 'lucide-react';
 
 const ContentRenderer = ({ blocks, className }) => {
   if (!blocks || !Array.isArray(blocks) || blocks.length === 0) {
@@ -48,6 +49,27 @@ const ContentRenderer = ({ blocks, className }) => {
                   </figcaption>
                 )}
               </figure>
+            );
+
+          case 'link':
+            const isButton = block.data.style === 'button';
+            return (
+              <div key={block.id} className="my-6">
+                <a 
+                  href={block.data.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={clsx(
+                    "inline-flex items-center gap-2 transition-all",
+                    isButton 
+                      ? "px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 active:scale-95 shadow-sm hover:shadow-md" 
+                      : "text-primary hover:text-primary/80 hover:underline font-medium text-lg"
+                  )}
+                >
+                  {block.data.text}
+                  <ExternalLink size={isButton ? 18 : 16} strokeWidth={isButton ? 2 : 2.5} />
+                </a>
+              </div>
             );
 
           case 'gallery':
