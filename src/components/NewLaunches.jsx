@@ -140,6 +140,10 @@ const NewLaunches = ({ products }) => {
                <img 
                  src={currentProduct.images?.[0] || '/images/products/speaker-transparent.png'} 
                  alt={currentProduct.name}
+                 width="800"
+                 height="800"
+                 loading={currentIndex === 0 ? "eager" : "lazy"}
+                 fetchPriority={currentIndex === 0 ? "high" : "auto"}
                  className="max-h-[35vh] md:max-h-[85vh] w-auto object-contain drop-shadow-2xl animate-float mt-0 md:mt-0"
                  style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }}
                />

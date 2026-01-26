@@ -4,12 +4,14 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const bucketName = storageBucket;
 
 // Helper to get consistent image URL
-const getImageUrl = (filename) => {
+const getImageUrl = (filename, options = {}) => {
+    const { width = 1200, quality = 80, format = 'webp' } = options;
+
     // Check if we have Supabase config (minimal check)
     if (supabaseUrl && bucketName) {
-        // Construct public URL
-        // Format: https://[project-ref].supabase.co/storage/v1/object/public/[bucket]/[filename]
-        return `${supabaseUrl}/storage/v1/object/public/${bucketName}/${filename}`;
+        // Construct public URL with transformation parameters
+        const baseUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${filename}`;
+        return `${baseUrl}?width=${width}&quality=${quality}&format=${format}`;
     }
     // Fallback to local
     return `/images/${filename}`;
@@ -18,13 +20,13 @@ const getImageUrl = (filename) => {
 // Map original local filenames to intended cloud filenames
 // For simplicity, we assume the cloud filenames match these or we hardcode specific ones if known.
 // Ideally, these files should exist in the bucket.
-const heroImg = '/images/hero-light.webp';
-const speakersImg = '/images/speakers.webp';
-const subwoofersImg = '/images/speakers.webp'; // Reusing speakers for demo
-const amplifiersImg = '/images/amplifiers.webp';
-const turntablesImg = '/images/turntables.webp';
-const productSpeakersImg = '/images/product-speakers.webp';
-const productAmpImg = '/images/product-amp.webp';
+const heroImg = getImageUrl('hero-light.webp', { width: 1920 });
+const speakersImg = getImageUrl('speakers.webp', { width: 800 });
+const subwoofersImg = getImageUrl('speakers.webp', { width: 800 });
+const amplifiersImg = getImageUrl('amplifiers.webp', { width: 800 });
+const turntablesImg = getImageUrl('turntables.webp', { width: 800 });
+const productSpeakersImg = getImageUrl('product-speakers.webp', { width: 800 });
+const productAmpImg = getImageUrl('product-amp.webp', { width: 800 });
 
 export const categories = [
     {
