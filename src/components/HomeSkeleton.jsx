@@ -4,6 +4,7 @@ const HomeSkeleton = () => {
   return (
     <div className="w-full min-h-screen bg-zinc-950 animate-pulse">
       {/* Hero / New Launches Skeleton */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/20 text-2xl font-light">Loading Cinema Focus...</div>
       <div className="relative w-full h-[100dvh] flex flex-col md:flex-row items-center justify-center px-6 md:px-20 overflow-hidden">
         
         {/* Left Side: Text */}

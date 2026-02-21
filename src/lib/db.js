@@ -34,7 +34,11 @@ export const getProducts = async (filter = null) => {
             q = query(q, where("brand", "==", brandName));
         }
 
-        const querySnapshot = await getDocs(q);
+        // Timeout promise
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+
+        const querySnapshot = await Promise.race([getDocs(q), timeout]);
+
         if (querySnapshot.empty) {
             console.warn("Firestore empty, returning seed data");
             let results = seedProducts;
@@ -52,7 +56,7 @@ export const getProducts = async (filter = null) => {
 
         return docs;
     } catch (error) {
-        console.warn("Firestore fetch failed", error);
+        console.warn("Firestore fetch failed or timed out", error);
         let results = seedProducts;
         if (categorySlug) results = results.filter(p => p.category === categorySlug);
         if (brandName) results = results.filter(p => p.brand === brandName);
@@ -121,7 +125,9 @@ export const getCategories = async () => {
         // Note: 'order' might need to be created in index for complex queries, but simple get shouldn't fail tough.
         // If fail, just getDocs(collection(db, "categories")) and sort in JS.
 
-        const querySnapshot = await getDocs(collection(db, "categories"));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const querySnapshot = await Promise.race([getDocs(collection(db, "categories")), timeout]);
+
         if (querySnapshot.empty) return seedCategories;
 
         const cats = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -137,7 +143,8 @@ export const getHero = async () => {
     if (USE_MOCK) return seedHero;
     try {
         const docRef = doc(db, "hero", "main");
-        const docSnap = await getDoc(docRef);
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const docSnap = await Promise.race([getDoc(docRef), timeout]);
         if (docSnap.exists()) return docSnap.data();
         return seedHero;
     } catch (e) { return seedHero; }
@@ -147,7 +154,8 @@ export const getTrustBadges = async () => {
     if (USE_MOCK) return seedTrustBadges;
     try {
         const docRef = doc(db, "site_content", "trust_badges");
-        const docSnap = await getDoc(docRef);
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const docSnap = await Promise.race([getDoc(docRef), timeout]);
         if (docSnap.exists()) return docSnap.data().items || [];
         return seedTrustBadges;
     } catch (e) { return seedTrustBadges; }
@@ -156,7 +164,8 @@ export const getTrustBadges = async () => {
 export const getFeaturedProducts = async () => {
     try {
         const q = query(collection(db, "products"), where("featured", "==", true), limit(4));
-        const querySnapshot = await getDocs(q);
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const querySnapshot = await Promise.race([getDocs(q), timeout]);
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
         // Fallback to local
@@ -167,7 +176,8 @@ export const getFeaturedProducts = async () => {
 export const getProjects = async () => {
     try {
         const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
-        const querySnapshot = await getDocs(q);
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const querySnapshot = await Promise.race([getDocs(q), timeout]);
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
         console.error("getProjects error:", e);
@@ -182,7 +192,8 @@ export const getProjects = async () => {
 export const getNewLaunches = async () => {
     try {
         const q = query(collection(db, "new_launches")); // Can order by createdAt if added
-        const querySnapshot = await getDocs(q);
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const querySnapshot = await Promise.race([getDocs(q), timeout]);
 
         if (querySnapshot.empty) {
             return [];
@@ -198,7 +209,8 @@ export const getNewLaunches = async () => {
 export const getPressReleases = async () => {
     try {
         const q = query(collection(db, "press_releases"), orderBy("date", "desc"));
-        const querySnapshot = await getDocs(q);
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const querySnapshot = await Promise.race([getDocs(q), timeout]);
 
         if (querySnapshot.empty) {
             return seedPressReleases;

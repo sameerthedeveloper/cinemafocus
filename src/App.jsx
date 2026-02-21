@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
 import { SiteSettingsProvider } from './context/SiteSettingsContext';
+import HomeSkeleton from './components/HomeSkeleton'; // Import for fallback if needed globally
 
 // Lazy Load Pages
 const Home = lazy(() => import('./pages/Home'));
@@ -51,7 +52,6 @@ const PortalNewLaunches = lazy(() => import('./pages/portal/NewLaunches'));
 
 import { usePageTracking } from './lib/analytics';
 import AppleLoader from './components/AppleLoader';
-import HomeSkeleton from './components/HomeSkeleton';
 
 const PageLoader = () => (
   <HomeSkeleton />
@@ -62,60 +62,76 @@ const AppContent = () => {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Public Routes */}
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<ProductList />} />
-          <Route path="/products/:slug" element={<ProductDetail />} />
-          <Route path="/category/:slug" element={<CategoryPage />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/press" element={<PressReleases />} />
-          <Route path="/press/:id" element={<PressReleaseDetail />} />
+      {/* Public Routes */}
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/products" element={<ProductList />} />
+        <Route path="/products/:slug" element={<ProductDetail />} />
+        <Route path="/category/:slug" element={<CategoryPage />} />
+        <Route path="/gallery" element={<Gallery />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/press" element={<PressReleases />} />
+        <Route path="/press/:id" element={<PressReleaseDetail />} />
+      </Route>
+
+      {/* Admin Routes */}
+      <Route path="/admin/login" element={
+        <Suspense fallback={<PageLoader />}>
+          <Login />
+        </Suspense>
+      } />
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/admin" element={
+          <Suspense fallback={<PageLoader />}>
+            <AdminLayout />
+          </Suspense>
+        }>
+           <Route index element={<Navigate to="/admin/dashboard" replace />} />
+           <Route path="dashboard" element={<Dashboard />} />
+           <Route path="products" element={<AdminProducts />} />
+           <Route path="products/new" element={<AdminAddProduct />} />
+           <Route path="products/edit/:id" element={<AdminEditProduct />} />
+           
+           {/* New Sections */}
+           <Route path="new-launches" element={<AdminNewLaunches />} />
+           <Route path="new-launches/new" element={<AdminAddNewLaunch />} />
+           <Route path="press-releases" element={<AdminPressReleases />} />
+           <Route path="press-releases/new" element={<AdminAddPressRelease />} />
+           <Route path="press-releases/edit/:id" element={<AdminEditPressRelease />} />
+
+           <Route path="categories" element={<AdminCategories />} />
+           <Route path="users" element={<AdminUsers />} />
+           <Route path="messages" element={<AdminMessages />} />
+           <Route path="gallery" element={<AdminProjects />} />
+           <Route path="seo" element={<AdminSEO />} />
+           <Route path="site-control" element={<SiteControl />} />
         </Route>
+      </Route>
 
-        {/* Admin Routes */}
-        <Route path="/admin/login" element={<Login />} />
-
-        <Route element={<ProtectedRoute />}>
-          <Route path="/admin" element={<AdminLayout />}>
-             <Route index element={<Navigate to="/admin/dashboard" replace />} />
-             <Route path="dashboard" element={<Dashboard />} />
-             <Route path="products" element={<AdminProducts />} />
-             <Route path="products/new" element={<AdminAddProduct />} />
-             <Route path="products/edit/:id" element={<AdminEditProduct />} />
-             
-             {/* New Sections */}
-             <Route path="new-launches" element={<AdminNewLaunches />} />
-             <Route path="new-launches/new" element={<AdminAddNewLaunch />} />
-             <Route path="press-releases" element={<AdminPressReleases />} />
-             <Route path="press-releases/new" element={<AdminAddPressRelease />} />
-             <Route path="press-releases/edit/:id" element={<AdminEditPressRelease />} />
-
-             <Route path="categories" element={<AdminCategories />} />
-             <Route path="users" element={<AdminUsers />} />
-             <Route path="messages" element={<AdminMessages />} />
-             <Route path="gallery" element={<AdminProjects />} />
-             <Route path="seo" element={<AdminSEO />} />
-             <Route path="site-control" element={<SiteControl />} />
-          </Route>
+      {/* Dealer Portal Routes */}
+      <Route path="/portal/login" element={
+        <Suspense fallback={<PageLoader />}>
+          <PortalLogin />
+        </Suspense>
+      } />
+      <Route element={<RoleProtectedRoute allowedRoles={['dealer', 'admin']} redirectTo="/portal/login" />}>
+        <Route path="/portal" element={
+          <Suspense fallback={<PageLoader />}>
+            <PortalLayout />
+          </Suspense>
+        }>
+          <Route index element={<Navigate to="/portal/dashboard" replace />} />
+          <Route path="dashboard" element={<PortalDashboard />} />
+          <Route path="messages" element={<PortalMessages />} />
+          <Route path="press-releases" element={<PortalPressReleases />} />
+          <Route path="press-releases/new" element={<AdminAddPressRelease />} />
+          <Route path="press-releases/edit/:id" element={<AdminEditPressRelease />} />
+          <Route path="new-launches" element={<PortalNewLaunches />} />
         </Route>
-
-        {/* Dealer Portal Routes */}
-        <Route path="/portal/login" element={<PortalLogin />} />
-        <Route element={<RoleProtectedRoute allowedRoles={['dealer', 'admin']} redirectTo="/portal/login" />}>
-          <Route path="/portal" element={<PortalLayout />}>
-            <Route index element={<Navigate to="/portal/dashboard" replace />} />
-            <Route path="dashboard" element={<PortalDashboard />} />
-            <Route path="messages" element={<PortalMessages />} />
-            <Route path="press-releases" element={<PortalPressReleases />} />
-            <Route path="press-releases/new" element={<AdminAddPressRelease />} />
-            <Route path="press-releases/edit/:id" element={<AdminEditPressRelease />} />
-            <Route path="new-launches" element={<PortalNewLaunches />} />
-          </Route>
-        </Route>
-        
+      </Route>
+      
       </Routes>
     </Suspense>
   );

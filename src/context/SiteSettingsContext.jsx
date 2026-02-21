@@ -30,6 +30,8 @@ export const SiteSettingsProvider = ({ children }) => {
       } else {
         setDoc(settingsRef, { showDesktopMenu: true, showPrice: true }, { merge: true });
       }
+    }, (error) => {
+        console.warn("Settings fetch failed:", error);
     });
 
     // 2. SEO Settings Listener
@@ -42,6 +44,9 @@ export const SiteSettingsProvider = ({ children }) => {
         setDoc(seoRef, seoSettings, { merge: true });
       }
       setLoading(false); // Set loading false after at least SEO attempts load
+    }, (error) => {
+      console.warn("SEO fetch failed:", error);
+      setLoading(false); // Ensure we stop loading even on error
     });
 
     return () => {
