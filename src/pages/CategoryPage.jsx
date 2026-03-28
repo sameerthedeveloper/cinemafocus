@@ -39,8 +39,17 @@ const CategoryPage = () => {
        <div className="space-y-4 mb-12 text-center">
           <SEO 
             title={category.name} 
-            description={`Explore our premium selection of ${category.name.toLowerCase()}.`}
+            description={`Explore our premium selection of ${category.name.toLowerCase()} — expertly curated by Cinema Focus for the ultimate audio experience.`}
             path={`/category/${slug}`}
+            keywords={`${category.name}, buy ${category.name.toLowerCase()}, premium ${category.name.toLowerCase()}, Cinema Focus`}
+            schema={{
+              "@context": "https://schema.org",
+              "@type": "CollectionPage",
+              "name": category.name,
+              "description": `Premium ${category.name.toLowerCase()} from Cinema Focus.`,
+              "url": `https://cinemafocus.in/category/${slug}`,
+              "isPartOf": { "@type": "WebSite", "name": "Cinema Focus", "url": "https://cinemafocus.in" }
+            }}
           />
           <h1 className="text-4xl md:text-5xl font-serif font-medium">{category.name}</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">

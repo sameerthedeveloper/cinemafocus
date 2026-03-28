@@ -35,7 +35,7 @@ export const getProducts = async (filter = null) => {
         }
 
         // Timeout promise
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
 
         const querySnapshot = await Promise.race([getDocs(q), timeout]);
 
@@ -56,7 +56,7 @@ export const getProducts = async (filter = null) => {
 
         return docs;
     } catch (error) {
-        console.warn("Firestore fetch failed or timed out", error);
+        console.error("Firestore [getProducts] failed:", error);
         let results = seedProducts;
         if (categorySlug) results = results.filter(p => p.category === categorySlug);
         if (brandName) results = results.filter(p => p.brand === brandName);
@@ -89,7 +89,7 @@ export const getBrands = async () => {
         return brands.sort();
 
     } catch (error) {
-        console.warn("Firestore fetch brands failed", error);
+        console.error("Firestore [getBrands] failed:", error);
         const brands = [...new Set(seedProducts.map(p => p.brand))];
         return brands.sort();
     }
@@ -112,7 +112,7 @@ export const getProduct = async (slug) => {
             return seedProducts.find(p => p.slug === slug);
         }
     } catch (error) {
-        console.warn("Firestore fetch failed", error);
+        console.error("Firestore [getProduct] failed:", error);
         return seedProducts.find(p => p.slug === slug);
     }
 };
@@ -125,7 +125,7 @@ export const getCategories = async () => {
         // Note: 'order' might need to be created in index for complex queries, but simple get shouldn't fail tough.
         // If fail, just getDocs(collection(db, "categories")) and sort in JS.
 
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
         const querySnapshot = await Promise.race([getDocs(collection(db, "categories")), timeout]);
 
         if (querySnapshot.empty) return seedCategories;
@@ -134,7 +134,7 @@ export const getCategories = async () => {
         // sorting in JS to be safe from missing index
         return cats.sort((a, b) => (a.order || 0) - (b.order || 0));
     } catch (error) {
-        console.warn("Firestore fetch failed", error);
+        console.error("Firestore [getCategories] failed:", error);
         return seedCategories;
     }
 };
@@ -143,31 +143,38 @@ export const getHero = async () => {
     if (USE_MOCK) return seedHero;
     try {
         const docRef = doc(db, "hero", "main");
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
         const docSnap = await Promise.race([getDoc(docRef), timeout]);
         if (docSnap.exists()) return docSnap.data();
         return seedHero;
-    } catch (e) { return seedHero; }
+    } catch (error) {
+        console.error("Firestore [getHero] failed:", error);
+        return seedHero;
+    }
 };
 
 export const getTrustBadges = async () => {
     if (USE_MOCK) return seedTrustBadges;
     try {
         const docRef = doc(db, "site_content", "trust_badges");
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
         const docSnap = await Promise.race([getDoc(docRef), timeout]);
         if (docSnap.exists()) return docSnap.data().items || [];
         return seedTrustBadges;
-    } catch (e) { return seedTrustBadges; }
+    } catch (error) {
+        console.error("Firestore [getTrustBadges] failed:", error);
+        return seedTrustBadges;
+    }
 };
 
 export const getFeaturedProducts = async () => {
     try {
         const q = query(collection(db, "products"), where("featured", "==", true), limit(4));
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
         const querySnapshot = await Promise.race([getDocs(q), timeout]);
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (e) {
+    } catch (error) {
+        console.error("Firestore [getFeaturedProducts] failed:", error);
         // Fallback to local
         return seedProducts.filter(p => p.featured).slice(0, 4);
     }
@@ -176,7 +183,7 @@ export const getFeaturedProducts = async () => {
 export const getProjects = async () => {
     try {
         const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
         const querySnapshot = await Promise.race([getDocs(q), timeout]);
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
@@ -192,7 +199,7 @@ export const getProjects = async () => {
 export const getNewLaunches = async () => {
     try {
         const q = query(collection(db, "new_launches")); // Can order by createdAt if added
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
         const querySnapshot = await Promise.race([getDocs(q), timeout]);
 
         if (querySnapshot.empty) {
@@ -200,8 +207,8 @@ export const getNewLaunches = async () => {
         }
 
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (e) {
-        console.warn("getNewLaunches fetch failed", e);
+    } catch (error) {
+        console.error("Firestore [getNewLaunches] failed:", error);
         return [];
     }
 };
@@ -209,7 +216,7 @@ export const getNewLaunches = async () => {
 export const getPressReleases = async () => {
     try {
         const q = query(collection(db, "press_releases"), orderBy("date", "desc"));
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 800));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
         const querySnapshot = await Promise.race([getDocs(q), timeout]);
 
         if (querySnapshot.empty) {
@@ -217,8 +224,8 @@ export const getPressReleases = async () => {
         }
 
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (e) {
-        console.warn("getPressReleases fetch failed", e);
+    } catch (error) {
+        console.error("Firestore [getPressReleases] failed:", error);
         return seedPressReleases;
     }
 };

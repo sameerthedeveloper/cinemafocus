@@ -76,7 +76,19 @@ const Contact = () => {
 
   return (
     <div className="animate-fade-in">
-       <SEO title="Contact" description="Ready to elevate your home audio experience? Visit our showroom or send us a message." />
+       <SEO 
+         title="Contact Us" 
+         description="Ready to elevate your home audio experience? Visit the Cinema Focus showroom in Oman or send us a message for expert consultation."
+         keywords="contact Cinema Focus, audio showroom Oman, home cinema consultation, visit showroom"
+         schema={{
+           "@context": "https://schema.org",
+           "@type": "ContactPage",
+           "name": "Contact Cinema Focus",
+           "description": "Get in touch with Cinema Focus for premium audio consultation, showroom visits, and product enquiries.",
+           "url": "https://cinemafocus.in/contact",
+           "isPartOf": { "@type": "WebSite", "name": "Cinema Focus", "url": "https://cinemafocus.in" }
+         }}
+       />
        <Section className="py-20 text-center">
         <h1 className="text-4xl md:text-5xl font-serif font-medium mb-4">Get in Touch</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">

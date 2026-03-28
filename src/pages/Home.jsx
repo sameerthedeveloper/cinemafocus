@@ -14,6 +14,7 @@ import { hero as fallbackHero, categories as seedCategories, products as seedPro
 import NewLaunches from '../components/NewLaunches';
 import PressReleases from '../components/PressReleases';
 import HomeSkeleton from '../components/HomeSkeleton';
+import LazyImage from '../components/LazyImage';
 
 // Local Assets for Fallback
 const imgSpeakers = '/images/speakers.webp';
@@ -123,19 +124,49 @@ const Home = () => {
   return (
     <div className="animate-fade-in pb-20">
       <SEO 
-        title="Home" 
-        schema={{
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          "name": "Cinema Focus",
-          "url": "https://cinemafocus.in",
-          "logo": "https://cinemafocus.in/logo.png",
-          "contactPoint": {
-            "@type": "ContactPoint",
-            "telephone": "+91-9876543210",
-            "contactType": "customer service"
+        title="Premium Audio & Home Cinema Systems" 
+        description="Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Oman. Explore speakers, subwoofers, amplifiers, and turntables from world-renowned brands."
+        keywords="home cinema, hi-fi audio, speakers, subwoofers, amplifiers, turntables, premium audio, Oman, Cinema Focus, home theater"
+        schema={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Cinema Focus",
+            "url": "https://cinemafocus.in",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://cinemafocus.in/products?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Cinema Focus",
+            "url": "https://cinemafocus.in",
+            "logo": "https://cinemafocus.in/logo.svg",
+            "sameAs": [],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer service",
+              "availableLanguage": ["English", "Arabic"]
+            }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "Cinema Focus",
+            "url": "https://cinemafocus.in",
+            "image": "https://cinemafocus.in/logo.svg",
+            "@id": "https://cinemafocus.in/#localbusiness",
+            "description": "Premium audio and home cinema showroom in Oman, curating the finest speakers, amplifiers, and turntables.",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "OM"
+            },
+            "priceRange": "$$$$"
           }
-        }}
+        ]}
       />
       
       {/* 1. New Launches Section (Apple Style Hero) */}
@@ -237,11 +268,17 @@ const Home = () => {
               {projects.length > 0 ? projects.slice(0, 3).map((project, i) => (
                 <div 
                   key={project.id || i} 
-                  className="relative aspect-video overflow-hidden rounded-2xl group cursor-pointer"
+                  className="relative group cursor-pointer"
                   onClick={() => openLightbox(i)}
                 >
-                  <img src={project.imageUrl} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={project.title} />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <LazyImage 
+                    src={project.imageUrl} 
+                    alt={project.title}
+                    aspectRatio="aspect-video"
+                    containerClassName="rounded-2xl"
+                    className="transition-transform duration-1000 group-hover:scale-110" 
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
                      <span className="text-white font-medium text-lg tracking-wide border border-white/30 px-6 py-2 rounded-full backdrop-blur-sm">View Photo</span>
                   </div>
                 </div>

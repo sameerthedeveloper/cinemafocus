@@ -1,17 +1,18 @@
 import React from 'react';
 import Button from './Button';
-import Section from './Section';
+import LazyImage from './LazyImage';
 
 const Hero = ({ title, subtitle, ctaText, ctaLink, imageUrl }) => {
   return (
     <div className="relative h-screen flex items-center bg-zinc-950 overflow-hidden">
-      {/* Background Image - Subtle Parallax or just static high quality */}
+      {/* Background Image - Smooth Fade-in & Optimization */}
       <div className="absolute inset-0 z-0">
-        <img 
+        <LazyImage 
           src={imageUrl} 
           alt="Hero Background" 
           fetchPriority="high"
           loading="eager"
+          aspectRatio="h-full"
           className="w-full h-full object-cover opacity-60"
         />
         {/* Dark overlay for text contrast */}

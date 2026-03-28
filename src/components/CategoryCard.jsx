@@ -1,17 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import LazyImage from './LazyImage';
 
 const CategoryCard = ({ category }) => {
   return (
     <Link 
-      to={`/category/${category.slug}`}
-      className="group relative block overflow-hidden rounded-2xl aspect-[4/5] bg-secondary/20"
+      to={`/products?category=${category.slug}`}
+      className="group relative block overflow-hidden rounded-2xl bg-secondary/20"
     >
-      <img
+      <LazyImage
         src={category.imageUrl}
         alt={category.name}
-        loading="lazy"
-        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-60"
+        aspectRatio="aspect-[4/5]"
+        className="opacity-80 group-hover:opacity-60 group-hover:scale-105"
       />
       
       <div className="absolute inset-0 flex flex-col justify-end p-8 z-10">

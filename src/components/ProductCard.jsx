@@ -1,22 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import clsx from 'clsx';
 import { useCurrency } from '../hooks/useCurrency';
+import LazyImage from './LazyImage';
 
 const ProductCard = ({ product }) => {
   const { formatPrice, showPrice } = useCurrency();
   return (
     <Link to={`/products/${product.slug}`} className="group block space-y-6">
-      {/* Image Container - Clean, no borders, gray background */}
-      <div className="aspect-square bg-secondary/30 rounded-2xl overflow-hidden relative">
-         <img
-          src={product.images?.[0] || '/images/placeholder.png'}
-          alt={product.name}
-          onError={(e) => { e.target.src = '/images/placeholder.png'; }}
-          loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        />
-      </div>
+      {/* Dynamic Image with Lazy Loading & Skeleton */}
+      <LazyImage 
+        src={product.images?.[0]} 
+        alt={product.name}
+        className="p-4 group-hover:scale-110 transition-transform duration-500"
+        containerClassName="rounded-2xl shadow-sm bg-secondary/10"
+        objectFit="contain"
+      />
 
       {/* Content - Minimal text below */}
       <div className="text-center space-y-2">

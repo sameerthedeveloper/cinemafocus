@@ -1,13 +1,26 @@
 import React from 'react';
 import Section from '../components/Section';
 import SEO from '../components/SEO';
+import LazyImage from '../components/LazyImage';
 const heroImg = '/images/hero-light.png';
 const speakersImg = '/images/speakers.png';
 
 const About = () => {
   return (
     <div className="animate-fade-in">
-      <SEO title="About" description="We are more than just a retailer; we are a destination for those who seek to experience music and film exactly as the artist intended." />
+      <SEO 
+        title="About Cinema Focus" 
+        description="We are more than just a retailer — we are a destination for those who seek to experience music and film exactly as the artist intended. Visit our showroom in Oman."
+        keywords="about Cinema Focus, premium audio showroom, hi-fi retailer Oman, home cinema specialist"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          "name": "About Cinema Focus",
+          "description": "Cinema Focus is a premium audio and home cinema showroom dedicated to delivering reference-class audiovisual experiences.",
+          "url": "https://cinemafocus.in/about",
+          "isPartOf": { "@type": "WebSite", "name": "Cinema Focus", "url": "https://cinemafocus.in" }
+        }}
+      />
       <Section className="py-20 text-center">
         <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-6">About Cinema Focus</h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -17,13 +30,13 @@ const About = () => {
 
       <Section background="bg-secondary">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-           <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-white">
-             <img 
-               src={heroImg} 
-               alt="Our Showroom" 
-               className="w-full h-full object-cover"
-             />
-           </div>
+           <LazyImage 
+              src={heroImg} 
+              alt="Our Showroom" 
+              aspectRatio="aspect-[4/3]"
+              containerClassName="rounded-2xl bg-white shadow-sm"
+              className="object-cover"
+           />
            <div className="space-y-6">
              <h2 className="text-3xl font-medium tracking-tight text-primary">Our Philosophy</h2>
              <p className="text-muted-foreground leading-relaxed text-lg">
@@ -55,13 +68,13 @@ const About = () => {
                 <li className="flex items-center gap-3"><span className="text-primary">✓</span> Home Installation & Support</li>
              </ul>
            </div>
-           <div className="md:order-1 aspect-[4/3] rounded-2xl overflow-hidden bg-secondary">
-             <img 
-               src={speakersImg} 
-               alt="Listening Experience" 
-               className="w-full h-full object-cover"
-             />
-           </div>
+           <LazyImage 
+              src={speakersImg} 
+              alt="Listening Experience" 
+              aspectRatio="aspect-[4/3]"
+              containerClassName="rounded-2xl"
+              className="object-cover"
+           />
         </div>
       </Section>
     </div>

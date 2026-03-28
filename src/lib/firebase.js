@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 
@@ -14,6 +14,16 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+    useFetchStreams: false
+});
 export const storage = getStorage(app);
 export const auth = getAuth(app);
+
+// Connectivity Diagnostic
+import { collection, onSnapshot, limit, query } from 'firebase/firestore';
+onSnapshot(query(collection(db, 'products'), limit(1)), 
+  () => console.log("%c✔ Firestore Connected Successfully", "color: #10b981; font-weight: bold;"),
+  (err) => console.error("%c✘ Firestore Connection Failed:", "color: #ef4444; font-weight: bold;", err)
+);

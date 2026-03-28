@@ -6,6 +6,7 @@ import { getProduct, getProducts } from '../lib/db';
 import SEO from '../components/SEO';
 import { useCurrency } from '../hooks/useCurrency';
 import { ChevronRight, ChevronLeft, ShieldCheck, Truck, RotateCcw, FileText } from 'lucide-react';
+import LazyImage from '../components/LazyImage';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -25,6 +26,16 @@ const ProductDetail = () => {
     fetchProduct();
   }, [slug]);
 
+  // Preload all gallery images in background
+  useEffect(() => {
+    if (product?.images?.length > 1) {
+      product.images.forEach((url) => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+  }, [product]);
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
   }
@@ -42,26 +53,45 @@ const ProductDetail = () => {
     <div className="animate-fade-in pt-6">
       <SEO 
         title={product.name} 
-        description={product.shortDescription || product.name}
+        description={product.shortDescription || product.longDescription?.substring(0, 160) || product.name}
         image={product.images?.[0]}
         path={`/products/${slug}`}
-        schema={{
-          "@context": "https://schema.org",
-          "@type": "Product",
-          "name": product.name,
-          "image": product.images,
-          "description": product.shortDescription || product.longDescription?.substring(0, 150),
-          "brand": {
-            "@type": "Brand",
-            "name": product.brand || "Cinema Focus"
+        keywords={`${product.name}, ${product.brand}, ${product.category?.replace('-', ' ')}, premium audio, Cinema Focus`}
+        schema={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": product.name,
+            "image": product.images,
+            "description": product.shortDescription || product.longDescription?.substring(0, 300),
+            "sku": product.slug,
+            "category": product.category?.replace('-', ' '),
+            "brand": {
+              "@type": "Brand",
+              "name": product.brand || "Cinema Focus"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": product.price || 0,
+              "priceCurrency": "OMR",
+              "availability": "https://schema.org/InStock",
+              "seller": {
+                "@type": "Organization",
+                "name": "Cinema Focus"
+              }
+            }
           },
-          "offers": {
-            "@type": "Offer",
-            "price": product.price,
-            "priceCurrency": "INR",
-            "availability": "https://schema.org/InStock"
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://cinemafocus.in" },
+              { "@type": "ListItem", "position": 2, "name": product.category?.replace('-', ' ') || "Products", "item": `https://cinemafocus.in/products?category=${product.category}` },
+              { "@type": "ListItem", "position": 3, "name": product.brand, "item": `https://cinemafocus.in/products?category=${product.category}` },
+              { "@type": "ListItem", "position": 4, "name": product.name }
+            ]
           }
-        }}
+        ]}
       />
       {/* Breadcrumb */}
       <div className="max-w-[1400px] px-4 md:px-8 mx-auto py-4 flex mt-15 items-center text-sm text-muted-foreground">
@@ -83,30 +113,32 @@ const ProductDetail = () => {
              {/* Images Gallery - Sticky */}
              <div className="space-y-6 lg:sticky lg:top-32 h-fit">
                <div className="relative group aspect-square md:aspect-[4/3] bg-secondary/20 overflow-hidden rounded-2xl flex items-center justify-center">
-                 <img 
+                 <LazyImage 
                    key={activeIndex}
                    src={product.images[activeIndex]} 
                    alt={product.name} 
-                   className="w-full h-full object-contain p-8 mix-blend-multiply animate-fade-in transition-all duration-300"
+                   className="p-8 mix-blend-multiply transition-all duration-300 shadow-sm"
+                   aspectRatio="aspect-square md:aspect-[4/3]"
+                   objectFit="contain"
                  />
                  
                  {product.images.length > 1 && (
                    <>
                      <button 
                        onClick={() => setActiveIndex((prev) => (prev === 0 ? product.images.length - 1 : prev - 1))}
-                       className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer"
+                       className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer z-20"
                        aria-label="Previous image"
                      >
                        <ChevronLeft size={24} />
                      </button>
                      <button 
                        onClick={() => setActiveIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1))}
-                       className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer"
+                       className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer z-20"
                        aria-label="Next image"
                      >
                        <ChevronRight size={24} />
                      </button>
-                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-background/40 backdrop-blur-sm rounded-full">
+                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-background/40 backdrop-blur-sm rounded-full z-20">
                        {product.images.map((_, idx) => (
                          <div 
                            key={idx} 
@@ -126,7 +158,7 @@ const ProductDetail = () => {
                        onClick={() => setActiveIndex(idx)}
                        className={`aspect-square bg-secondary/20 overflow-hidden rounded-xl cursor-pointer transition-all duration-300 flex items-center justify-center border-2 ${idx === activeIndex ? 'border-primary opacity-100 ring-4 ring-primary/5' : 'border-transparent opacity-60 hover:opacity-100 shadow-sm'}`}
                      >
-                       <img src={img} alt={`${product.name} ${idx}`} loading="lazy" className="w-full h-full object-contain p-2 mix-blend-multiply" />
+                       <LazyImage src={img} alt={`${product.name} ${idx}`} className="p-2 mix-blend-multiply" objectFit="contain" />
                      </button>
                    ))}
                  </div>

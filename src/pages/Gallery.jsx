@@ -55,7 +55,19 @@ const Gallery = () => {
   return (
     <div className="animate-fade-in min-h-screen bg-background">
       <ScrollToTop />
-      <SEO title="Gallery" description="A visual journey through some of our most exquisite home cinema and audio installations." />
+      <SEO 
+        title="Installation Gallery" 
+        description="A visual journey through Cinema Focus's most exquisite home cinema and audio installations. See how we bring premium sound to life."
+        keywords="home cinema installations, audio setup gallery, premium speaker installations, Cinema Focus projects, showroom gallery"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "ImageGallery",
+          "name": "Cinema Focus Installation Gallery",
+          "description": "A curated collection of bespoke home cinema and audio installations by Cinema Focus.",
+          "url": "https://cinemafocus.in/gallery",
+          "isPartOf": { "@type": "WebSite", "name": "Cinema Focus", "url": "https://cinemafocus.in" }
+        }}
+      />
       
       {/* Header Section */}
       <Section className="text-center pt-32 pb-16">

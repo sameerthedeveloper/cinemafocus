@@ -8,13 +8,15 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "push": "node scripts/push.js"
+    "push": "node scripts/push.js",
+    "sitemap": "node scripts/generate-sitemap.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.90.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "firebase": "^12.7.0",
+    "firebase-admin": "^13.7.0",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

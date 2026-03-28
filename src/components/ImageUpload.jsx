@@ -8,12 +8,54 @@ const ImageUpload = ({ onUploadComplete, initialImage = '' }) => {
   const [imageUrl, setImageUrl] = useState(initialImage);
   const inputId = useId(); // Unique ID for each instance
 
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_SIZE = 1920;
+
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          }, 'image/jpeg', 0.8);
+        };
+      };
+    });
+  };
+
   const handleFileChange = async (e) => {
-    const file = e.target.files[0];
+    let file = e.target.files[0];
     if (!file) return;
 
     setUploading(true);
     try {
+      // Compress if it's an image
+      if (file.type.startsWith('image/')) {
+        file = await compressImage(file);
+      }
+
       const fileName = `uploads/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
       const storageRef = ref(storage, fileName);
 

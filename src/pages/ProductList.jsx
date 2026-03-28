@@ -64,11 +64,20 @@ const ProductList = () => {
        <SEO 
          title={getPageTitle()} 
          description={activeCategory === 'all' 
-           ? 'Browse our complete collection of high-fidelity audio equipment.'
+           ? 'Browse our complete collection of high-fidelity audio equipment — speakers, subwoofers, amplifiers, and turntables.'
            : activeCategory === 'new-arrivals' 
              ? 'Check out the latest additions to our premium audio collection.'
              : `Explore our premium range of ${categories.find(c => c.slug === activeCategory)?.name || 'audio equipment'}.`
          }
+         keywords="buy speakers, premium audio equipment, hi-fi systems, home cinema products, Cinema Focus collection"
+         schema={{
+           "@context": "https://schema.org",
+           "@type": "CollectionPage",
+           "name": getPageTitle(),
+           "description": "Browse the Cinema Focus collection of premium audio equipment.",
+           "url": "https://cinemafocus.in/products",
+           "isPartOf": { "@type": "WebSite", "name": "Cinema Focus", "url": "https://cinemafocus.in" }
+         }}
        />
        <div className="space-y-6 mb-24 text-center">
           <h1 className="text-5xl md:text-6xl font-medium tracking-tight">Our Collection.</h1>

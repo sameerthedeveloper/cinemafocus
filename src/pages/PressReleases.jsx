@@ -29,7 +29,19 @@ const PressReleases = () => {
 
     return (
         <div className="animate-fade-in pt-24 pb-20">
-            <SEO title="Press Room" description="Latest news and updates from Cinema Focus." />
+            <SEO 
+              title="Press Room" 
+              description="Latest news, product launches, and press releases from Cinema Focus — your source for premium audio industry updates."
+              keywords="Cinema Focus news, audio press releases, home cinema announcements, product launches"
+              schema={{
+                "@context": "https://schema.org",
+                "@type": "CollectionPage",
+                "name": "Cinema Focus Press Room",
+                "description": "Latest news and press releases from Cinema Focus.",
+                "url": "https://cinemafocus.in/press",
+                "isPartOf": { "@type": "WebSite", "name": "Cinema Focus", "url": "https://cinemafocus.in" }
+              }}
+            />
             
             <Section>
                 <div className="mb-16 text-center space-y-4">
