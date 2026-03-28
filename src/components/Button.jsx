@@ -8,6 +8,7 @@ const Button = ({
   variant = 'primary', 
   size = 'md', 
   to, 
+  href,
   onClick, 
   className,
   icon = false,
@@ -49,6 +50,14 @@ const Button = ({
       <Link to={to} className={classes} {...props}>
         {content}
       </Link>
+    );
+  }
+
+  if (href) {
+    return (
+      <a href={href} className={classes} {...props}>
+        {content}
+      </a>
     );
   }
 

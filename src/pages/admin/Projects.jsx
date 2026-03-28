@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { db } from '../../lib/firebase';
-import { supabase, storageBucket } from '../../lib/supabase';
+import { db, storage } from '../../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, getDocs, deleteDoc, doc, addDoc, query, orderBy } from 'firebase/firestore';
 import { Loader2, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 
@@ -62,23 +62,16 @@ const Projects = () => {
     
     setSaving(true);
     try {
-      // 1. Upload Image to Supabase
+      // 1. Upload Image to Firebase
       const fileExt = newProject.image.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-      const bucketName = storageBucket;
+      const fileName = `projects/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+      const storageRef = ref(storage, fileName);
 
-      const { data, error } = await supabase.storage
-        .from(bucketName)
-        .upload(fileName, newProject.image);
+      // Upload the file
+      await uploadBytes(storageRef, newProject.image);
 
-      if (error) throw error;
-
-      // Get Public URL
-      const { data: publicUrlData } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(fileName);
-        
-      const imageUrl = publicUrlData.publicUrl;
+      // Get the download URL
+      const imageUrl = await getDownloadURL(storageRef);
 
       // 2. Insert into Firestore
       await addDoc(collection(db, 'projects'), {

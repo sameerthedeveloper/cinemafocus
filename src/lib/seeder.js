@@ -1,7 +1,7 @@
-import { db } from "./firebase.js";
+import { db, storage } from "./firebase.js";
 import { collection, doc, writeBatch, getDocs, setDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { categories, products, hero, trustBadges, newLaunches, pressReleases } from "./seed-data.js";
-import { supabase, storageBucket } from "./supabase.js";
 
 const ASSETS_TO_UPLOAD = [
     'hero.png',
@@ -12,9 +12,8 @@ const ASSETS_TO_UPLOAD = [
     'product-amp.png'
 ];
 
-const uploadAssetsToSupabase = async () => {
-    const bucketName = storageBucket;
-    console.log(`Starting Supabase asset upload to bucket: ${bucketName}...`);
+const uploadAssetsToFirebase = async () => {
+    console.log(`Starting Firebase asset upload...`);
 
     const uploads = ASSETS_TO_UPLOAD.map(async (filename) => {
         try {
@@ -23,13 +22,11 @@ const uploadAssetsToSupabase = async () => {
             if (!response.ok) throw new Error(`Missing local file: ${filename}`);
             const blob = await response.blob();
 
-            // 2. Upload to Supabase (Upsert to overwrite)
-            const { error } = await supabase.storage
-                .from(bucketName)
-                .upload(filename, blob, { upsert: true });
-
-            if (error) throw error;
-            console.log(`Saved ${filename} to Supabase.`);
+            // 2. Upload to Firebase
+            const storageRef = ref(storage, filename);
+            await uploadBytes(storageRef, blob);
+            
+            console.log(`Saved ${filename} to Firebase Storage.`);
         } catch (e) {
             console.warn(`Failed to upload ${filename}:`, e.message);
         }
@@ -42,9 +39,9 @@ const uploadAssetsToSupabase = async () => {
 export const seedDatabase = async () => {
     console.log("Starting database reset...");
 
-    // 0. Ensure Assets exist in Supabase (The "Fetch from Supabase" requirement)
+    // 0. Ensure Assets exist in Firebase
     try {
-        await uploadAssetsToSupabase();
+        await uploadAssetsToFirebase();
     } catch (e) {
         console.error("Asset upload failed, continuing with data reset...");
     }

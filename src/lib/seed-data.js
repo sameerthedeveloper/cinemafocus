@@ -1,19 +1,7 @@
-import { storageBucket } from './supabase.js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const bucketName = storageBucket;
-
 // Helper to get consistent image URL
-const getImageUrl = (filename, options = {}) => {
-    const { width = 1200, quality = 80, format = 'webp' } = options;
-
-    // Check if we have Supabase config (minimal check)
-    if (supabaseUrl && bucketName) {
-        // Construct public URL with transformation parameters
-        const baseUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${filename}`;
-        return `${baseUrl}?width=${width}&quality=${quality}&format=${format}`;
-    }
-    // Fallback to local
+const getImageUrl = (filename) => {
+    // We prioritize local assets in the repository for initial data.
+    // When seeded to Firestore, the seeder can replace these with cloud URLs if needed.
     return `/images/${filename}`;
 };
 
@@ -27,13 +15,19 @@ const amplifiersImg = getImageUrl('amplifiers.webp', { width: 800 });
 const turntablesImg = getImageUrl('turntables.webp', { width: 800 });
 const productSpeakersImg = getImageUrl('product-speakers.webp', { width: 800 });
 const productAmpImg = getImageUrl('product-amp.webp', { width: 800 });
-
 export const categories = [
     {
         name: "Floorstanding Speakers",
         slug: "floorstanding-speakers",
         imageUrl: speakersImg,
         description: "Experience the full depth of sound with our flagship floorstanding speakers.",
+        productCount: 18
+    },
+    {
+        name: "Studio Monitors",
+        slug: "studio-monitors",
+        imageUrl: productSpeakersImg,
+        description: "Professional reference monitors for the world's leading recording studios.",
         productCount: 12
     },
     {
@@ -55,7 +49,14 @@ export const categories = [
         slug: "subwoofers",
         imageUrl: subwoofersImg,
         description: "Deep, articulate bass that you can feel.",
-        productCount: 6
+        productCount: 8
+    },
+    {
+        name: "Home Theater",
+        slug: "home-theater",
+        imageUrl: heroImg,
+        description: "Immersive cinematic sound for the most demanding home environments.",
+        productCount: 4
     }
 ];
 
@@ -164,6 +165,216 @@ export const products = [
             { key: "Tubes", value: "KT150" },
             { key: "Impedance Taps", value: "16, 8, 4 Ohms" },
             { key: "Weight", value: "45 kg" }
+        ]
+    },
+    {
+        slug: "atc-scm-100a-sl-pro",
+        name: "ATC SCM 100A SL Pro",
+        brand: "ATC",
+        price: 18500,
+        category: "studio-monitors",
+        catalogUrl: "/catalogs/atc/SCM 100A.pdf",
+        shortDescription: "Three-way active studio monitor with 12\" bass driver.",
+        longDescription: "The ATC SCM100A is a three-way active studio monitor known for its accurate sound reproduction and powerful performance. It features a tri-amplified design with dedicated power for each driver, incorporating the legendary 75mm 'Super Dome' midrange driver.",
+        images: [productSpeakersImg],
+        featured: true,
+        specifications: [
+            { key: "Drivers", value: "25mm HF, 75mm Mid, 314mm LF" },
+            { key: "Frequency Response", value: "32Hz - 22kHz (-6dB)" },
+            { key: "Max SPL", value: "115dB continuous" },
+            { key: "Amplifier Output", value: "350W (Bass 200W, Mid 100W, HF 50W)" },
+            { key: "Crossover Frequencies", value: "380Hz, 3.5kHz" },
+            { key: "Weight", value: "65kg" }
+        ]
+    },
+    {
+        slug: "atc-scm-300a-sl-pro",
+        name: "ATC SCM 300A SL Pro",
+        brand: "ATC",
+        price: 45000,
+        category: "studio-monitors",
+        catalogUrl: "/catalogs/atc/SCM 300A.pdf",
+        shortDescription: "Flagship active 3-way reference monitor with twin 15\" bass drivers.",
+        longDescription: "The ATC SCM300A SL Pro is ATC's flagship active 3-way reference monitor, designed for the largest and most demanding recording environments. It features twin 15\" SL spec bass drivers and a rack-mount P4 4-way grounded source amplifier.",
+        images: [productSpeakersImg],
+        featured: true,
+        specifications: [
+            { key: "Drivers", value: "34mm HF, 75mm Mid, 2 x 375mm LF" },
+            { key: "Frequency Response", value: "25Hz - 20kHz (-6dB)" },
+            { key: "Max SPL", value: "121dB continuous" },
+            { key: "Amplifier Output", value: "850W (Bass 2x275W, Mid 200W, HF 100W)" },
+            { key: "Weight", value: "140kg (per monitor)" }
+        ]
+    },
+    {
+        slug: "atc-scs-120-pro",
+        name: "ATC SCS 120 Pro",
+        brand: "ATC",
+        price: 9500,
+        category: "subwoofers",
+        catalogUrl: "/catalogs/atc/SCS 120.pdf",
+        shortDescription: "Professional 15\" active studio subwoofer.",
+        longDescription: "The ATC SCS120 Pro is a high-performance 15-inch active studio subwoofer designed to complement ATC's range of professional monitoring systems. It delivers deep, articulate bass with exceptional clarity and power.",
+        images: [subwoofersImg],
+        featured: false,
+        specifications: [
+            { key: "Driver", value: "15\" ATC SS75-375SC" },
+            { key: "Frequency Range", value: "20Hz - 320Hz (-6dB)" },
+            { key: "Max SPL", value: "113dB continuous" },
+            { key: "Amplifier Output", value: "300W Class AB MOSFET" },
+            { key: "Weight", value: "44.5kg" }
+        ]
+    },
+    {
+        slug: "atc-hts-11",
+        name: "ATC HTS 11",
+        brand: "ATC",
+        price: 2800,
+        category: "home-theater",
+        catalogUrl: "/catalogs/atc/HTS 11.pdf",
+        shortDescription: "Compact 2-way on-wall loudspeaker.",
+        longDescription: "The ATC HTS11 is a mid-size 2-way on-wall loudspeaker designed for main loudspeakers in medium-sized rooms or as surround speakers in larger rooms. It offers the legendary ATC performance in a discreet, wall-mounted form factor.",
+        images: [productSpeakersImg],
+        featured: false,
+        specifications: [
+            { key: "Drivers", value: "25mm HF, 150mm Mid/Bass" },
+            { key: "Frequency Response", value: "55Hz - 25kHz (-6dB)" },
+            { key: "Max SPL", value: "108dB continuous" },
+            { key: "Recommended Power", value: "75W - 300W" },
+            { key: "Weight", value: "16.9kg" }
+        ]
+    },
+    {
+        slug: "atc-scm-50asl",
+        name: "ATC SCM 50ASL",
+        brand: "ATC",
+        price: 15500,
+        category: "floorstanding-speakers",
+        catalogUrl: "/catalogs/atc/SCM 50.pdf",
+        shortDescription: "Active three-way reference monitor/loudspeaker.",
+        longDescription: "The ATC SCM50ASL is a versatile three-way active system, equally at home in a professional studio or a high-end home audio system. It features the 75mm soft dome midrange and a 234mm Super Linear bass driver.",
+        images: [productSpeakersImg],
+        featured: false,
+        specifications: [
+            { key: "Drivers", value: "25mm HF, 75mm Mid, 234mm LF" },
+            { key: "Frequency Response", value: "38Hz - 25kHz (-6dB)" },
+            { key: "Max SPL", value: "112dB continuous" },
+            { key: "Amplifier Output", value: "350W (Bass 200W, Mid 100W, HF 50W)" },
+            { key: "Weight", value: "48.9kg" }
+        ]
+    },
+    {
+        slug: "atc-scm-25a-pro-mk2",
+        name: "ATC SCM 25A Pro Mk2",
+        brand: "ATC",
+        price: 8200,
+        category: "studio-monitors",
+        catalogUrl: "/catalogs/atc/scm 25A.pdf",
+        shortDescription: "Compact active 3-way studio monitor.",
+        longDescription: "The SCM25A Pro Mk2 is a compact 3-way active studio monitor that delivers the transparency and detail of larger ATC systems in a smaller footprint. It features the SH25-76S dual-suspension tweeter for improved high-frequency performance.",
+        images: [productSpeakersImg],
+        featured: true,
+        specifications: [
+            { key: "Drivers", value: "25mm HF, 75mm Mid, 164mm LF" },
+            { key: "Frequency Response", value: "47Hz - 22kHz (-6dB)" },
+            { key: "Max SPL", value: "109dB continuous" },
+            { key: "Amplifier Output", value: "242W Total" },
+            { key: "Weight", value: "25.4kg" }
+        ]
+    },
+    {
+        slug: "atc-scm-12i-pro",
+        name: "ATC SCM 12i Pro",
+        brand: "ATC",
+        price: 2400,
+        category: "studio-monitors",
+        catalogUrl: "/catalogs/atc/scm 12I.pdf",
+        shortDescription: "Compact 2-way passive monitor for installation.",
+        longDescription: "The SCM12i Pro is a compact, high-performance 2-way passive monitor designed for installations in smaller studios or for surround sound applications. It uses ATC's proprietary Constrained Layer Damping (CLD) bass/mid driver.",
+        images: [productSpeakersImg],
+        featured: false,
+        specifications: [
+            { key: "Drivers", value: "25mm HF, 150mm Mid/Bass" },
+            { key: "Frequency Response", value: "56Hz - 22kHz (-6dB)" },
+            { key: "Nominal Impedance", value: "8 Ohms" },
+            { key: "Recommended Power", value: "75W - 300W" },
+            { key: "Weight", value: "15kg" }
+        ]
+    },
+    {
+        slug: "atc-c4-sub-mk2",
+        name: "ATC C4 Sub Mk2",
+        brand: "ATC",
+        price: 5500,
+        category: "subwoofers",
+        catalogUrl: "/catalogs/atc/scm C4.pdf",
+        shortDescription: "High-performance 12\" active subwoofer.",
+        longDescription: "The ATC C4 Sub Mk2 is a premium 12-inch active subwoofer designed for the most demanding home cinema and stereo applications. It features a 300W Class AB MOSFET amplifier and the SS75-314SC driver.",
+        images: [subwoofersImg],
+        featured: false,
+        specifications: [
+            { key: "Driver", value: "12\" ATC SS75-314SC" },
+            { key: "Low Frequency Cut-off", value: "22Hz (-6dB)" },
+            { key: "Max SPL", value: "110dB continuous" },
+            { key: "Amplifier Output", value: "300W Class AB" },
+            { key: "Weight", value: "42kg" }
+        ]
+    },
+    {
+        slug: "atc-scm-110a-pro",
+        name: "ATC SCM 110A Pro",
+        brand: "ATC",
+        price: 22000,
+        category: "studio-monitors",
+        catalogUrl: "/catalogs/atc/SCM 110A.pdf",
+        shortDescription: "Active 3-way reference monitor with twin 9\" bass drivers.",
+        longDescription: "The ATC SCM110A Pro is a powerful active 3-way reference monitor designed for mid-to-large scale recording and mixing. It features twin 9\" SL spec bass drivers and the 75mm Super Dome midrange.",
+        images: [productSpeakersImg],
+        featured: false,
+        specifications: [
+            { key: "Drivers", value: "25mm HF, 75mm Mid, 2 x 234mm LF" },
+            { key: "Frequency Response", value: "30Hz - 22kHz (-6dB)" },
+            { key: "Max SPL", value: "115dB continuous" },
+            { key: "Amplifier Output", value: "350W Tri-amp" },
+            { key: "Weight", value: "73kg" }
+        ]
+    },
+    {
+        slug: "atc-scm-200a-sl-pro",
+        name: "ATC SCM 200A SL Pro",
+        brand: "ATC",
+        price: 32000,
+        category: "studio-monitors",
+        catalogUrl: "/catalogs/atc/SCM 200A.pdf",
+        shortDescription: "Large-format active 3-way studio monitor with twin 12\" bass drivers.",
+        longDescription: "The ATC SCM200A SL Pro is a large-format 3-way active monitor that provides exceptional SPL and clarity. It features twin 12\" SL spec bass drivers and a rack-mounted P4 4-way amplifier.",
+        images: [productSpeakersImg],
+        featured: false,
+        specifications: [
+            { key: "Drivers", value: "34mm HF, 75mm Mid, 2 x 314mm LF" },
+            { key: "Frequency Response", value: "32Hz - 20kHz (-6dB)" },
+            { key: "Max SPL", value: "118dB continuous" },
+            { key: "Amplifier Output", value: "850W P4 Rack-mount" },
+            { key: "Weight", value: "116kg" }
+        ]
+    },
+    {
+        slug: "atc-hts-7",
+        name: "ATC HTS 7",
+        brand: "ATC",
+        price: 1800,
+        category: "home-theater",
+        catalogUrl: "/catalogs/atc/HTC 7.pdf",
+        shortDescription: "Compact 2-way on-wall loudspeaker.",
+        longDescription: "The ATC HTS7 is a compact 2-way on-wall loudspeaker, perfect for small-to-medium rooms or as high-quality surround channels in a larger system.",
+        images: [productSpeakersImg],
+        featured: false,
+        specifications: [
+            { key: "Drivers", value: "25mm HF, 125mm Mid/Bass" },
+            { key: "Frequency Response", value: "44Hz - 22kHz (-6dB)" },
+            { key: "Max SPL", value: "103dB" },
+            { key: "Recommended Power", value: "75W - 300W" },
+            { key: "Weight", value: "8kg" }
         ]
     }
 ];

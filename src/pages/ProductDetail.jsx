@@ -5,13 +5,14 @@ import Button from '../components/Button';
 import { getProduct, getProducts } from '../lib/db';
 import SEO from '../components/SEO';
 import { useCurrency } from '../hooks/useCurrency';
-import { ChevronRight, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ShieldCheck, Truck, RotateCcw, FileText } from 'lucide-react';
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const { formatPrice, showPrice } = useCurrency();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -19,6 +20,7 @@ const ProductDetail = () => {
       const p = await getProduct(slug);
       setProduct(p);
       setLoading(false);
+      setActiveIndex(0);
     };
     fetchProduct();
   }, [slug]);
@@ -63,10 +65,13 @@ const ProductDetail = () => {
       />
       {/* Breadcrumb */}
       <div className="max-w-[1400px] px-4 md:px-8 mx-auto py-4 flex mt-15 items-center text-sm text-muted-foreground">
-        <Link to="/products" className="hover:text-primary transition-colors">Products</Link>
-        <ChevronRight size={14} className="mx-2" />
+        {/* <Link to="/products" className="hover:text-primary transition-colors">Products</Link> */}
         <Link to={`/products?category=${product.category}`} className="hover:text-primary transition-colors capitalize">
           {product.category.replace('-', ' ')}
+        </Link>
+        <ChevronRight size={14} className="mx-2" />
+<Link to={`/products?category=${product.category}`} className="hover:text-primary transition-colors capitalize">
+          {product.brand}
         </Link>
         <ChevronRight size={14} className="mx-2" />
         <span className="text-foreground font-medium" aria-current="page">{product.name}</span>
@@ -75,21 +80,54 @@ const ProductDetail = () => {
       <Section className="py-12 md:py-20" container={false}>
          <div className="max-w-[1400px] mx-auto px-4 md:px-8">
            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
-             {/* Images (simple gallery for now) - Sticky */}
+             {/* Images Gallery - Sticky */}
              <div className="space-y-6 lg:sticky lg:top-32 h-fit">
-               <div className="aspect-square md:aspect-[4/3] bg-secondary/20 overflow-hidden rounded-2xl flex items-center justify-center">
+               <div className="relative group aspect-square md:aspect-[4/3] bg-secondary/20 overflow-hidden rounded-2xl flex items-center justify-center">
                  <img 
-                   src={product.images[0]} 
+                   key={activeIndex}
+                   src={product.images[activeIndex]} 
                    alt={product.name} 
-                   className="w-full h-full object-contain p-8 mix-blend-multiply"
+                   className="w-full h-full object-contain p-8 mix-blend-multiply animate-fade-in transition-all duration-300"
                  />
-               </div>
-               {product.images.length > 1 && (
-                 <div className="grid grid-cols-4 gap-4">
-                   {product.images.map((img, idx) => (
-                     <div key={idx} className="aspect-square bg-secondary/20 overflow-hidden rounded-xl cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center">
-                       <img src={img} alt={`${product.name} ${idx}`} loading="lazy" className="w-full h-full object-contain p-2 mix-blend-multiply" />
+                 
+                 {product.images.length > 1 && (
+                   <>
+                     <button 
+                       onClick={() => setActiveIndex((prev) => (prev === 0 ? product.images.length - 1 : prev - 1))}
+                       className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer"
+                       aria-label="Previous image"
+                     >
+                       <ChevronLeft size={24} />
+                     </button>
+                     <button 
+                       onClick={() => setActiveIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1))}
+                       className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer"
+                       aria-label="Next image"
+                     >
+                       <ChevronRight size={24} />
+                     </button>
+                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-background/40 backdrop-blur-sm rounded-full">
+                       {product.images.map((_, idx) => (
+                         <div 
+                           key={idx} 
+                           className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === activeIndex ? 'bg-primary w-4' : 'bg-primary/30'}`}
+                         />
+                       ))}
                      </div>
+                   </>
+                 )}
+               </div>
+               
+               {product.images.length > 1 && (
+                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+                   {product.images.map((img, idx) => (
+                     <button 
+                       key={idx} 
+                       onClick={() => setActiveIndex(idx)}
+                       className={`aspect-square bg-secondary/20 overflow-hidden rounded-xl cursor-pointer transition-all duration-300 flex items-center justify-center border-2 ${idx === activeIndex ? 'border-primary opacity-100 ring-4 ring-primary/5' : 'border-transparent opacity-60 hover:opacity-100 shadow-sm'}`}
+                     >
+                       <img src={img} alt={`${product.name} ${idx}`} loading="lazy" className="w-full h-full object-contain p-2 mix-blend-multiply" />
+                     </button>
                    ))}
                  </div>
                )}
@@ -128,6 +166,18 @@ const ProductDetail = () => {
                {/* Actions */}
                <div className="flex flex-col sm:flex-row gap-4 pt-4">
                  <Button to="/contact" size="lg" className="rounded-full px-10 py-6 text-lg">Enquire Now</Button>
+                 {product.catalogUrl && (
+                   <Button 
+                     href={product.catalogUrl} 
+                     target="_blank" 
+                     variant="outline" 
+                     size="lg" 
+                     className="rounded-full px-10 py-6 text-lg flex items-center justify-center gap-2"
+                   >
+                     <FileText size={20} />
+                     Download Catalog
+                   </Button>
+                 )}
                  <Button to="/contact" variant="outline" size="lg" className="rounded-full px-10 py-6 text-lg">Visit Showroom</Button>
                </div>
              </div>

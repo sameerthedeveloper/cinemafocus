@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../lib/firebase';
-import { supabase, storageBucket } from '../../lib/supabase';
+import { db, storage } from '../../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Loader2, Save, Upload, Database, LayoutTemplate, Info, Phone, Shield, Globe, Plus, Trash2 } from 'lucide-react';
 import { seedDatabase } from '../../lib/seeder';
@@ -100,19 +100,15 @@ const SiteControl = () => {
       setLoading(true);
       const fileExt = file.name.split('.').pop();
       const fileName = `hero/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-      const bucketName = storageBucket;
+      const storageRef = ref(storage, fileName);
 
-      const { data, error } = await supabase.storage
-        .from(bucketName)
-        .upload(fileName, file);
+      // Upload the file
+      await uploadBytes(storageRef, file);
 
-      if (error) throw error;
+      // Get the download URL
+      const imageUrl = await getDownloadURL(storageRef);
 
-      const { data: publicUrlData } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(fileName);
-
-      setHero(prev => ({ ...prev, imageUrl: publicUrlData.publicUrl }));
+      setHero(prev => ({ ...prev, imageUrl }));
       setMessage("Image uploaded! Don't forget to save.");
       
     } catch (error) {
@@ -393,7 +389,7 @@ const SiteControl = () => {
                       <p className="text-sm text-orange-800/80 mt-1 mb-3">
                          This will <strong>delete all existing products and categories</strong> and replace them with the default demo data.
                          <br/>
-                         Images will be served from Supabase storage if configured.
+                         Images will be served from Firebase Storage if configured.
                       </p>
                       <button 
                         onClick={handleSeed} 

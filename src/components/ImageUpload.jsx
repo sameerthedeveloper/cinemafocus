@@ -1,5 +1,6 @@
 import React, { useState, useId } from 'react';
-import { supabase, storageBucket } from '../lib/supabase';
+import { storage } from '../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Upload, X, Loader2 } from 'lucide-react';
 
 const ImageUpload = ({ onUploadComplete, initialImage = '' }) => {
@@ -14,19 +15,14 @@ const ImageUpload = ({ onUploadComplete, initialImage = '' }) => {
     setUploading(true);
     try {
       const fileName = `uploads/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-      
-      const { data, error } = await supabase.storage
-        .from(storageBucket)
-        .upload(fileName, file, { upsert: true });
+      const storageRef = ref(storage, fileName);
 
-      if (error) throw error;
+      // Upload the file
+      await uploadBytes(storageRef, file);
 
-      // Get the public URL
-      const { data: urlData } = supabase.storage
-        .from(storageBucket)
-        .getPublicUrl(fileName);
+      // Get the download URL
+      const url = await getDownloadURL(storageRef);
 
-      const url = urlData.publicUrl;
       setImageUrl(url);
       onUploadComplete(url);
     } catch (error) {
