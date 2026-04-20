@@ -79,9 +79,18 @@ export default function AdminSiteControlPage() {
   const handleSave = async (settingId, data) => {
     setLoading(true);
     try {
-      const { error } = await supabase
+      // Try to upsert to site_settings first
+      let { error } = await supabase
         .from('site_settings')
         .upsert({ id: settingId, data });
+      
+      // If table doesn't exist, fallback to site_content
+      if (error && error.code === 'PGRST205') {
+        const fallback = await supabase
+          .from('site_content')
+          .upsert({ id: settingId, data });
+        error = fallback.error;
+      }
       
       if (error) throw error;
       
