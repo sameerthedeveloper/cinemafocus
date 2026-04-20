@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import clsx from 'clsx';
 import Button from './Button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
@@ -135,19 +136,18 @@ const NewLaunches = ({ products }) => {
          <div className="w-full md:w-1/2 h-auto md:h-full flex items-center justify-center relative z-10 pointer-events-none pt-24 md:pt-0">
             <div 
                className={clsx(
-                 "transition-all duration-1000 cubic-bezier(0.16, 1, 0.3, 1) transform w-full flex justify-center",
+                 "transition-all duration-1000 cubic-bezier(0.16, 1, 0.3, 1) transform w-full flex justify-center relative aspect-square max-h-[35vh] md:max-h-[85vh]",
                  isTransitioning ? "opacity-0 scale-90 translate-x-12 blur-sm" : "opacity-100 scale-100 translate-x-0 blur-0"
                )}
             >
-               <img 
+               <Image 
                  src={currentProduct.images?.[0] || '/images/products/speaker-transparent.png'} 
                  alt={currentProduct.name}
-                 width="800"
-                 height="800"
-                 loading={currentIndex === 0 ? "eager" : "lazy"}
-                 fetchPriority={currentIndex === 0 ? "high" : "auto"}
-                 className="max-h-[35vh] md:max-h-[85vh] w-auto object-contain drop-shadow-2xl animate-float mt-0 md:mt-0"
+                 fill
+                 priority={currentIndex === 0}
+                 className="object-contain drop-shadow-2xl animate-float mt-0 md:mt-0"
                  style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }}
+                 sizes="(max-width: 768px) 90vw, 50vw"
                />
             </div>
          </div>
