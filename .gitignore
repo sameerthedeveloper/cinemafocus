@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -10,41 +10,35 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
-# next.js
+# Next.js
 /.next/
 /out/
-
-# production
 /build
 
-# misc
-.DS_Store
+# Secrets & Environment
+.env*
 *.pem
+firebase-service-account.json
 
-# debug
+# Debug & Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+.DS_Store
 
-# env files (can opt-in for committing if needed)
-.env*
+# Large Files & Documentation
+_old_vite/cinemafocus-chatgpt-context.md
+**/scm home.pdf
+/docs/large/
 
-# vercel
+# Vercel
 .vercel
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
-# secrets
-firebase-service-account.json
-.env*
-*.pem
-
-# large files / context
-_old_vite/cinemafocus-chatgpt-context.md
-**/scm home.pdf
+# Temporary Scripts
+scripts/inspect_site_content.js
+scripts/test_connection.js
