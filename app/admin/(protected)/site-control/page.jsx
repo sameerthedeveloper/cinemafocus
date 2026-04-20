@@ -39,11 +39,21 @@ export default function AdminSiteControlPage() {
         return;
       }
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('site_settings')
         .select('data')
         .eq('id', settingId)
         .single();
+
+      if (error && error.code === 'PGRST205') {
+        const fallback = await supabase
+          .from('site_content')
+          .select('data')
+          .eq('id', settingId)
+          .single();
+        data = fallback.data;
+        error = fallback.error;
+      }
 
       if (data) {
         const val = data.data;

@@ -25,10 +25,20 @@ export const SiteSettingsProvider = ({ children }) => {
     const fetchSettings = async () => {
       try {
         // Fetch SEO and General settings from Supabase
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from('site_settings')
           .select('id, data')
           .in('id', ['general', 'seo']);
+
+        // Fallback to site_content if site_settings is missing
+        if (error && error.code === 'PGRST205') {
+            const fallback = await supabase
+              .from('site_content')
+              .select('id, data')
+              .in('id', ['general', 'seo']);
+            data = fallback.data;
+            error = fallback.error;
+        }
 
         if (error) throw error;
 
