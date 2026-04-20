@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { revalidateData } from '@/lib/actions';
 
 const SiteSettingsContext = createContext();
 
@@ -105,6 +106,9 @@ export const SiteSettingsProvider = ({ children }) => {
       
       if (error) throw error;
       
+      // Revalidate server cache
+      await revalidateData('settings');
+      
       // 3. Optimistic local update for zero-latency feel
       if (mergedData.showDesktopMenu !== undefined) setShowDesktopMenu(mergedData.showDesktopMenu);
       if (mergedData.showPrice !== undefined) setShowPrice(mergedData.showPrice);
@@ -130,6 +134,10 @@ export const SiteSettingsProvider = ({ children }) => {
         .upsert({ id: 'seo', data: mergedData });
       
       if (error) throw error;
+      
+      // Revalidate server cache
+      await revalidateData('settings');
+      
       setSeoSettings(mergedData);
     } catch (error) {
       console.error("Error updating SEO settings:", error);

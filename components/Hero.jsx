@@ -1,19 +1,25 @@
 import React from 'react';
+import Image from 'next/image';
 import Button from './Button';
-import LazyImage from './LazyImage';
 
 const Hero = ({ title, subtitle, ctaText, ctaLink, imageUrl }) => {
   return (
     <div className="relative h-screen flex items-center bg-zinc-950 overflow-hidden">
-      {/* Background Image - Smooth Fade-in & Optimization */}
+      {/* Background Image - LCP Optimized with next/image */}
       <div className="absolute inset-0 z-0">
-        <LazyImage 
-          src={imageUrl} 
-          alt="Hero Background" 
-          priority={true}
-          aspectRatio="h-full"
-          className="w-full h-full object-cover opacity-60"
-        />
+        {imageUrl ? (
+          <Image 
+            src={imageUrl} 
+            alt="Cinema Focus Hero" 
+            fill
+            priority
+            quality={90}
+            className="object-cover opacity-60"
+            sizes="100vw"
+          />
+        ) : (
+          <div className="w-full h-full bg-zinc-900" />
+        )}
         {/* Dark overlay for text contrast */}
         <div className="absolute inset-0 bg-black/40" />
         {/* Subtle gradient overlay from bottom to blend */}

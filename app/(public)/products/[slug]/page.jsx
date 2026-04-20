@@ -1,11 +1,9 @@
-import { getProduct } from '@/lib/db';
-import { createClient } from '@/lib/supabase/server';
+import { getProduct } from '@/lib/cms';
 import ProductDetailClient from './ProductDetailClient';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const supabase = await createClient();
-  const product = await getProduct(supabase, slug);
+  const product = await getProduct(slug);
 
   if (!product) {
     return {
@@ -24,8 +22,7 @@ export async function generateMetadata({ params }) {
 
 export default async function ProductDetailPage({ params }) {
   const { slug } = await params;
-  const supabase = await createClient();
-  const product = await getProduct(supabase, slug);
+  const product = await getProduct(slug);
 
   if (!product) {
     return (

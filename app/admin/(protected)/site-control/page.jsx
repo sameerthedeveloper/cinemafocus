@@ -7,6 +7,7 @@ import BackupTools from '@/components/admin/BackupTools';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import clsx from 'clsx';
 import { seedDatabase } from '@/lib/seeder';
+import { revalidateData } from '@/lib/actions';
 
 export default function AdminSiteControlPage() {
   const [activeTab, setActiveTab] = useState('hero');
@@ -93,6 +94,9 @@ export default function AdminSiteControlPage() {
       }
       
       if (error) throw error;
+      
+      // Revalidate server cache for settings
+      await revalidateData('settings');
       
       setMessage('Saved successfully!');
       setTimeout(() => setMessage(''), 3000);
@@ -428,6 +432,7 @@ export default function AdminSiteControlPage() {
                     onClick={async () => {
                       try {
                         await themeContext.updateSettings({ showDesktopMenu: !themeContext.showDesktopMenu });
+                        await revalidateData('settings');
                         setMessage('Menu visibility updated!');
                         setTimeout(() => setMessage(''), 3000);
                       } catch (e) {
@@ -459,6 +464,7 @@ export default function AdminSiteControlPage() {
                     onClick={async () => {
                       try {
                         await themeContext.updateSettings({ showPrice: !themeContext.showPrice });
+                        await revalidateData('settings');
                         setMessage('Price visibility updated!');
                         setTimeout(() => setMessage(''), 3000);
                       } catch (e) {

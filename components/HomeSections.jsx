@@ -13,7 +13,7 @@ import {
   getTrustBadges, 
   getProjects, 
   getPressReleases 
-} from '@/lib/db';
+} from '@/lib/cms';
 
 const iconMap = {
   Globe,
@@ -27,13 +27,13 @@ const CustomIcon = ({ name, ...props }) => {
   return LucideIcon ? <LucideIcon {...props} /> : null;
 };
 
-export async function PressSection({ supabase }) {
-  const data = await getPressReleases(supabase);
+export async function PressSection() {
+  const data = await getPressReleases();
   return <PressReleases releases={data} />;
 }
 
-export async function CollectionSection({ supabase }) {
-  const data = await getCategories(supabase);
+export async function CollectionSection() {
+  const data = await getCategories();
   return (
     <Section id="categories" className="bg-background">
       <div className="text-center mb-16 md:mb-24 space-y-4">
@@ -51,8 +51,8 @@ export async function CollectionSection({ supabase }) {
   );
 }
 
-export async function FeaturedSection({ supabase }) {
-  const data = await getFeaturedProducts(supabase);
+export async function FeaturedSection() {
+  const data = await getFeaturedProducts();
   return (
     <Section id="featured" background="bg-secondary/5">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
@@ -69,8 +69,8 @@ export async function FeaturedSection({ supabase }) {
   );
 }
 
-export async function TrustSection({ supabase }) {
-  const data = await getTrustBadges(supabase);
+export async function TrustSection() {
+  const data = await getTrustBadges();
   return (
     <Section id="trust" background="bg-card">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
@@ -87,8 +87,8 @@ export async function TrustSection({ supabase }) {
   );
 }
 
-export async function GallerySection({ supabase }) {
-  const data = await getProjects(supabase);
+export async function GallerySection() {
+  const data = await getProjects();
   return (
     <Section id="gallery">
       <div className="mb-16 text-center">

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { 
   getHero, 
   getNewLaunches 
-} from '@/lib/db';
+} from '@/lib/cms';
 import { createClient } from '@/lib/supabase/server';
 import Hero from '@/components/Hero';
 import NewLaunches from '@/components/NewLaunches';
@@ -16,12 +16,10 @@ import {
 } from '@/components/HomeSections';
 
 export default async function Home() {
-  const supabase = await createClient();
-
   // ONLY fetch critical LCP data upfront to minimize server response time
   const [heroData, newLaunchesData] = await Promise.all([
-    getHero(supabase),
-    getNewLaunches(supabase)
+    getHero(),
+    getNewLaunches()
   ]);
 
   return (
@@ -41,15 +39,15 @@ export default async function Home() {
 
       {/* Deferred Sections - Streamed via Suspense */}
       <Suspense fallback={<div className="h-48 flex items-center justify-center opacity-50">Loading Press...</div>}>
-        <PressSection supabase={supabase} />
+        <PressSection />
       </Suspense>
 
       <Suspense fallback={<div className="py-24 container mx-auto px-6 h-[400px] border-t border-white/5 animate-pulse" />}>
-        <CollectionSection supabase={supabase} />
+        <CollectionSection />
       </Suspense>
 
       <Suspense fallback={<div className="py-24 container mx-auto px-6 h-[400px] bg-white/5 animate-pulse" />}>
-        <FeaturedSection supabase={supabase} />
+        <FeaturedSection />
       </Suspense>
 
       <div className="py-24 container mx-auto px-6">
@@ -79,11 +77,11 @@ export default async function Home() {
       </div>
 
       <Suspense fallback={<div className="py-24 h-48 bg-card animate-pulse" />}>
-        <TrustSection supabase={supabase} />
+        <TrustSection />
       </Suspense>
 
        <Suspense fallback={<div className="py-24 container mx-auto px-6 h-[600px] animate-pulse" />}>
-          <GallerySection supabase={supabase} />
+          <GallerySection />
        </Suspense>
     </div>
   );
