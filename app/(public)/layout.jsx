@@ -7,7 +7,7 @@ export default function PublicLayout({ children }) {
     <>
       <ScrollToTop />
       <Header />
-      <main className="flex-grow flex flex-col pt-20 md:pt-0">
+      <main className="flex-grow flex flex-col pt-0">
          {children}
       </main>
       <Footer />
