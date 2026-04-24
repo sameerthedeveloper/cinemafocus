@@ -44,15 +44,16 @@ export default function ProductDetailClient({ product }) {
            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
              {/* Images Gallery */}
              <div className="space-y-6 lg:sticky lg:top-32 h-fit">
-               <div className="relative group aspect-square md:aspect-[4/3] bg-secondary/20 overflow-hidden rounded-2xl flex items-center justify-center">
-                 <LazyImage 
-                   key={activeIndex}
-                   src={product.images?.[activeIndex]} 
-                   alt={product.name} 
-                   className="p-8 mix-blend-multiply transition-all duration-300 shadow-sm"
-                   aspectRatio="aspect-square md:aspect-[4/3]"
-                   objectFit="contain"
-                 />
+                <div className="relative group aspect-square md:aspect-[4/3] bg-white overflow-hidden rounded-2xl flex items-center justify-center p-8">
+                  <LazyImage 
+                    key={activeIndex}
+                    src={product.images?.[activeIndex]} 
+                    alt={product.name} 
+                    className="transition-all duration-300 shadow-sm"
+                    aspectRatio="w-full h-full"
+                    objectFit="contain"
+                    priority={true}
+                  />
                  
                  {product.images?.length > 1 && (
                    <>
@@ -88,9 +89,9 @@ export default function ProductDetailClient({ product }) {
                      <button 
                        key={idx} 
                        onClick={() => setActiveIndex(idx)}
-                       className={`aspect-square bg-secondary/20 overflow-hidden rounded-xl cursor-pointer transition-all duration-300 flex items-center justify-center border-2 ${idx === activeIndex ? 'border-primary opacity-100 ring-4 ring-primary/5' : 'border-transparent opacity-60 hover:opacity-100 shadow-sm'}`}
+                       className={`aspect-square bg-white overflow-hidden rounded-xl cursor-pointer transition-all duration-300 flex items-center justify-center border-2 p-1 ${idx === activeIndex ? 'border-primary opacity-100 ring-4 ring-primary/5' : 'border-transparent opacity-60 hover:opacity-100 shadow-sm'}`}
                      >
-                       <LazyImage src={img} alt={`${product.name} ${idx}`} className="p-2 mix-blend-multiply" objectFit="contain" />
+                       <LazyImage src={img} alt={`${product.name} ${idx}`} className="" objectFit="contain" />
                      </button>
                    ))}
                  </div>

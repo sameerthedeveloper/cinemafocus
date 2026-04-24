@@ -3,11 +3,11 @@ import Section from '@/components/Section';
 import LazyImage from '@/components/LazyImage';
 
 // Local Assets (Ensure these exist in public/images/ or are accessible)
-const heroImg = '/images/hero-light.png';
-const speakersImg = '/images/speakers.png';
+const heroImg = '/images/hero-light.webp';
+const speakersImg = '/images/speakers.webp';
 
 export const metadata = {
-  title: "About Cinema Focus",
+  title: "About",
   description: "We are more than just a retailer — we are a destination for those who seek to experience music and film exactly as the artist intended. Visit our showroom in Oman.",
   keywords: "about Cinema Focus, premium audio showroom, hi-fi retailer Oman, home cinema specialist",
 };

@@ -14,8 +14,12 @@ export async function generateMetadata({ params }) {
   }
 
   return {
-    title: `${category.name} | Cinema Focus`,
+    title: `${category.name} Archives`,
     description: `Explore our premium selection of ${category.name.toLowerCase()} — expertly curated by Cinema Focus for the ultimate audio experience.`,
+    openGraph: {
+      title: `${category.name} Archives - Cinema Focus`,
+      description: `Explore our premium selection of ${category.name.toLowerCase()} — expertly curated by Cinema Focus for the ultimate audio experience.`,
+    }
   };
 }
 

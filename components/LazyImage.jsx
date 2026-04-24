@@ -36,7 +36,7 @@ const LazyImage = ({
   }, [src, priority]);
 
   // Handle fallback if src is missing
-  const imageSrc = src || '/images/placeholder.png';
+  const imageSrc = src || '/images/placeholder.svg';
 
   return (
     <div className={clsx(
@@ -51,7 +51,7 @@ const LazyImage = ({
 
       {/* Optimized next/image */}
       <Image
-        src={hasError ? '/images/placeholder.png' : imageSrc}
+        src={hasError ? '/images/placeholder.svg' : imageSrc}
         alt={alt || "Cinema Focus Asset"}
         fill
         priority={priority}

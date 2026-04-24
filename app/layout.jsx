@@ -14,12 +14,39 @@ export const viewport = {
 };
 
 export const metadata = {
+  metadataBase: new URL("https://www.cinemafocus.in"),
   title: {
-    default: "Cinema Focus — Premium Audio & Home Cinema Systems",
-    template: "%s | Cinema Focus"
+    default: "Cinema Focus - Premium Audio & Home Cinema Systems",
+    template: "%s - Cinema Focus"
   },
   description: "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Oman. Explore our curated collection of speakers, subwoofers, amplifiers, and turntables.",
   keywords: "home cinema, hi-fi audio, speakers, subwoofers, amplifiers, turntables, premium audio, Oman, Cinema Focus",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Cinema Focus - Premium Audio & Home Cinema Systems",
+    description: "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Oman.",
+    url: "https://www.cinemafocus.in",
+    siteName: "Cinema Focus",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "/images/default-og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Cinema Focus - Premium Audio & Home Cinema Systems",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cinema Focus - Premium Audio & Home Cinema Systems",
+    description: "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Oman.",
+    site: "@cinemafocus",
+    images: ["/images/default-og.jpg"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

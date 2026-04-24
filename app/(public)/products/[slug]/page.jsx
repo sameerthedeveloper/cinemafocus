@@ -12,11 +12,18 @@ export async function generateMetadata({ params }) {
   }
 
   return {
-    title: `${product.name} | Cinema Focus`,
+    title: product.name,
     description: product.shortDescription || product.longDescription?.substring(0, 160) || product.name,
     openGraph: {
+      title: `${product.name} - Cinema Focus`,
+      description: product.shortDescription || product.longDescription?.substring(0, 160) || product.name,
       images: product.images?.[0] ? [{ url: product.images[0] }] : [],
     },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} - Cinema Focus`,
+      description: product.shortDescription || product.longDescription?.substring(0, 160) || product.name,
+    }
   };
 }
 

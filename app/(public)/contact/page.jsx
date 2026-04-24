@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import ContactClient from './ContactClient';
 
 export const metadata = {
-  title: "Contact Us | Cinema Focus",
+  title: "Contact Us",
   description: "Ready to elevate your home audio experience? Visit the Cinema Focus showroom or send us a message for expert consultation.",
   keywords: "contact Cinema Focus, audio showroom Oman, home cinema consultation, visit showroom",
 };
