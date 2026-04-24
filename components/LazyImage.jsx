@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import clsx from 'clsx';
-import supabaseLoader from '@/lib/supabase/loader';
 
 /**
  * A highly optimized Image component that handles:
@@ -52,8 +51,8 @@ const LazyImage = ({
 
       {/* Optimized next/image */}
       <Image
-        loader={supabaseLoader}
         src={hasError ? '/images/placeholder.svg' : imageSrc}
+        unoptimized={hasError || (imageSrc && typeof imageSrc === 'string' && imageSrc.endsWith('.svg'))}
         alt={alt || "Cinema Focus Asset"}
         fill
         priority={priority}

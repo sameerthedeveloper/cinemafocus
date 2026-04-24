@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import { Menu, X } from 'lucide-react';
 import { useSiteSettings } from '../context/SiteSettingsContext';
-const logo = '/images/logo.webp';
+const logo = '/images/logo.png';
 const logoLight = '/images/logo-light.webp';
 
 const Header = () => {
@@ -52,10 +52,12 @@ const Header = () => {
     <header
       className={clsx(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out',
-        // Desktop: Transparent on Home when not scrolled
-        !isScrolled && isHome
-          ? 'bg-transparent py-5 border-none'
-          : 'bg-background/80 backdrop-blur-xl py-3 border-b border-border shadow-sm'
+        // Mobile: Always visible background
+        'bg-background/80 backdrop-blur-xl py-3 border-b border-border',
+        // Desktop: Dynamic based on scroll
+        isScrolled 
+          ? 'md:bg-background/80 md:backdrop-blur-2xl md:shadow-sm md:py-3' 
+          : 'md:bg-transparent md:py-5 md:border-none md:backdrop-blur-none'
       )}
     >
       <div className="container px-6 mx-auto flex items-center justify-between">
@@ -69,7 +71,7 @@ const Header = () => {
               fill
               priority
               className="object-contain object-left"
-              sizes="200px"
+              sizes="240px"
             />
           </div>
           
@@ -113,7 +115,7 @@ const Header = () => {
         <button 
           className={clsx(
             "md:hidden z-50 p-2 -mr-2 transition-colors",
-            useLightContent ? "text-white" : "text-foreground"
+            useLightContent ? "text-black" : "text-foreground"
           )}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Toggle menu"

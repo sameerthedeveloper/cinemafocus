@@ -17,7 +17,7 @@ const TwitterIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
 );
 
-const logo = '/images/logo-light.webp';
+const logo = '/images/logo.png';
 
 const Footer = () => {
   const [footerData, setFooterData] = useState({
@@ -47,20 +47,20 @@ const Footer = () => {
   }, []);
 
   return (
-    <footer className="bg-[#0a0a0a] border-t border-white/5 mt-auto pt-16 pb-8">
+    <footer className="bg-card border-t border-border mt-auto pt-16 pb-8">
       <div className="container px-4 mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 mb-12 text-center md:text-left">
         {/* Brand Column */}
         <div className="space-y-4 flex flex-col items-center md:items-start">
           <Link href="/" className="block mb-4" aria-label="Cinema Focus Home">
-            <img src={logo} alt="Cinema Focus Logo" width="240" height="71" className="h-24 w-auto dark:mix-blend-normal object-contain" />
+            <img src={logo} alt="Cinema Focus Logo" width="240" height="71" className="h-24 w-auto mix-blend-multiply dark:mix-blend-normal object-contain" />
           </Link>
           <p className="text-muted-foreground leading-relaxed text-sm">
             Immerse yourself in every note. We curate the finest audio and home cinema systems for the ultimate listening experience.
           </p>
-          <div className="flex space-x-4 pt-2 justify-center md:justify-start text-white/40">
-            {footerData.facebook && <a href={footerData.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-primary transition-colors"><FacebookIcon size={20} /></a>}
-            {footerData.instagram && <a href={footerData.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-primary transition-colors"><InstagramIcon size={20} /></a>}
-            {footerData.twitter && <a href={footerData.twitter} target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="hover:text-primary transition-colors"><TwitterIcon size={20} /></a>}
+          <div className="flex space-x-4 pt-2 justify-center md:justify-start">
+            {footerData.facebook && <a href={footerData.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-muted-foreground hover:text-primary transition-colors"><FacebookIcon size={20} /></a>}
+            {footerData.instagram && <a href={footerData.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors"><InstagramIcon size={20} /></a>}
+            {footerData.twitter && <a href={footerData.twitter} target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-muted-foreground hover:text-primary transition-colors"><TwitterIcon size={20} /></a>}
           </div>
         </div>
 
