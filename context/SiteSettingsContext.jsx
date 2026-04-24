@@ -9,7 +9,7 @@ const SiteSettingsContext = createContext();
 export const useSiteSettings = () => useContext(SiteSettingsContext);
 
 export const SiteSettingsProvider = ({ children }) => {
-  const [theme] = useState('light');
+  const [theme, setTheme] = useState('light');
   const [showDesktopMenu, setShowDesktopMenu] = useState(true);
   const [showPrice, setShowPrice] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -145,7 +145,9 @@ export const SiteSettingsProvider = ({ children }) => {
     }
   };
   
-  const updateTheme = async () => {};
+  const updateTheme = (newTheme) => {
+    setTheme(newTheme || (theme === 'light' ? 'dark' : 'light'));
+  };
 
   return (
     <SiteSettingsContext.Provider value={{ theme, showDesktopMenu, showPrice, seoSettings, updateSettings, updateSeoSettings, updateTheme, loading }}>
