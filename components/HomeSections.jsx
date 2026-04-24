@@ -1,11 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import Section from './Section';
 import CategoryCard from './CategoryCard';
 import ProductCard from './ProductCard';
 import Button from './Button';
 import PressReleases from './PressReleases';
-import HomeGallery from './HomeGallery';
+const HomeGallery = dynamic(() => import('./HomeGallery'), { 
+  ssr: true,
+  loading: () => <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-[400px] bg-white/5 animate-pulse rounded-2xl" />
+});
 import { Globe, ShieldCheck, Headphones, Award } from 'lucide-react';
 import { 
   getCategories, 

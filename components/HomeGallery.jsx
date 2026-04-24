@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import LazyImage from './LazyImage';
@@ -95,14 +96,19 @@ export default function HomeGallery({ projects }) {
             </button>
 
             <div 
-                className="relative max-w-7xl max-h-[90vh] w-full p-4 flex flex-col items-center justify-center"
+                className="relative max-w-7xl h-[80vh] w-full p-4 flex flex-col items-center justify-center"
                 onClick={(e) => e.stopPropagation()} 
             >
-                <img 
-                    src={displayedProjects[lightboxIndex].imageUrl} 
-                    alt={displayedProjects[lightboxIndex].title}
-                    className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-sm"
-                />
+                <div className="relative w-full h-full">
+                    <Image 
+                        src={displayedProjects[lightboxIndex].imageUrl} 
+                        alt={displayedProjects[lightboxIndex].title}
+                        fill
+                        className="object-contain shadow-2xl rounded-sm"
+                        sizes="90vw"
+                        priority
+                    />
+                </div>
                 <div className="mt-6 text-center">
                     <h3 className="text-white text-xl md:text-2xl font-light tracking-wide">{displayedProjects[lightboxIndex].title}</h3>
                     <p className="text-white/40 text-sm mt-2 font-mono">

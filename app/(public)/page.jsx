@@ -39,15 +39,52 @@ export default async function Home() {
 
       {/* Deferred Sections - Animations start here to preserve visual experience below the fold */}
       <div className="animate-fade-in">
-        <Suspense fallback={<div className="h-48 flex items-center justify-center opacity-50">Loading Press...</div>}>
+        <Suspense fallback={
+          <div className="py-24 container mx-auto px-6">
+            <div className="flex justify-between items-end mb-12">
+              <div className="space-y-4">
+                <div className="h-4 w-32 bg-white/10 animate-pulse rounded" />
+                <div className="h-10 w-48 bg-white/10 animate-pulse rounded" />
+              </div>
+              <div className="h-6 w-24 bg-white/10 animate-pulse rounded" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[1, 2, 3].map(i => <div key={i} className="aspect-video bg-white/5 animate-pulse rounded-2xl" />)}
+            </div>
+          </div>
+        }>
           <PressSection />
         </Suspense>
 
-        <Suspense fallback={<div className="py-24 container mx-auto px-6 h-[400px] border-t border-white/5 animate-pulse" />}>
+        <Suspense fallback={
+          <div className="py-24 container mx-auto px-6">
+            <div className="text-center mb-16 space-y-4">
+              <div className="h-12 w-64 bg-white/10 animate-pulse rounded mx-auto" />
+              <div className="h-6 w-96 bg-white/10 animate-pulse rounded mx-auto" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map(i => <div key={i} className="aspect-[4/5] bg-white/5 animate-pulse rounded-2xl" />)}
+            </div>
+          </div>
+        }>
           <CollectionSection />
         </Suspense>
 
-        <Suspense fallback={<div className="py-24 container mx-auto px-6 h-[400px] bg-white/5 animate-pulse" />}>
+        <Suspense fallback={
+          <div className="py-24 container mx-auto px-6">
+            <div className="flex justify-between items-end mb-16">
+              <div className="h-12 w-48 bg-white/10 animate-pulse rounded" />
+              <div className="h-6 w-32 bg-white/10 animate-pulse rounded" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+              {[1, 2, 3, 4, 5].map(i => <div key={i} className="space-y-4">
+                <div className="aspect-square bg-white/5 animate-pulse rounded-2xl" />
+                <div className="h-6 w-3/4 bg-white/10 animate-pulse rounded mx-auto" />
+                <div className="h-4 w-1/2 bg-white/10 animate-pulse rounded mx-auto" />
+              </div>)}
+            </div>
+          </div>
+        }>
           <FeaturedSection />
         </Suspense>
 
@@ -77,11 +114,30 @@ export default async function Home() {
           </div>
         </div>
 
-        <Suspense fallback={<div className="py-24 h-48 bg-card animate-pulse" />}>
+        <Suspense fallback={
+          <div className="py-24 bg-card">
+            <div className="container mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12">
+              {[1, 2, 3, 4].map(i => <div key={i} className="space-y-4 flex flex-col items-center">
+                <div className="h-12 w-12 bg-white/10 animate-pulse rounded-full" />
+                <div className="h-4 w-24 bg-white/10 animate-pulse rounded" />
+              </div>)}
+            </div>
+          </div>
+        }>
           <TrustSection />
         </Suspense>
 
-        <Suspense fallback={<div className="py-24 container mx-auto px-6 h-[600px] animate-pulse" />}>
+        <Suspense fallback={
+          <div className="py-24 container mx-auto px-6">
+            <div className="mb-16 text-center space-y-4">
+              <div className="h-12 w-48 bg-white/10 animate-pulse rounded mx-auto" />
+              <div className="h-6 w-32 bg-white/10 animate-pulse rounded mx-auto" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => <div key={i} className="aspect-video bg-white/5 animate-pulse rounded-2xl" />)}
+            </div>
+          </div>
+        }>
           <GallerySection />
         </Suspense>
       </div>

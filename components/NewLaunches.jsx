@@ -147,7 +147,7 @@ const NewLaunches = ({ products }) => {
                  priority={currentIndex === 0}
                  className="object-contain drop-shadow-2xl animate-float mt-0 md:mt-0"
                  style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }}
-                 sizes="(max-width: 768px) 90vw, 50vw"
+                 sizes="(max-width: 768px) 90vw, 40vw"
                />
             </div>
          </div>
