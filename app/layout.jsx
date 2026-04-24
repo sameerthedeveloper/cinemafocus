@@ -58,7 +58,10 @@ export const metadata = {
   },
   other: {
     "dns-prefetch": "https://xdvzchxtbwfdmlxhnzpo.supabase.co",
-    "preconnect": "https://xdvzchxtbwfdmlxhnzpo.supabase.co",
+    "preconnect": [
+      "https://xdvzchxtbwfdmlxhnzpo.supabase.co",
+      "https://images.unsplash.com"
+    ]
   }
 };
 

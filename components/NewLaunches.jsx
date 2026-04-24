@@ -145,6 +145,7 @@ const NewLaunches = ({ products }) => {
                  alt={currentProduct.name}
                  fill
                  priority={currentIndex === 0}
+                 fetchPriority={currentIndex === 0 ? "high" : "auto"}
                  className="object-contain drop-shadow-2xl animate-float mt-0 md:mt-0"
                  style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }}
                  sizes="(max-width: 768px) 90vw, 40vw"

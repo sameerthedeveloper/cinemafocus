@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import clsx from 'clsx';
+import supabaseLoader from '@/lib/supabase/loader';
 
 /**
  * A highly optimized Image component that handles:
@@ -51,10 +52,12 @@ const LazyImage = ({
 
       {/* Optimized next/image */}
       <Image
+        loader={supabaseLoader}
         src={hasError ? '/images/placeholder.svg' : imageSrc}
         alt={alt || "Cinema Focus Asset"}
         fill
         priority={priority}
+        fetchPriority={priority ? "high" : "auto"}
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
         sizes={sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"}

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import { Menu, X } from 'lucide-react';
@@ -61,25 +62,31 @@ const Header = () => {
         {/* Logo */}
         <Link href="/" className="block hover:opacity-80 transition-opacity z-50" aria-label="Cinema Focus Home">
           {/* Mobile Logo (Always Dark/Standard) */}
-          <img 
-            src={logo} 
-            alt="Cinema Focus Logo" 
-            width="240"
-            height="71"
-            className="h-10 w-auto object-contain md:hidden"
-          />
+          <div className="h-10 w-48 relative md:hidden">
+            <Image 
+              src={logo} 
+              alt="Cinema Focus Logo" 
+              fill
+              priority
+              className="object-contain object-left"
+              sizes="200px"
+            />
+          </div>
           
           {/* Desktop Logo (Dynamic) */}
-          <img 
-            src={useLightContent ? logoLight : logo} 
-            alt="Cinema Focus Logo" 
-            width="240"
-            height="71"
-            className={clsx(
-              "hidden md:block w-auto object-contain transition-all duration-500",
-              useLightContent ? "h-14 md:h-16" : "h-10 md:h-12"
-            )}
-          />
+          <div className={clsx(
+              "hidden md:block relative transition-all duration-500",
+              useLightContent ? "h-14 md:h-16 w-64" : "h-10 md:h-12 w-48"
+            )}>
+            <Image 
+              src={useLightContent ? logoLight : logo} 
+              alt="Cinema Focus Logo" 
+              fill
+              priority
+              className="object-contain object-left"
+              sizes="300px"
+            />
+          </div>
         </Link>
 
         {/* Desktop Nav */}

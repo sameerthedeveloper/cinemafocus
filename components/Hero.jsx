@@ -13,6 +13,7 @@ const Hero = ({ title, subtitle, ctaText, ctaLink, imageUrl }) => {
             alt="Cinema Focus Hero" 
             fill
             priority
+            fetchPriority="high"
             quality={90}
             className="object-cover opacity-60"
             sizes="100vw"
