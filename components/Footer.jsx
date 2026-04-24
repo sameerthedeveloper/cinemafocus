@@ -52,7 +52,7 @@ const Footer = () => {
         {/* Brand Column */}
         <div className="space-y-4 flex flex-col items-center md:items-start">
           <Link href="/" className="block mb-4" aria-label="Cinema Focus Home">
-            <img src={logo} alt="Cinema Focus Logo" width="240" height="71" className="h-24 w-auto mix-blend-multiply dark:mix-blend-normal object-contain" />
+            <img src={logo} alt="Cinema Focus Logo" width="240" height="71" className="h-24 w-auto dark:mix-blend-normal object-contain" />
           </Link>
           <p className="text-muted-foreground leading-relaxed text-sm">
             Immerse yourself in every note. We curate the finest audio and home cinema systems for the ultimate listening experience.
