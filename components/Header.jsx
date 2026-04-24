@@ -13,13 +13,16 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const { theme, showDesktopMenu } = useSiteSettings();
+  const [mounted, setMounted] = useState(false);
   
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isHome = pathname === '/';
 
   // "Dark Header" State (White Logo/Text)
-  // Occurs if:
-  // 1. We are in Global Dark Mode (if enabled)
-  // 2. OR We are on the Home Hero (unscrolled) which has a dark background even in light mode
+  // During hydration, we default to the state that matches the Home Hero's background
   const useLightContent = theme === 'dark' || (isHome && !isScrolled);
 
   useEffect(() => {
@@ -48,12 +51,10 @@ const Header = () => {
     <header
       className={clsx(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out',
-        // Mobile: Always visible background
-        'bg-background/80 backdrop-blur-xl py-3 border-b border-border',
-        // Desktop: Dynamic based on scroll
-        isScrolled 
-          ? 'md:bg-background/80 md:backdrop-blur-2xl md:shadow-sm md:py-3' 
-          : 'md:bg-transparent md:py-5 md:border-none md:backdrop-blur-none'
+        // Desktop: Transparent on Home when not scrolled
+        !isScrolled && isHome
+          ? 'bg-transparent py-5 border-none'
+          : 'bg-background/80 backdrop-blur-xl py-3 border-b border-border shadow-sm'
       )}
     >
       <div className="container px-6 mx-auto flex items-center justify-between">
@@ -82,7 +83,6 @@ const Header = () => {
         </Link>
 
         {/* Desktop Nav */}
-        {/* Desktop Nav - Hidden by default as per user request */}
         {showDesktopMenu && (
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
@@ -106,7 +106,7 @@ const Header = () => {
         <button 
           className={clsx(
             "md:hidden z-50 p-2 -mr-2 transition-colors",
-            useLightContent ? "text-black" : "text-foreground"
+            useLightContent ? "text-white" : "text-foreground"
           )}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Toggle menu"
