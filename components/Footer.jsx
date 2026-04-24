@@ -54,7 +54,7 @@ const Footer = () => {
           <Link href="/" className="block mb-4" aria-label="Cinema Focus Home">
             <img src={logo} alt="Cinema Focus Logo" width="240" height="71" className="h-24 w-auto mix-blend-multiply dark:mix-blend-normal object-contain" />
           </Link>
-          <p className="text-muted-foreground leading-relaxed text-sm">
+          <p className="text-muted-foreground leading-relaxed">
             Immerse yourself in every note. We curate the finest audio and home cinema systems for the ultimate listening experience.
           </p>
           <div className="flex space-x-4 pt-2 justify-center md:justify-start">
@@ -66,8 +66,8 @@ const Footer = () => {
 
         {/* Quick Links */}
         <div>
-          <h3 className="text-primary font-medium tracking-widest uppercase mb-6 text-xs transition-opacity opacity-70">Explore</h3>
-          <ul className="space-y-3 text-sm">
+          <h3 className="text-primary font-medium tracking-widest uppercase mb-6">Explore</h3>
+          <ul className="space-y-3">
             <li><Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">All Products</Link></li>
             <li><Link href="/gallery" className="text-muted-foreground hover:text-primary transition-colors">Gallery</Link></li>
             <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link></li>
@@ -77,8 +77,8 @@ const Footer = () => {
 
         {/* Categories */}
         <div>
-          <h3 className="text-primary font-medium tracking-widest uppercase mb-6 text-xs transition-opacity opacity-70">Categories</h3>
-          <ul className="space-y-3 text-sm">
+          <h3 className="text-primary font-medium tracking-widest uppercase mb-6">Categories</h3>
+          <ul className="space-y-3">
             <li><Link href="/products?category=speakers" className="text-muted-foreground hover:text-primary transition-colors">Speakers</Link></li>
             <li><Link href="/products?category=subwoofers" className="text-muted-foreground hover:text-primary transition-colors">Subwoofers</Link></li>
             <li><Link href="/products?category=amplifiers" className="text-muted-foreground hover:text-primary transition-colors">Amplifiers</Link></li>
@@ -88,8 +88,8 @@ const Footer = () => {
 
         {/* Contact Info */}
         <div>
-          <h3 className="text-primary font-medium tracking-widest uppercase mb-6 text-xs transition-opacity opacity-70">Contact Us</h3>
-          <ul className="space-y-4 text-sm">
+          <h3 className="text-primary font-medium tracking-widest uppercase mb-6">Contact Us</h3>
+          <ul className="space-y-4">
             <li className="flex items-start gap-3 text-muted-foreground justify-center md:justify-start">
               <MapPin size={20} className="text-primary shrink-0 mt-1" />
               <span>{footerData.address}</span>
@@ -114,7 +114,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="container px-4 mx-auto border-t border-border pt-8 text-center text-muted-foreground text-xs uppercase tracking-widest font-light">
+      <div className="container px-4 mx-auto border-t border-border pt-8 text-center text-muted-foreground text-sm">
         <p>&copy; {new Date().getFullYear()} Cinema Focus. All rights reserved.</p>
       </div>
     </footer>
