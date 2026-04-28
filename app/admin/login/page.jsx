@@ -26,7 +26,7 @@ export default function LoginPage() {
       if (error) {
         setError("Invalid login credentials.");
       } else {
-        // Refresh the router so middleware can reflect the updated session
+        // Refresh the router so the proxy can reflect the updated session
         router.refresh();
         router.push('/admin/dashboard');
       }
