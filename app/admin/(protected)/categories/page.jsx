@@ -2,14 +2,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Loader2, Plus, Trash2, LayoutGrid, X } from 'lucide-react';
+import { Loader2, Plus, Trash2, LayoutGrid, X, Edit, Check } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
+import { revalidateData } from '@/lib/actions';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
   const supabase = createClient();
 
   // Form State
@@ -22,6 +24,26 @@ export default function AdminCategoriesPage() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  const handleEditClick = (category) => {
+    setEditingCategory(category);
+    setFormData({
+      name: category.name,
+      description: category.description || '',
+      imageUrl: category.image_url || ''
+    });
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingCategory(null);
+    setFormData({
+      name: '',
+      description: '',
+      imageUrl: ''
+    });
+  };
 
   const fetchCategories = async () => {
     try {
@@ -70,6 +92,13 @@ export default function AdminCategoriesPage() {
           .eq('id', id);
         
         if (error) throw error;
+        
+        try {
+          await revalidateData('categories');
+        } catch (err) {
+          console.warn("Failed to revalidate categories:", err);
+        }
+
         setCategories(categories.filter(c => c.id !== id));
       } catch (error) {
         console.error("Error deleting category:", error);
@@ -83,31 +112,56 @@ export default function AdminCategoriesPage() {
     setSaving(true);
     
     try {
-      const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      
-      const newCategory = {
-        id: slug, // Using slug as ID for consistency with legacy links
-        name: formData.name,
-        slug: slug,
-        description: formData.description,
-        image_url: formData.imageUrl || "https://placehold.co/600x400?text=No+Image",
-        product_count: 0,
-        featured: false
-      };
+      if (editingCategory) {
+        // Edit Mode
+        const updatedCategory = {
+          id: editingCategory.id, // Keep the same ID
+          name: formData.name,
+          slug: editingCategory.slug, // Keep the same slug
+          description: formData.description,
+          image_url: formData.imageUrl || "https://placehold.co/600x400?text=No+Image",
+          product_count: editingCategory.productCount || editingCategory.product_count || 0,
+          featured: editingCategory.featured || false
+        };
 
-      const { error } = await supabase
-        .from('categories')
-        .upsert(newCategory);
+        const { error } = await supabase
+          .from('categories')
+          .upsert(updatedCategory);
+        
+        if (error) throw error;
+      } else {
+        // Create Mode
+        const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        
+        const newCategory = {
+          id: slug, // Using slug as ID for consistency with legacy links
+          name: formData.name,
+          slug: slug,
+          description: formData.description,
+          image_url: formData.imageUrl || "https://placehold.co/600x400?text=No+Image",
+          product_count: 0,
+          featured: false
+        };
+
+        const { error } = await supabase
+          .from('categories')
+          .upsert(newCategory);
+        
+        if (error) throw error;
+      }
       
-      if (error) throw error;
+      try {
+        await revalidateData('categories');
+      } catch (err) {
+        console.warn("Failed to revalidate categories:", err);
+      }
       
       fetchCategories();
-      setFormData({ name: '', description: '', imageUrl: '' });
-      setShowModal(false);
+      closeModal();
 
     } catch (error) {
-      console.error("Error adding category:", error);
-      alert("Failed to add category: " + error.message);
+      console.error("Error saving category:", error);
+      alert("Failed to save category: " + error.message);
     } finally {
       setSaving(false);
     }
@@ -121,7 +175,11 @@ export default function AdminCategoriesPage() {
            <p className="text-muted-foreground mt-1 text-sm md:text-base">Organize your product catalog.</p>
         </div>
         <button 
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setEditingCategory(null);
+            setFormData({ name: '', description: '', imageUrl: '' });
+            setShowModal(true);
+          }}
           className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity w-full md:w-auto justify-center"
         >
           <Plus size={18} />
@@ -139,10 +197,16 @@ export default function AdminCategoriesPage() {
                 {category.image_url && (
                     <img src={category.image_url} alt={category.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 )}
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                  <button 
+                    onClick={() => handleEditClick(category)}
+                    className="p-2 bg-white/90 text-primary rounded-lg hover:bg-secondary shadow-sm transition-colors"
+                  >
+                    <Edit size={16} />
+                  </button>
                   <button 
                     onClick={() => handleDelete(category.id)}
-                    className="p-2 bg-white/90 text-red-500 rounded-lg hover:bg-red-50 shadow-sm"
+                    className="p-2 bg-white/90 text-red-500 rounded-lg hover:bg-red-50 shadow-sm transition-colors"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -170,8 +234,8 @@ export default function AdminCategoriesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
           <div className="bg-background rounded-2xl w-full max-w-lg shadow-xl border border-border overflow-hidden">
             <div className="p-6 border-b border-border flex justify-between items-center bg-secondary/30">
-               <h2 className="text-xl font-medium">New Category</h2>
-               <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground">
+               <h2 className="text-xl font-medium">{editingCategory ? 'Edit Category' : 'New Category'}</h2>
+               <button onClick={closeModal} className="text-muted-foreground hover:text-foreground">
                  <X size={20} />
                </button>
             </div>
@@ -211,7 +275,7 @@ export default function AdminCategoriesPage() {
               <div className="pt-4 flex justify-end gap-3">
                  <button 
                    type="button" 
-                   onClick={() => setShowModal(false)}
+                   onClick={closeModal}
                    className="px-5 py-2.5 text-muted-foreground hover:bg-secondary rounded-lg font-medium transition-colors"
                  >
                    Cancel
@@ -221,8 +285,14 @@ export default function AdminCategoriesPage() {
                    disabled={saving}
                    className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
                  >
-                   {saving ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
-                   {saving ? 'Creating...' : 'Create Category'}
+                   {saving ? (
+                     <Loader2 className="animate-spin" size={18} />
+                   ) : editingCategory ? (
+                     <Check size={18} />
+                   ) : (
+                     <Plus size={18} />
+                   )}
+                   {saving ? (editingCategory ? 'Saving...' : 'Creating...') : editingCategory ? 'Save Changes' : 'Create Category'}
                  </button>
               </div>
             </form>
