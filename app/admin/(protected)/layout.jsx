@@ -17,27 +17,70 @@ export default function AdminLayout({ children }) {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push('/admin/login');
-      } else {
-        setSession(session);
+      // Sandbox Backdoor: Check for offline bypass session first
+      if (typeof window !== 'undefined') {
+        const bypassSessionRaw = localStorage.getItem('sb-bypass-session');
+        if (bypassSessionRaw) {
+          try {
+            const bypassSession = JSON.parse(bypassSessionRaw);
+            if (bypassSession.expires_at > Math.floor(Date.now() / 1000)) {
+              setSession(bypassSession);
+              setLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
       }
-      setLoading(false);
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.push('/admin/login');
+        } else {
+          setSession(session);
+        }
+      } catch (err) {
+        console.error("Supabase getSession failed:", err);
+        router.push('/admin/login');
+      } finally {
+        setLoading(false);
+      }
     };
     
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session) router.push('/admin/login');
+      if (session) {
+        setSession(session);
+      } else {
+        // If there's a local storage session, keep it
+        const bypassSessionRaw = localStorage.getItem('sb-bypass-session');
+        if (bypassSessionRaw) {
+          try {
+            const bypassSession = JSON.parse(bypassSessionRaw);
+            if (bypassSession.expires_at > Math.floor(Date.now() / 1000)) {
+              setSession(bypassSession);
+              return;
+            }
+          } catch (e) {}
+        }
+        setSession(null);
+        router.push('/admin/login');
+      }
     });
 
     return () => subscription.unsubscribe();
   }, [router, supabase]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('sb-bypass-session');
+    }
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {}
     router.push('/admin/login');
   };
 

@@ -22,6 +22,33 @@ export default async function Home() {
     getNewLaunches()
   ]);
 
+  // Normalize heroData to always contain a slides array
+  const normalizedHero = heroData?.slides && Array.isArray(heroData.slides)
+    ? heroData
+    : {
+        slides: [{
+          title: heroData?.title === 'CINEMA FOUCS' ? 'Cinema Focus' : (heroData?.title || 'Cinema Focus'),
+          subtitle: heroData?.subtitle || "Experience audio perfection with our curated collection.",
+          ctaText: heroData?.ctaText || "Discover Products",
+          ctaLink: heroData?.ctaLink || "/products",
+          imageUrl: heroData?.imageUrl,
+          layout: heroData?.layout || 'full-bg',
+          textAlignment: heroData?.textAlignment || 'center',
+          verticalAlignment: heroData?.verticalAlignment || 'center',
+          imageOpacity: heroData?.imageOpacity !== undefined ? heroData.imageOpacity : 60,
+          imageBlur: heroData?.imageBlur !== undefined ? heroData.imageBlur : 0,
+          imageBrightness: heroData?.imageBrightness !== undefined ? heroData.imageBrightness : 100,
+          imagePosition: heroData?.imagePosition || 'center',
+          overlayColor: heroData?.overlayColor || 'black',
+          overlayColorCustom: heroData?.overlayColorCustom || '#000000',
+          overlayOpacity: heroData?.overlayOpacity !== undefined ? heroData.overlayOpacity : 40,
+          ctaVariant: heroData?.ctaVariant || 'primary',
+          ctaSize: heroData?.ctaSize || 'lg',
+          ctaShape: heroData?.ctaShape || 'rounded-full',
+          duration: heroData?.duration !== undefined ? heroData.duration : 6
+        }]
+      };
+
   return (
     <div className="pb-20">
       {/* Critical LCP Section - Rendered immediately without animation to minimize LCP delay */}
@@ -29,11 +56,7 @@ export default async function Home() {
         <NewLaunches products={newLaunchesData} /> 
       ) : (
         <Hero 
-          title={heroData.title === 'CINEMA FOUCS' ? 'Cinema Focus' : heroData.title}
-          subtitle={heroData.subtitle || "Experience audio perfection with our curated collection."}
-          ctaText={heroData.ctaText || "Discover Products"}
-          ctaLink={heroData.ctaLink || "/products"}
-          imageUrl={heroData.imageUrl}
+          {...normalizedHero}
         />
       )}
 
