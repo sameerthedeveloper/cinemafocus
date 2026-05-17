@@ -1,0 +1,66 @@
+[
+  {
+    "id": "floorstanding-speakers",
+    "name": "Floorstanding Speakers",
+    "slug": "floorstanding-speakers",
+    "description": "Experience the full depth of sound with flagship high-fidelity loudspeakers.",
+    "imageUrl": "/images/speakers.webp",
+    "featured": true
+  },
+  {
+    "id": "studio-monitors",
+    "name": "Studio Monitors",
+    "slug": "studio-monitors",
+    "description": "Professional reference monitors for absolute accuracy and transparency.",
+    "imageUrl": "/images/product-speakers.webp",
+    "featured": true
+  },
+  {
+    "id": "tube-amplifiers",
+    "name": "Tube Amplifiers",
+    "slug": "tube-amplifiers",
+    "description": "Warm, rich, and authentic. The harmonic heart of high-fidelity playback.",
+    "imageUrl": "/images/amplifiers.webp",
+    "featured": true
+  },
+  {
+    "id": "turntables",
+    "name": "Turntables",
+    "slug": "turntables",
+    "description": "Precision analog playback systems and audio turntables for the purist.",
+    "imageUrl": "/images/turntables.webp",
+    "featured": false
+  },
+  {
+    "id": "subwoofers",
+    "name": "Subwoofers",
+    "slug": "subwoofers",
+    "description": "Deep, articulate bass performance that anchors your overall soundstage.",
+    "imageUrl": "/images/speakers.webp",
+    "featured": false
+  },
+  {
+    "id": "home-theater",
+    "name": "Home Theater",
+    "slug": "home-theater",
+    "description": "Immersive multi-channel soundscapes designed for ultimate home cinemas.",
+    "imageUrl": "/images/hero-light.webp",
+    "featured": false
+  },
+  {
+    "id": "music-streamers",
+    "name": "Music Streamers",
+    "slug": "music-streamers",
+    "description": "High-resolution digital audio streamers, network players, and audio servers.",
+    "imageUrl": "/images/amplifiers.webp",
+    "featured": true
+  },
+  {
+    "id": "accessories",
+    "name": "Accessories",
+    "slug": "accessories",
+    "description": "High-end audiophile interconnects, speaker cables, clocks, and power blocks.",
+    "imageUrl": "/images/turntables.webp",
+    "featured": false
+  }
+]

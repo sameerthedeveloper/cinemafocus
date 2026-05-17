@@ -4,18 +4,23 @@ import React from 'react';
 import Link from 'next/link';
 import { useCurrency } from '../hooks/useCurrency';
 import LazyImage from './LazyImage';
-import { getProductImageUrl } from '../lib/supabase/storage';
 
 const ProductCard = ({ product }) => {
   const { formatPrice, showPrice } = useCurrency();
   
   if (!product) return null;
 
+  // Resolve the best available image source:
+  // 1. image_url  — explicit URL set by admin (Supabase storage or external)
+  // 2. images[0]  — first image from the local images array (e.g. /images/products/slug-0.png)
+  // 3. Fallback   — placeholder handled by LazyImage itself
+  const imageSrc = product.image_url || product.images?.[0] || null;
+
   return (
     <Link href={`/products/${product.slug}`} className="group block space-y-6">
       {/* Dynamic Image with Lazy Loading & Skeleton */}
       <LazyImage 
-        src={product.image_url || getProductImageUrl(product.brand, product.slug, product.images?.[0]?.split('/').pop())} 
+        src={imageSrc} 
         alt={product.name}
         className="p-4 group-hover:scale-110 transition-transform duration-500"
         containerClassName="rounded-2xl shadow-sm bg-secondary/10"
