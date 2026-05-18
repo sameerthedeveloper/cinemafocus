@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Loader2, Save, Upload, Database, LayoutTemplate, Info, Phone, Shield, Globe, Plus, Trash2, AlignLeft, AlignCenter, AlignRight, Sparkles, Eye } from 'lucide-react';
+import { Loader2, Save, Upload, Database, LayoutTemplate, Info, Phone, Shield, Globe, Plus, Trash2, AlignLeft, AlignCenter, AlignRight, Sparkles, Eye, Hammer, AlertTriangle } from 'lucide-react';
 import BackupTools from '@/components/admin/BackupTools';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import clsx from 'clsx';
@@ -22,6 +22,12 @@ export default function AdminSiteControlPage() {
   const [philosophy, setPhilosophy] = useState({ title: '', text: '' });
   const [footer, setFooter] = useState({ address: '', phones: [], email: '', facebook: '', instagram: '', twitter: '', workingHours: '' });
   const [trustBadges, setTrustBadges] = useState([]);
+  const [maintenance, setMaintenance] = useState({
+    enabled: false,
+    title: 'Refining the Sound.',
+    message: 'We are currently upgrading our digital studio to bring you an even more refined acoustic experience. Please check back shortly.',
+    activeInDev: false
+  });
 
   useEffect(() => {
     fetchData();
@@ -35,6 +41,7 @@ export default function AdminSiteControlPage() {
       else if (activeTab === 'philosophy') settingId = 'philosophy';
       else if (activeTab === 'footer') settingId = 'footer';
       else if (activeTab === 'trust') settingId = 'trust_badges';
+      else if (activeTab === 'maintenance') settingId = 'maintenance';
       
       if (!settingId) {
         setLoading(false);
@@ -93,6 +100,7 @@ export default function AdminSiteControlPage() {
         else if (activeTab === 'philosophy') setPhilosophy(prev => ({...prev, ...val}));
         else if (activeTab === 'footer') setFooter(prev => ({...prev, ...val}));
         else if (activeTab === 'trust') setTrustBadges(val.items || []);
+        else if (activeTab === 'maintenance') setMaintenance(prev => ({...prev, ...val}));
       } else {
         // Fallback for missing trust badges
         if (activeTab === 'trust') {
@@ -102,6 +110,13 @@ export default function AdminSiteControlPage() {
              { icon: 'Headphones', title: 'Expert Support', description: 'Consult with audiophiles' },
              { icon: 'Award', title: 'Authorized Dealer', description: '100% Genuine Products' }
            ]);
+        } else if (activeTab === 'maintenance') {
+            setMaintenance({
+              enabled: false,
+              title: 'Refining the Sound.',
+              message: 'We are currently upgrading our digital studio to bring you an even more refined acoustic experience. Please check back shortly.',
+              activeInDev: false
+            });
         }
       }
     } catch (e) { console.error(e); }
@@ -280,6 +295,7 @@ export default function AdminSiteControlPage() {
     { id: 'philosophy', label: 'About/Philosophy', icon: Info },
     { id: 'trust', label: 'Trust Badges', icon: Shield },
     { id: 'footer', label: 'Footer & Contact', icon: Phone },
+    { id: 'maintenance', label: 'Maintenance Mode', icon: Hammer },
     { id: 'database', label: 'Database Ops', icon: Database },
   ];
 
@@ -1143,6 +1159,104 @@ export default function AdminSiteControlPage() {
                   </button>
                </div>
             </div>
+        )}
+
+        {/* MAINTENANCE TAB */}
+        {activeTab === 'maintenance' && (
+          <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6 animate-fade-in">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 rounded-lg">
+                <Hammer size={24} />
+              </div>
+              <div>
+                <h3 className="font-medium text-lg">Maintenance Mode Settings</h3>
+                <p className="text-sm text-muted-foreground">Control public-facing storefront access and offline screens.</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-6 border border-border rounded-xl bg-card gap-4 md:gap-0 shadow-sm">
+              <div>
+                <div className="font-medium text-base">Enable Maintenance Mode</div>
+                <div className="text-xs text-muted-foreground mt-1 max-w-md">
+                  When enabled, public storefront pages (Home, Products, Brands) will display a premium offline screen. Admin dashboard remains fully accessible.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMaintenance(prev => ({ ...prev, enabled: !prev.enabled }))}
+                className={clsx(
+                  "relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer flex-shrink-0",
+                  maintenance.enabled ? "bg-amber-500" : "bg-zinc-200"
+                )}
+              >
+                <span
+                  className={clsx(
+                    "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-sm",
+                    maintenance.enabled ? "translate-x-7" : "translate-x-1"
+                  )}
+                />
+              </button>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-6 border border-border rounded-xl bg-card gap-4 md:gap-0 shadow-sm">
+              <div>
+                <div className="font-medium text-base">Apply to Local Development too</div>
+                <div className="text-xs text-muted-foreground mt-1 max-w-md">
+                  If disabled, maintenance mode will only apply to the deployed production version (e.g. Vercel/Netlify). Keep off to debug normally.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMaintenance(prev => ({ ...prev, activeInDev: !prev.activeInDev }))}
+                className={clsx(
+                  "relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer flex-shrink-0",
+                  maintenance.activeInDev ? "bg-primary" : "bg-zinc-200"
+                )}
+              >
+                <span
+                  className={clsx(
+                    "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-sm",
+                    maintenance.activeInDev ? "translate-x-7" : "translate-x-1"
+                  )}
+                />
+              </button>
+            </div>
+
+            <div className="space-y-4 pt-4 border-t border-border">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Maintenance Screen Heading</label>
+                <input 
+                  type="text" 
+                  value={maintenance.title || ''} 
+                  onChange={e => setMaintenance(prev => ({ ...prev, title: e.target.value }))} 
+                  className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all" 
+                  placeholder="e.g. Refining the Sound." 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Splash Message Description</label>
+                <textarea 
+                  value={maintenance.message || ''} 
+                  onChange={e => setMaintenance(prev => ({ ...prev, message: e.target.value }))} 
+                  rows={3} 
+                  className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all resize-none" 
+                  placeholder="Explain why the site is down and when it will return..." 
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-border flex items-center gap-4">
+              <button 
+                type="button" 
+                onClick={() => saveSection("maintenance", maintenance)} 
+                disabled={loading} 
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50 cursor-pointer shadow-sm"
+              >
+                {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Maintenance Settings
+              </button>
+            </div>
+          </div>
         )}
 
         {message && (

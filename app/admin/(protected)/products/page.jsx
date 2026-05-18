@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, Upload, X, Check, Loader2, AlertCircle, CheckSquare, Square } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload, X, Check, Loader2, AlertCircle, CheckSquare, Square, Search } from 'lucide-react';
 import { revalidateData } from '@/lib/actions';
 
 export default function AdminProductsPage() {
@@ -20,12 +20,52 @@ export default function AdminProductsPage() {
   const [importError, setImportError] = useState('');
   const [importSuccess, setImportSuccess] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Bulk Edit States
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false);
+  const [bulkEditing, setBulkEditing] = useState(false);
+  const [bulkEditFields, setBulkEditFields] = useState({
+    updateBrand: false,
+    updateCategory: false,
+    updatePrice: false,
+  });
+  const [bulkEditData, setBulkEditData] = useState({
+    brand: '',
+    category: '',
+    price: '',
+  });
+  const [categories, setCategories] = useState([]);
 
   const supabase = createClient();
 
+  const filteredProducts = products.filter(product => {
+    const search = searchTerm.toLowerCase();
+    return (
+      product.name?.toLowerCase().includes(search) ||
+      product.brand?.toLowerCase().includes(search) ||
+      product.category?.toLowerCase().includes(search)
+    );
+  });
+
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -96,6 +136,66 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleBulkEdit = async (e) => {
+    e.preventDefault();
+    if (selectedIds.size === 0) return;
+    
+    if (!bulkEditFields.updateBrand && !bulkEditFields.updateCategory && !bulkEditFields.updatePrice) {
+      alert("Please select at least one field to update.");
+      return;
+    }
+
+    setBulkEditing(true);
+    try {
+      const payload = {};
+      if (bulkEditFields.updateBrand) {
+        payload.brand = bulkEditData.brand.trim();
+      }
+      if (bulkEditFields.updateCategory) {
+        payload.category = bulkEditData.category.trim();
+      }
+      if (bulkEditFields.updatePrice) {
+        payload.price = bulkEditData.price === '' ? null : Number(bulkEditData.price);
+      }
+
+      const ids = Array.from(selectedIds);
+      const { error } = await supabase
+        .from('products')
+        .update(payload)
+        .in('id', ids);
+
+      if (error) throw error;
+
+      // Update local state
+      setProducts(prev => prev.map(p => {
+        if (selectedIds.has(p.id)) {
+          return {
+            ...p,
+            ...payload
+          };
+        }
+        return p;
+      }));
+
+      setSelectedIds(new Set());
+      setShowBulkEditModal(false);
+      setBulkEditFields({ updateBrand: false, updateCategory: false, updatePrice: false });
+      setBulkEditData({ brand: '', category: '', price: '' });
+      alert("Successfully updated selected products.");
+
+      try {
+        await revalidateData('products');
+      } catch (err) {
+        console.warn('Revalidation skipped:', err);
+      }
+    } catch (error) {
+      console.error('Error bulk updating products:', error);
+      alert('Failed to update products: ' + error.message);
+    } finally {
+      setBulkEditing(false);
+    }
+  };
+
   const toggleSelect = (id) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
@@ -106,14 +206,14 @@ export default function AdminProductsPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === products.length) {
+    if (selectedIds.size === filteredProducts.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(products.map(p => p.id)));
+      setSelectedIds(new Set(filteredProducts.map(p => p.id)));
     }
   };
 
-  const allSelected = products.length > 0 && selectedIds.size === products.length;
+  const allSelected = filteredProducts.length > 0 && selectedIds.size === filteredProducts.length;
   const someSelected = selectedIds.size > 0 && !allSelected;
 
   // Drag and Drop handlers
@@ -201,8 +301,8 @@ export default function AdminProductsPage() {
       const missingCategories = Array.from(requiredCategories).filter(c => !dbCategorySlugs.has(c));
 
       if (missingCategories.length > 0) {
-        addLog(`Found ${missingCategories.length} missing categories: ${missingCategories.join(', ')}`);
-        addLog("Automatically seeding missing categories...");
+        addLog(`Found ${missingCategories.length} missing brands: ${missingCategories.join(', ')}`);
+        addLog("Automatically seeding missing brands...");
 
         for (const catSlug of missingCategories) {
           const catName = catSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -324,9 +424,20 @@ export default function AdminProductsPage() {
           <div className="w-px h-5 bg-border" />
           <button
             onClick={() => setSelectedIds(new Set())}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer mr-1"
           >
             Deselect all
+          </button>
+          <button
+            onClick={() => {
+              setBulkEditFields({ updateBrand: false, updateCategory: false, updatePrice: false });
+              setBulkEditData({ brand: '', category: '', price: '' });
+              setShowBulkEditModal(true);
+            }}
+            className="flex items-center gap-1.5 px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-full text-xs font-semibold transition-colors cursor-pointer"
+          >
+            <Edit size={12} className="text-primary" />
+            Bulk Edit
           </button>
           <button
             onClick={handleBulkDelete}
@@ -342,6 +453,26 @@ export default function AdminProductsPage() {
           </button>
         </div>
       )}
+
+      <div className="mb-6 max-w-md relative">
+        <Search className="absolute left-3.5 top-3 text-muted-foreground w-4 h-4" />
+        <input
+          type="text"
+          placeholder="Search products by name, brand, or category..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-border/80 bg-background/50 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 shadow-sm"
+        />
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm('')}
+            className="absolute right-3 top-3 p-0.5 rounded-full hover:bg-secondary/85 text-muted-foreground transition-colors cursor-pointer"
+            title="Clear search"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
 
       {loading ? (
         <div className="text-center py-20 text-muted-foreground">Loading products...</div>
@@ -371,13 +502,13 @@ export default function AdminProductsPage() {
                   <th className="p-4 font-medium text-sm text-muted-foreground">Image</th>
                   <th className="p-4 font-medium text-sm text-muted-foreground">Name</th>
                   <th className="p-4 font-medium text-sm text-muted-foreground">Brand</th>
-                  <th className="p-4 font-medium text-sm text-muted-foreground">Category</th>
+                  <th className="p-4 font-medium text-sm text-muted-foreground">Brand Category</th>
                   <th className="p-4 font-medium text-sm text-muted-foreground">Price</th>
                   <th className="p-4 font-medium text-sm text-muted-foreground text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {products.map((product) => {
+                {filteredProducts.map((product) => {
                   const isChecked = selectedIds.has(product.id);
                   return (
                     <tr
@@ -425,10 +556,10 @@ export default function AdminProductsPage() {
                     </tr>
                   );
                 })}
-                {products.length === 0 && (
+                {filteredProducts.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="p-12 text-center text-muted-foreground">
-                      No products found. Add your first one to get started.
+                    <td colSpan="7" className="p-12 text-center text-muted-foreground font-light italic">
+                      {searchTerm ? 'No products match your search. Try adjusting your query.' : 'No products found. Add your first one to get started.'}
                     </td>
                   </tr>
                 )}
@@ -532,7 +663,7 @@ export default function AdminProductsPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">Import Completed Successfully!</h3>
-                    <p className="text-sm text-emerald-400/80 mt-1">All {importProgress.total} products and their categories are fully synced in the database.</p>
+                    <p className="text-sm text-emerald-400/80 mt-1">All {importProgress.total} products and their brands are fully synced in the database.</p>
                   </div>
                 </div>
               )}
@@ -559,6 +690,141 @@ export default function AdminProductsPage() {
                </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Bulk Product Edit Modal */}
+      {showBulkEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <form 
+            onSubmit={handleBulkEdit}
+            className="bg-background rounded-2xl w-full max-w-lg shadow-2xl border border-border overflow-hidden flex flex-col max-h-[85vh] animate-scale-up"
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-border flex justify-between items-center bg-secondary/30">
+               <div>
+                 <h2 className="text-xl font-medium flex items-center gap-2 text-foreground">
+                   <Edit className="text-primary" size={20} />
+                   Bulk Edit Products
+                 </h2>
+                 <p className="text-xs text-muted-foreground mt-0.5">
+                   Applying changes to <span className="text-primary font-semibold">{selectedIds.size}</span> selected products.
+                 </p>
+               </div>
+               <button 
+                 type="button"
+                 onClick={() => {
+                   if (!bulkEditing) setShowBulkEditModal(false);
+                 }} 
+                 className="text-muted-foreground hover:text-foreground p-1 hover:bg-secondary rounded-full transition-colors cursor-pointer"
+                 disabled={bulkEditing}
+               >
+                 <X size={20} />
+               </button>
+            </div>
+
+            {/* Fields List */}
+            <div className="p-6 overflow-y-auto space-y-5 flex-1">
+              
+              {/* Brand Upgrade */}
+              <div className="p-4 border border-border rounded-2xl bg-secondary/15 space-y-3 transition-colors hover:border-border/80">
+                <label className="flex items-center gap-2.5 font-medium text-sm text-foreground cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={bulkEditFields.updateBrand} 
+                    onChange={e => setBulkEditFields(prev => ({ ...prev, updateBrand: e.target.checked }))} 
+                    className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer" 
+                  />
+                  <span>Update Brand</span>
+                </label>
+                {bulkEditFields.updateBrand && (
+                  <input 
+                    type="text" 
+                    required 
+                    value={bulkEditData.brand} 
+                    onChange={e => setBulkEditData(prev => ({ ...prev, brand: e.target.value }))} 
+                    className="w-full p-2.5 bg-background border border-border rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 shadow-sm animate-fade-in" 
+                    placeholder="e.g. McIntosh" 
+                  />
+                )}
+              </div>
+
+              {/* Brand Category Upgrade */}
+              <div className="p-4 border border-border rounded-2xl bg-secondary/15 space-y-3 transition-colors hover:border-border/80">
+                <label className="flex items-center gap-2.5 font-medium text-sm text-foreground cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={bulkEditFields.updateCategory} 
+                    onChange={e => setBulkEditFields(prev => ({ ...prev, updateCategory: e.target.checked }))} 
+                    className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer" 
+                  />
+                  <span>Update Brand Category</span>
+                </label>
+                {bulkEditFields.updateCategory && (
+                  <select 
+                    required 
+                    value={bulkEditData.category} 
+                    onChange={e => setBulkEditData(prev => ({ ...prev, category: e.target.value }))} 
+                    className="w-full p-2.5 bg-background border border-border rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-foreground cursor-pointer animate-fade-in"
+                  >
+                    <option value="">Select Brand Category</option>
+                    {categories.map(cat => (
+                      <option key={cat.slug} value={cat.slug}>{cat.name}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Price Upgrade */}
+              <div className="p-4 border border-border rounded-2xl bg-secondary/15 space-y-3 transition-colors hover:border-border/80">
+                <label className="flex items-center gap-2.5 font-medium text-sm text-foreground cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={bulkEditFields.updatePrice} 
+                    onChange={e => setBulkEditFields(prev => ({ ...prev, updatePrice: e.target.checked }))} 
+                    className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer" 
+                  />
+                  <span>
+                    Update Price <span className="text-xs font-normal text-muted-foreground ml-1">(Optional - Keep blank for Call for Price)</span>
+                  </span>
+                </label>
+                {bulkEditFields.updatePrice && (
+                  <div className="relative animate-fade-in">
+                    <span className="absolute left-3.5 top-2.5 text-xs text-muted-foreground font-mono">OMR</span>
+                    <input 
+                      type="number" 
+                      step="any"
+                      value={bulkEditData.price} 
+                      onChange={e => setBulkEditData(prev => ({ ...prev, price: e.target.value }))} 
+                      className="w-full pl-14 pr-4 p-2.5 bg-background border border-border rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 shadow-sm" 
+                      placeholder="e.g. 1250" 
+                    />
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            {/* Actions Footer */}
+            <div className="p-6 border-t border-border flex justify-end gap-3 bg-secondary/30">
+               <button 
+                 type="button"
+                 onClick={() => setShowBulkEditModal(false)}
+                 disabled={bulkEditing}
+                 className="px-6 py-2.5 text-muted-foreground hover:bg-secondary rounded-full font-medium transition-colors cursor-pointer disabled:opacity-50 text-sm"
+               >
+                 Cancel
+               </button>
+               <button 
+                 type="submit"
+                 disabled={bulkEditing}
+                 className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer disabled:opacity-50 text-sm"
+               >
+                 {bulkEditing && <Loader2 size={16} className="animate-spin" />}
+                 {bulkEditing ? 'Updating...' : `Save Bulk Changes`}
+               </button>
+            </div>
+          </form>
         </div>
       )}
     </div>

@@ -75,9 +75,9 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* Categories */}
+        {/* Brands */}
         <div>
-          <h3 className="text-primary font-medium tracking-widest uppercase mb-6">Categories</h3>
+          <h3 className="text-primary font-medium tracking-widest uppercase mb-6">Brands</h3>
           <ul className="space-y-3">
             <li><Link href="/products?category=speakers" className="text-muted-foreground hover:text-primary transition-colors">Speakers</Link></li>
             <li><Link href="/products?category=subwoofers" className="text-muted-foreground hover:text-primary transition-colors">Subwoofers</Link></li>

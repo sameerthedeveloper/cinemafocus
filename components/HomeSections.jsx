@@ -41,15 +41,19 @@ export async function CollectionSection() {
   return (
     <Section id="categories" className="bg-background">
       <div className="text-center mb-16 md:mb-24 space-y-4">
-        <h2 className="text-4xl md:text-5xl font-medium tracking-tight">Our Collection.</h2>
+        <h2 className="text-4xl md:text-5xl font-medium tracking-tight">Shop by Brand.</h2>
         <p className="text-xl text-muted font-light max-w-2xl mx-auto">
-           Precision engineering meets acoustic artistry.
+           World-class audio brands, curated for you.
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 px-4 md:px-0">
-        {data.map((category) => (
-          <CategoryCard key={category.slug} category={category} />
-        ))}
+      <div className="relative w-full max-w-7xl mx-auto px-4 md:px-0">
+        <div className="flex items-start gap-6 md:gap-10 overflow-x-auto pb-8 pt-4 scrollbar-hide snap-x touch-pan-x justify-start md:justify-center">
+          {data.map((category) => (
+            <div key={category.slug} className="snap-center">
+              <CategoryCard category={category} />
+            </div>
+          ))}
+        </div>
       </div>
     </Section>
   );

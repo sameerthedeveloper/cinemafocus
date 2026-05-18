@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, LayoutGrid, Users, MessageSquare, Image, Search, Newspaper, Sparkles, Menu, X } from 'lucide-react';
+import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, Tag, Users, MessageSquare, Image, Search, Newspaper, Sparkles, Menu, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import clsx from 'clsx';
 
@@ -89,7 +89,7 @@ export default function AdminLayout({ children }) {
     { label: "Products", path: "/admin/products", icon: Package },
     { label: "New Launches", path: "/admin/new-launches", icon: Sparkles },
     { label: "Press Releases", path: "/admin/press-releases", icon: Newspaper },
-    { label: "Categories", path: "/admin/categories", icon: LayoutGrid },
+    { label: "Brands", path: "/admin/categories", icon: Tag },
     { label: "Gallery", path: "/admin/gallery", icon: Image },
     { label: "Users", path: "/admin/users", icon: Users },
     { label: "Messages", path: "/admin/messages", icon: MessageSquare },

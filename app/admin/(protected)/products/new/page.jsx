@@ -108,7 +108,7 @@ export default function AddProductPage() {
         name: formData.name,
         slug: slug,
         brand: formData.brand,
-        price: Number(formData.price),
+        price: formData.price === '' ? null : Number(formData.price),
         category: formData.category,
         short_description: formData.shortDescription, 
         long_description: formData.longDescription,   
@@ -161,13 +161,13 @@ export default function AddProductPage() {
               <input required name="brand" value={formData.brand} onChange={handleChange} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" placeholder="e.g. KEF" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Price</label>
-              <input required type="number" name="price" value={formData.price} onChange={handleChange} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" placeholder="2499.99" />
+              <label className="text-sm font-medium">Price <span className="text-xs font-normal text-muted-foreground ml-1">(Optional - Keep blank for Call for Price)</span></label>
+              <input type="number" step="any" name="price" value={formData.price} onChange={handleChange} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" placeholder="2499.99" />
             </div>
              <div className="space-y-2 ">
-              <label className="text-sm font-medium">Category</label>
+              <label className="text-sm font-medium">Brand Category</label>
               <select required name="category" value={formData.category} onChange={handleChange} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none">
-                <option value="">Select Category</option>
+                <option value="">Select Brand Category</option>
                 {categories.map(cat => (
                   <option key={cat.slug} value={cat.slug}>{cat.name}</option>
                 ))}

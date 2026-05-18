@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { Plus, Trash2, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Sparkles, Loader2 } from 'lucide-react';
 
 export default function AdminNewLaunchesPage() {
   const [launches, setLaunches] = useState([]);
@@ -96,7 +96,10 @@ export default function AdminNewLaunchesPage() {
                 </td>
                 <td className="p-4 text-sm text-muted-foreground">{launch.brand}</td>
                 <td className="p-4 text-sm font-medium">₹{launch.price?.toLocaleString()}</td>
-                <td className="p-4 flex justify-end gap-3">
+                <td className="p-4 flex justify-end gap-3 items-center">
+                  <Link href={`/admin/new-launches/edit/${launch.id}`} className="p-2 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-all" title="Edit">
+                    <Edit size={18} />
+                  </Link>
                   <button onClick={() => handleDelete(launch.id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete">
                     <Trash2 size={18} />
                   </button>

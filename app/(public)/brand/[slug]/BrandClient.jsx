@@ -4,7 +4,7 @@ import React from 'react';
 import ProductCard from '@/components/ProductCard';
 import Section from '@/components/Section';
 
-export default function CategoryClient({ category, products }) {
+export default function BrandClient({ category, products }) {
   if (!category) return null;
 
   return (
@@ -12,7 +12,7 @@ export default function CategoryClient({ category, products }) {
        <div className="space-y-4 mb-12 text-center pt-10">
           <h1 className="text-4xl md:text-5xl font-medium tracking-tight">{category.name}</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-             Explore our premium selection of {category.name.toLowerCase()}.
+             Explore our premium {category.name} collection.
           </p>
        </div>
 
@@ -25,7 +25,7 @@ export default function CategoryClient({ category, products }) {
        
        {products.length === 0 && (
          <div className="text-center py-20 text-muted-foreground">
-           No products found in this category.
+           No products found for this brand.
          </div>
        )}
     </Section>

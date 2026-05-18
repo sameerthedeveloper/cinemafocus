@@ -14,8 +14,44 @@ import {
   TrustSection, 
   GallerySection 
 } from '@/components/HomeSections';
+import JsonLd from '@/components/JsonLd';
 
 export default async function Home() {
+  const businessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Cinema Focus",
+    "image": "https://www.cinemafocus.in/logo.svg",
+    "description": "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Oman.",
+    "@id": "https://www.cinemafocus.in/#localbusiness",
+    "url": "https://www.cinemafocus.in",
+    "telephone": "+96824498303",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Al Khuwair",
+      "addressLocality": "Muscat",
+      "postalCode": "113",
+      "addressCountry": "OM"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 23.5952,
+      "longitude": 58.4112
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Sunday"
+      ],
+      "opens": "09:00",
+      "closes": "18:00"
+    }
+  };
+
   // ONLY fetch critical LCP data upfront to minimize server response time
   const [heroData, newLaunchesData] = await Promise.all([
     getHero(),
@@ -51,6 +87,7 @@ export default async function Home() {
 
   return (
     <div className="pb-20">
+      <JsonLd data={businessSchema} />
       {/* Critical LCP Section - Rendered immediately without animation to minimize LCP delay */}
       {newLaunchesData && newLaunchesData.length > 0 ? (
         <NewLaunches products={newLaunchesData} /> 

@@ -12,38 +12,50 @@ const ProductCard = ({ product }) => {
 
   // Resolve the best available image source:
   // 1. image_url  — explicit URL set by admin (Supabase storage or external)
-  // 2. images[0]  — first image from the local images array (e.g. /images/products/slug-0.png)
+  // 2. images[0]  — first image from the local images array
   // 3. Fallback   — placeholder handled by LazyImage itself
   const imageSrc = product.image_url || product.images?.[0] || null;
 
   return (
-    <Link href={`/products/${product.slug}`} className="group block space-y-6">
-      {/* Dynamic Image with Lazy Loading & Skeleton */}
-      <LazyImage 
-        src={imageSrc} 
-        alt={product.name}
-        className="p-4 group-hover:scale-110 transition-transform duration-500"
-        containerClassName="rounded-2xl shadow-sm bg-secondary/10"
-        objectFit="contain"
-      />
+    <Link href={`/products/${product.slug}`} className="group block" aria-label={`View ${product.name}`}>
+      {/* Card container — Apple uses soft bg, no visible border, just shadow on hover */}
+      <div className="relative rounded-3xl overflow-hidden bg-secondary/40 transition-all duration-500 ease-out group-hover:bg-secondary/70 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
+        {/* Image area */}
+        <div className="relative aspect-square overflow-hidden p-6 pb-4">
+          <LazyImage
+            src={imageSrc}
+            alt={product.name}
+            className="transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+            containerClassName="rounded-2xl bg-transparent"
+            objectFit="contain"
+            aspectRatio="aspect-square"
+          />
 
-      {/* Content - Minimal text below */}
-      <div className="text-center space-y-2">
-        <h3 className="text-xl md:text-2xl font-medium text-foreground group-hover:text-primary transition-colors">
-          {product.name}
-        </h3>
-        <p className="text-muted text-sm md:text-base font-medium uppercase tracking-widest">
-           {product.category ? product.category.replace(/-/g, ' ') : 'New Arrival'}
-        </p>
-        {showPrice && product.price && (
-          <p className="text-foreground font-medium mt-1">
-            {formatPrice(product.price)}
+          {/* New badge */}
+          {product.is_new_launch && (
+            <span className="absolute top-4 left-4 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest bg-primary text-primary-foreground rounded-full leading-none z-10">
+              New
+            </span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="px-5 pb-6 pt-1 space-y-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            {product.brand || (product.category ? product.category.replace(/-/g, ' ') : 'Audio')}
           </p>
-        )}
-        
-        {/* Optional: "Shop >" link that appears or is always there */}
-        <div className="pt-2 text-primary text-sm font-medium opacity-0 transform translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-          Buy Now ›
+          <h3 className="text-base font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors duration-300">
+            {product.name}
+          </h3>
+          {showPrice && product.price ? (
+            <p className="text-sm font-medium text-foreground/80 pt-0.5">
+              {formatPrice(product.price)}
+            </p>
+          ) : (
+            <p className="text-sm font-medium text-primary/70 pt-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              Learn more →
+            </p>
+          )}
         </div>
       </div>
     </Link>

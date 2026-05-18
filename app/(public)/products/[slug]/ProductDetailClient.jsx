@@ -28,12 +28,8 @@ export default function ProductDetailClient({ product }) {
     <div className="animate-fade-in pt-6">
       {/* Breadcrumb */}
       <div className="max-w-[1400px] px-4 md:px-8 mx-auto py-4 flex mt-15 items-center text-sm text-muted-foreground">
-        <Link href={`/products?category=${product.category}`} className="hover:text-primary transition-colors capitalize">
+        <Link href={`/brand/${product.category}`} className="hover:text-primary transition-colors capitalize">
           {product.category?.replace('-', ' ')}
-        </Link>
-        <ChevronRight size={14} className="mx-2" />
-        <Link href={`/products?category=${product.category}`} className="hover:text-primary transition-colors capitalize">
-          {product.brand}
         </Link>
         <ChevronRight size={14} className="mx-2" />
         <span className="text-foreground font-medium" aria-current="page">{product.name}</span>
@@ -121,7 +117,7 @@ export default function ProductDetailClient({ product }) {
                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
                    {(product.specifications || []).map((spec, idx) => (
                      <div key={idx} className="pb-4 border-b border-border mx-2">
-                       <dt className="text-xs uppercase tracking-wider font-medium text-muted-foreground mb-1 opacity-70">{spec.key}</dt>
+                       <dt className="text-xs uppercase tracking-wider font-medium text-muted-foreground mb-1 opacity-70">{spec.key === 'Category' ? 'Brand Category' : spec.key}</dt>
                        <dd className="text-base text-foreground font-medium">{spec.value}</dd>
                      </div>
                    ))}

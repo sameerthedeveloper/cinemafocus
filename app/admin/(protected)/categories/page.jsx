@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Loader2, Plus, Trash2, LayoutGrid, X, Edit, Check } from 'lucide-react';
+import { Loader2, Plus, Trash2, Tag, X, Edit, Check } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import { revalidateData } from '@/lib/actions';
 
@@ -84,7 +84,7 @@ export default function AdminCategoriesPage() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
+    if (window.confirm("Are you sure you want to delete this brand?")) {
       try {
         const { error } = await supabase
           .from('categories')
@@ -96,13 +96,13 @@ export default function AdminCategoriesPage() {
         try {
           await revalidateData('categories');
         } catch (err) {
-          console.warn("Failed to revalidate categories:", err);
+          console.warn("Failed to revalidate brands:", err);
         }
 
         setCategories(categories.filter(c => c.id !== id));
       } catch (error) {
-        console.error("Error deleting category:", error);
-        alert("Failed to delete category: " + error.message);
+        console.error("Error deleting brand:", error);
+        alert("Failed to delete brand: " + error.message);
       }
     }
   };
@@ -160,8 +160,8 @@ export default function AdminCategoriesPage() {
       closeModal();
 
     } catch (error) {
-      console.error("Error saving category:", error);
-      alert("Failed to save category: " + error.message);
+      console.error("Error saving brand:", error);
+      alert("Failed to save brand: " + error.message);
     } finally {
       setSaving(false);
     }
@@ -171,8 +171,8 @@ export default function AdminCategoriesPage() {
     <div className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in relative pb-20 md:pb-8">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-8 md:mb-10">
         <div>
-           <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Categories</h1>
-           <p className="text-muted-foreground mt-1 text-sm md:text-base">Organize your product catalog.</p>
+           <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Brands</h1>
+           <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage the brands in your catalog.</p>
         </div>
         <button 
           onClick={() => {
@@ -183,12 +183,12 @@ export default function AdminCategoriesPage() {
           className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity w-full md:w-auto justify-center"
         >
           <Plus size={18} />
-          Add Category
+          Add Brand
         </button>
       </header>
 
       {loading ? (
-        <div className="text-center py-20 text-muted-foreground">Loading categories...</div>
+        <div className="text-center py-20 text-muted-foreground">Loading brands...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories.map((category) => (
@@ -218,13 +218,14 @@ export default function AdminCategoriesPage() {
                 <div className="mt-4 pt-4 border-t border-border flex justify-between items-center text-xs text-muted-foreground uppercase tracking-wider font-medium">
                    <span>/{category.slug}</span>
                    <span>{category.productCount || 0} Products</span>
+                   <span className="text-[10px] uppercase tracking-widest font-semibold bg-secondary px-2 py-0.5 rounded-full">Brand</span>
                 </div>
               </div>
             </div>
           ))}
           {categories.length === 0 && (
              <div className="col-span-full py-20 text-center text-muted-foreground bg-secondary/30 rounded-2xl border-dashed border-2 border-border">
-               No categories found. Add your first one above.
+               No brands found. Add your first brand above.
              </div>
           )}
         </div>
@@ -234,7 +235,7 @@ export default function AdminCategoriesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
           <div className="bg-background rounded-2xl w-full max-w-lg shadow-xl border border-border overflow-hidden">
             <div className="p-6 border-b border-border flex justify-between items-center bg-secondary/30">
-               <h2 className="text-xl font-medium">{editingCategory ? 'Edit Category' : 'New Category'}</h2>
+               <h2 className="text-xl font-medium">{editingCategory ? 'Edit Brand' : 'New Brand'}</h2>
                <button onClick={closeModal} className="text-muted-foreground hover:text-foreground">
                  <X size={20} />
                </button>
@@ -242,13 +243,13 @@ export default function AdminCategoriesPage() {
             
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Category Name</label>
+                <label className="text-sm font-medium">Brand Name</label>
                 <input 
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" 
-                  placeholder="e.g. Headphones"
+                  placeholder="e.g. KEF, Bowers &amp; Wilkins"
                 />
               </div>
 
@@ -292,7 +293,7 @@ export default function AdminCategoriesPage() {
                    ) : (
                      <Plus size={18} />
                    )}
-                   {saving ? (editingCategory ? 'Saving...' : 'Creating...') : editingCategory ? 'Save Changes' : 'Create Category'}
+                   {saving ? (editingCategory ? 'Saving...' : 'Creating...') : editingCategory ? 'Save Changes' : 'Create Brand'}
                  </button>
               </div>
             </form>
