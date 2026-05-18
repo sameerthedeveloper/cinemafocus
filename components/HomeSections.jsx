@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import Section from './Section';
 import CategoryCard from './CategoryCard';
 import ProductCard from './ProductCard';
+import BrandMarquee from './BrandMarquee';
 import Button from './Button';
 import PressReleases from './PressReleases';
 const HomeGallery = dynamic(() => import('./HomeGallery'), { 
@@ -46,14 +47,8 @@ export async function CollectionSection() {
            World-class audio brands, curated for you.
         </p>
       </div>
-      <div className="relative w-full max-w-7xl mx-auto px-4 md:px-0">
-        <div className="flex items-start gap-6 md:gap-10 overflow-x-auto pb-8 pt-4 scrollbar-hide snap-x touch-pan-x justify-start md:justify-center">
-          {data.map((category) => (
-            <div key={category.slug} className="snap-center">
-              <CategoryCard category={category} />
-            </div>
-          ))}
-        </div>
+      <div className="relative w-full max-w-7xl mx-auto md:px-0">
+        <BrandMarquee categories={data} />
       </div>
     </Section>
   );

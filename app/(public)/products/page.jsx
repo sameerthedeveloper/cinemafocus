@@ -141,20 +141,23 @@ function ProductListContent() {
       <div
         ref={filtersRef}
         className={clsx(
-          'sticky top-0 z-40 transition-all duration-300',
+          'sticky top-[64px] md:top-[72px] z-40 transition-all duration-300',
           filtersSticky
             ? 'bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-[0_1px_0_rgba(0,0,0,0.05)] py-2'
             : 'bg-transparent py-4'
         )}
       >
         <div className={clsx(
-          "max-w-7xl mx-auto px-4 md:px-8 transition-all duration-500 flex",
-          filtersSticky 
-            ? "flex-col md:flex-row justify-between items-center gap-4" 
-            : "flex-col gap-6"
+          "max-w-7xl mx-auto px-4 md:px-8 transition-all duration-500 flex flex-col items-center",
+          filtersSticky ? "gap-2" : "gap-6"
         )}>
           {/* Categories */}
-          <div className="flex overflow-x-auto py-2 scrollbar-hide touch-pan-x w-full md:w-auto flex-1 gap-2 md:gap-4">
+          <div className={clsx(
+            "flex overflow-x-auto scrollbar-hide touch-pan-x w-full gap-2 md:gap-4 transition-all duration-500 ease-in-out origin-top",
+            filtersSticky 
+              ? "max-h-0 opacity-0 overflow-hidden py-0 m-0 pointer-events-none" 
+              : "max-h-[200px] opacity-100 py-2"
+          )}>
             {filterTabs.map((tab) => (
               <button
                 key={tab.key}
@@ -162,61 +165,40 @@ function ProductListContent() {
                 onClick={tab.onClick}
                 className={clsx(
                   "flex-shrink-0 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-primary transition-all duration-300",
-                  filtersSticky
-                    ? clsx(
-                        'px-5 py-2 text-sm rounded-full font-medium whitespace-nowrap flex',
-                        activeCategory === tab.key
-                          ? 'bg-primary text-primary-foreground shadow-sm'
-                          : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground'
-                      )
-                    : clsx(
-                        "group flex flex-col items-center text-center w-[120px] md:w-[140px] p-4 rounded-[1.5rem] ease-out border",
-                        activeCategory === tab.key
-                          ? "bg-secondary/30 border-primary/30 shadow-[0_8px_16px_-6px_rgba(0,0,0,0.05)] -translate-y-0.5"
-                          : "bg-secondary/10 border-border/10 hover:bg-secondary/20 hover:border-primary/20 hover:shadow-[0_8px_16px_-6px_rgba(0,0,0,0.05)] hover:-translate-y-0.5"
-                      )
+                  "group flex flex-col items-center text-center w-[120px] md:w-[140px] p-4 rounded-[1.5rem] ease-out border",
+                  activeCategory === tab.key
+                    ? "bg-secondary/30 border-primary/30 shadow-[0_8px_16px_-6px_rgba(0,0,0,0.05)] -translate-y-0.5"
+                    : "bg-secondary/10 border-border/10 hover:bg-secondary/20 hover:border-primary/20 hover:shadow-[0_8px_16px_-6px_rgba(0,0,0,0.05)] hover:-translate-y-0.5"
                 )}
               >
-                {!filtersSticky && (
-                  <div className={clsx(
-                    "w-16 h-16 md:w-20 md:h-20 rounded-full bg-background flex items-center justify-center p-3 transition-all duration-300 ease-out group-hover:scale-[1.05] shadow-[inset_0_1px_2px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.02)] border mb-3",
-                    activeCategory === tab.key ? "border-primary/20" : "border-border/5"
-                  )}>
-                    {tab.key === 'all' ? (
-                      <svg className="w-8 h-8 text-foreground/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                    ) : tab.key === 'new-arrivals' ? (
-                      <svg className="w-8 h-8 text-foreground/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-                    ) : tab.imageSrc ? (
-                      <img src={tab.imageSrc} alt={tab.label} className="w-full h-full object-contain p-1" />
-                    ) : (
-                      <div className="text-muted-foreground/30 font-bold text-lg uppercase select-none">{tab.label.substring(0, 2)}</div>
-                    )}
-                  </div>
-                )}
-                
                 <div className={clsx(
-                  "space-y-1",
-                  filtersSticky ? "w-auto" : "w-full"
+                  "w-16 h-16 md:w-20 md:h-20 rounded-full bg-background flex items-center justify-center p-3 transition-all duration-300 ease-out group-hover:scale-[1.05] shadow-[inset_0_1px_2px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.02)] border mb-3",
+                  activeCategory === tab.key ? "border-primary/20" : "border-border/5"
                 )}>
+                  {tab.key === 'all' ? (
+                    <svg className="w-8 h-8 text-foreground/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                  ) : tab.key === 'new-arrivals' ? (
+                    <svg className="w-8 h-8 text-foreground/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                  ) : tab.imageSrc ? (
+                    <img src={tab.imageSrc} alt={tab.label} className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <div className="text-muted-foreground/30 font-bold text-lg uppercase select-none">{tab.label.substring(0, 2)}</div>
+                  )}
+                </div>
+                
+                <div className="space-y-1 w-full">
                   <span className={clsx(
-                    "transition-colors",
-                    filtersSticky
-                      ? "text-inherit"
-                      : clsx(
-                          "text-xs md:text-sm font-semibold tracking-tight leading-tight line-clamp-1 block",
-                          activeCategory === tab.key ? "text-primary" : "text-foreground group-hover:text-primary"
-                        )
+                    "transition-colors text-xs md:text-sm font-semibold tracking-tight leading-tight line-clamp-1 block",
+                    activeCategory === tab.key ? "text-primary" : "text-foreground group-hover:text-primary"
                   )}>
                     {tab.label}
                   </span>
                   
-                  {!filtersSticky && (
-                    <span className="text-[9px] md:text-[10px] text-muted-foreground/80 font-medium block">
-                      {tab.key === 'all' ? 'View Everything' : 
-                       tab.key === 'new-arrivals' ? 'Latest Products' : 
-                       `${tab.count || 0} ${tab.count === 1 ? 'item' : 'items'}`}
-                    </span>
-                  )}
+                  <span className="text-[9px] md:text-[10px] text-muted-foreground/80 font-medium block">
+                    {tab.key === 'all' ? 'View Everything' : 
+                     tab.key === 'new-arrivals' ? 'Latest Products' : 
+                     `${tab.count || 0} ${tab.count === 1 ? 'item' : 'items'}`}
+                  </span>
                 </div>
               </button>
             ))}
@@ -224,12 +206,12 @@ function ProductListContent() {
 
           {/* Search Bar */}
           <div className={clsx(
-            "relative flex-shrink-0 transition-all duration-500",
-            filtersSticky ? "w-full md:w-72" : "w-full max-w-2xl mx-auto"
+            "relative transition-all duration-500",
+            filtersSticky ? "w-full max-w-3xl" : "w-full max-w-2xl"
           )}>
             <Search className={clsx(
               "absolute text-muted-foreground/60 transition-all",
-              filtersSticky ? "left-3.5 top-2.5 w-4 h-4" : "left-4 top-3.5 w-5 h-5"
+              filtersSticky ? "left-4 top-3 w-5 h-5" : "left-4 top-3.5 w-5 h-5"
             )} />
             <input
               type="text"
@@ -239,7 +221,7 @@ function ProductListContent() {
               className={clsx(
                 "w-full rounded-full border focus:bg-background outline-none transition-all duration-300 shadow-sm",
                 filtersSticky
-                  ? "pl-10 pr-8 py-2 bg-secondary/50 border-border/40 focus:ring-1 focus:ring-primary/20 text-sm placeholder:text-muted-foreground/60"
+                  ? "pl-12 pr-10 py-2.5 bg-secondary/50 border-border/40 focus:ring-1 focus:ring-primary/20 text-sm placeholder:text-muted-foreground/60"
                   : "pl-12 pr-10 py-3 bg-secondary/30 border-border/40 focus:ring-2 focus:ring-primary/20 text-base placeholder:text-muted-foreground/50"
               )}
             />
@@ -248,11 +230,11 @@ function ProductListContent() {
                 onClick={() => setSearchQuery('')}
                 className={clsx(
                   "absolute rounded-full hover:bg-secondary/80 text-muted-foreground transition-colors cursor-pointer",
-                  filtersSticky ? "right-3 top-2.5 p-0.5" : "right-4 top-3.5 p-1"
+                  filtersSticky ? "right-3 top-2.5 p-1" : "right-4 top-3.5 p-1"
                 )}
                 title="Clear search"
               >
-                <X className={clsx(filtersSticky ? "w-3.5 h-3.5" : "w-5 h-5")} />
+                <X className={clsx(filtersSticky ? "w-4 h-4" : "w-5 h-5")} />
               </button>
             )}
           </div>
