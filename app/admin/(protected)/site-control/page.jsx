@@ -1024,7 +1024,7 @@ export default function AdminSiteControlPage() {
                             setFooter({...footer, phones: newPhones});
                           }}
                           className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary" 
-                          placeholder="+1 555 123 4567" 
+                          placeholder="e.g. Sales: +91 98410 35821, 044-28117722" 
                         />
                         <button onClick={() => {
                             const newPhones = footer.phones.filter((_, i) => i !== idx);

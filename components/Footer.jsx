@@ -96,10 +96,23 @@ const Footer = () => {
             </li>
             <li className="flex items-start gap-3 text-muted-foreground justify-center md:justify-start">
               <Phone size={20} className="text-primary shrink-0 mt-1" />
-              <div className="space-y-1">
-                {(footerData.phones || [footerData.phone]).map((p, i) => (
-                  <div key={i}>{p}</div>
-                ))}
+              <div className="space-y-1 w-full pt-1">
+                {(footerData.phones || [footerData.phone]).map((p, i) => {
+                  if (typeof p !== 'string') return null;
+                  const parts = p.split(':');
+                  if (parts.length > 1) {
+                    const numbers = parts.slice(1).join(':').split(',').map(n => n.trim()).filter(Boolean);
+                    return (
+                      <div key={i} className="flex flex-col items-center md:items-start mb-3 last:mb-0 leading-snug">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/70 mb-0.5">{parts[0].trim()}</span>
+                        {numbers.map((num, idx) => (
+                          <span key={idx} className="text-muted-foreground">{num}</span>
+                        ))}
+                      </div>
+                    );
+                  }
+                  return <div key={i} className="mb-2 last:mb-0">{p}</div>;
+                })}
               </div>
             </li>
             <li className="flex items-center gap-3 text-muted-foreground justify-center md:justify-start">
