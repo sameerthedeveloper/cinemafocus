@@ -163,6 +163,22 @@ const Hero = ({
     return {};
   };
 
+  const getTitleStyle = (slide) => {
+    if (!slide.titleSize) return {};
+    return {
+      fontSize: `clamp(24px, 5vw, ${slide.titleSize}px)`,
+      lineHeight: '1.15'
+    };
+  };
+
+  const getSubtitleStyle = (slide) => {
+    if (!slide.subtitleSize) return {};
+    return {
+      fontSize: `clamp(14px, 2.5vw, ${slide.subtitleSize}px)`,
+      lineHeight: '1.4'
+    };
+  };
+
   return (
     <div 
       className="relative w-full h-screen bg-zinc-950 overflow-hidden group/hero"
@@ -195,10 +211,10 @@ const Hero = ({
               )}>
                 {isActive && (
                   <div className={clsx("w-full max-w-xl space-y-8 animate-fade-in-up flex flex-col", flexAlignItems)}>
-                     <h1 className={clsx("text-4xl md:text-5xl lg:text-7xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-md", slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')}>
+                     <h1 className={clsx("text-4xl md:text-5xl lg:text-7xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-md", slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p className={clsx("text-lg md:text-xl text-zinc-300 font-light leading-relaxed drop-shadow-sm", pAlignClass, slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')}>
+                     <p className={clsx("text-lg md:text-xl text-zinc-300 font-light leading-relaxed drop-shadow-sm", pAlignClass, slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
                      <div className="pt-4">
@@ -265,10 +281,10 @@ const Hero = ({
                 <div className={`flex flex-col ${alignClass}`}>
                   {isActive && (
                     <div className={`max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                      <h1 className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-lg">
+                      <h1 className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
                         {slide.title}
                       </h1>
-                      <p className={clsx("text-xl md:text-2xl text-zinc-300 font-light max-w-2xl leading-relaxed drop-shadow-md", pAlignClass)}>
+                      <p className={clsx("text-xl md:text-2xl text-zinc-300 font-light max-w-2xl leading-relaxed drop-shadow-md", pAlignClass)} style={getSubtitleStyle(slide)}>
                         {slide.subtitle}
                       </p>
                       <div className="pt-8">
@@ -334,10 +350,10 @@ const Hero = ({
                <div className={`flex flex-col ${alignClass}`}>
                  {isActive && (
                    <div className={`max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                     <h1 className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-lg">
+                     <h1 className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p className={clsx("text-xl md:text-2xl text-zinc-300 font-light max-w-2xl leading-relaxed drop-shadow-md", pAlignClass)}>
+                     <p className={clsx("text-xl md:text-2xl text-zinc-300 font-light max-w-2xl leading-relaxed drop-shadow-md", pAlignClass)} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
                      <div className="pt-8">

@@ -445,11 +445,45 @@ export default function AdminSiteControlPage() {
                    <div className="space-y-2">
                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Main Hero Title</label>
                      <input value={currentSlide.title || ''} onChange={e => updateCurrentSlide({ title: e.target.value })} className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all" placeholder="e.g. The Future of Sound" />
+                      
+                      <div className="flex gap-4 items-center mt-2">
+                        <div className="flex-grow space-y-1">
+                          <div className="flex justify-between">
+                            <label className="text-[10px] font-medium text-muted-foreground uppercase">Title Font Size</label>
+                            <span className="text-[10px] text-primary font-bold">{currentSlide.titleSize !== undefined ? currentSlide.titleSize : 60}px</span>
+                          </div>
+                          <input 
+                            type="range" 
+                            min="24" 
+                            max="120" 
+                            value={currentSlide.titleSize !== undefined ? currentSlide.titleSize : 60} 
+                            onChange={e => updateCurrentSlide({ titleSize: parseInt(e.target.value) })}
+                            className="w-full h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary" 
+                          />
+                        </div>
+                      </div>
                    </div>
 
                    <div className="space-y-2">
                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Subtitle</label>
                      <textarea value={currentSlide.subtitle || ''} onChange={e => updateCurrentSlide({ subtitle: e.target.value })} rows={2} className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all resize-none" placeholder="e.g. Experience audio perfection..." />
+                      
+                      <div className="flex gap-4 items-center mt-2">
+                        <div className="flex-grow space-y-1">
+                          <div className="flex justify-between">
+                            <label className="text-[10px] font-medium text-muted-foreground uppercase">Subtitle Font Size</label>
+                            <span className="text-[10px] text-primary font-bold">{currentSlide.subtitleSize !== undefined ? currentSlide.subtitleSize : 20}px</span>
+                          </div>
+                          <input 
+                            type="range" 
+                            min="12" 
+                            max="48" 
+                            value={currentSlide.subtitleSize !== undefined ? currentSlide.subtitleSize : 20} 
+                            onChange={e => updateCurrentSlide({ subtitleSize: parseInt(e.target.value) })}
+                            className="w-full h-1 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary" 
+                          />
+                        </div>
+                      </div>
                    </div>
 
                    {/* Layout Mode */}
@@ -761,10 +795,10 @@ export default function AdminSiteControlPage() {
                             <div className={clsx("relative z-10 flex flex-col space-y-3", 
                               currentSlide.textAlignment === 'left' ? 'items-start text-left' : currentSlide.textAlignment === 'right' ? 'items-end text-right' : 'items-center text-center'
                             )}>
-                              <h3 className="text-lg md:text-xl font-bold tracking-tight text-white leading-tight">
+                              <h3 className="text-lg md:text-xl font-bold tracking-tight text-white leading-tight" style={{ fontSize: currentSlide.titleSize ? `${Math.max(14, currentSlide.titleSize / 2.5)}px` : undefined }}>
                                 {currentSlide.title || "Sound, unbound."}
                               </h3>
-                              <p className="text-[10px] text-zinc-400 font-light max-w-xs leading-relaxed line-clamp-2">
+                              <p className="text-[10px] text-zinc-400 font-light max-w-xs leading-relaxed line-clamp-2" style={{ fontSize: currentSlide.subtitleSize ? `${Math.max(9, currentSlide.subtitleSize / 1.8)}px` : undefined }}>
                                 {currentSlide.subtitle || "Experience music in its purest form..."}
                               </p>
                               <div className="pt-2">
@@ -793,10 +827,10 @@ export default function AdminSiteControlPage() {
                               <div className={clsx("flex flex-col space-y-2",
                                 currentSlide.textAlignment === 'left' ? 'items-start text-left' : currentSlide.textAlignment === 'right' ? 'items-end text-right' : 'items-center text-center'
                               )}>
-                                <h3 className="text-xs md:text-sm font-bold tracking-tight text-white leading-tight line-clamp-3">
+                                <h3 className="text-xs md:text-sm font-bold tracking-tight text-white leading-tight line-clamp-3" style={{ fontSize: currentSlide.titleSize ? `${Math.max(12, currentSlide.titleSize / 3)}px` : undefined }}>
                                   {currentSlide.title || "Sound, unbound."}
                                 </h3>
-                                <p className="text-[9px] text-zinc-400 font-light leading-relaxed line-clamp-2">
+                                <p className="text-[9px] text-zinc-400 font-light leading-relaxed line-clamp-2" style={{ fontSize: currentSlide.subtitleSize ? `${Math.max(8, currentSlide.subtitleSize / 2)}px` : undefined }}>
                                   {currentSlide.subtitle || "Experience music..."}
                                 </p>
                                 <div className="pt-1.5">
@@ -876,10 +910,10 @@ export default function AdminSiteControlPage() {
                               <div className={clsx("w-full flex flex-col space-y-3",
                                 currentSlide.textAlignment === 'left' ? 'items-start text-left' : currentSlide.textAlignment === 'right' ? 'items-end text-right' : 'items-center text-center'
                               )}>
-                                <h3 className="text-lg md:text-xl font-bold tracking-tight text-white leading-tight drop-shadow-md">
+                                <h3 className="text-lg md:text-xl font-bold tracking-tight text-white leading-tight drop-shadow-md" style={{ fontSize: currentSlide.titleSize ? `${Math.max(14, currentSlide.titleSize / 2.5)}px` : undefined }}>
                                   {currentSlide.title || "Sound, unbound."}
                                 </h3>
-                                <p className="text-[10px] text-zinc-200 font-light max-w-xs leading-relaxed line-clamp-2 drop-shadow-sm">
+                                <p className="text-[10px] text-zinc-200 font-light max-w-xs leading-relaxed line-clamp-2 drop-shadow-sm" style={{ fontSize: currentSlide.subtitleSize ? `${Math.max(9, currentSlide.subtitleSize / 1.8)}px` : undefined }}>
                                   {currentSlide.subtitle || "Experience music in its purest form..."}
                                 </p>
                                 <div className="pt-2">

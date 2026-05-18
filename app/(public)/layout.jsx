@@ -80,21 +80,8 @@ export default function PublicLayout({ children }) {
           <div className="flex items-center gap-2">
             
             <Link href="/" className="block hover:opacity-80 transition-opacity z-50" aria-label="Cinema Focus Home">
-          {/* Mobile Logo (Always Dark/Standard) */}
-          <div className="h-10 w-48 relative md:hidden">
-            <Image 
-              src={logo} 
-              alt="Cinema Focus Logo" 
-              fill
-              priority
-              className="object-contain object-left"
-              sizes="240px"
-            />
-          </div>
-          
-          {/* Desktop Logo (Dynamic) */}
           <div className={clsx(
-              "hidden md:block relative transition-all duration-500",
+              "block relative transition-all duration-500",
               useLightContent ? "h-14 md:h-16 w-64" : "h-10 md:h-12 w-48"
             )}>
             <Image 
@@ -138,7 +125,7 @@ export default function PublicLayout({ children }) {
           </div>
           
           <div className="text-[10px] text-zinc-700">
-            © {new Date().getFullYear()} Cinema Focus . All rights reserved.
+            © {new Date().getFullYear()} Cinema Focus. All rights reserved.
             {isLocal && (
               <div className="mt-3">
                 <Link href="/admin" className="text-zinc-600 hover:text-white transition-colors underline font-medium">
