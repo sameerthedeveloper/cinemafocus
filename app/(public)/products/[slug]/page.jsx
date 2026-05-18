@@ -29,9 +29,13 @@ export async function generateMetadata({ params }) {
     title,
     description,
     keywords,
+    alternates: {
+      canonical: `/products/${slug}`,
+    },
     openGraph: {
       title: `${title} - Cinema Focus`,
       description,
+      url: `https://cinemafocus.in/products/${slug}`,
       images: product.images?.[0] ? [{ url: product.images[0] }] : [],
     },
     twitter: {
@@ -55,6 +59,38 @@ export default async function ProductDetailPage({ params }) {
     );
   }
 
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://cinemafocus.in/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Products",
+        "item": "https://cinemafocus.in/products"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": product.brand || product.category || "Brand",
+        "item": `https://cinemafocus.in/brand/${product.category || 'all'}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": product.name,
+        "item": `https://cinemafocus.in/products/${product.slug}`
+      }
+    ]
+  };
+
   // Dynamic Product JSON-LD structured data
   const productSchema = {
     "@context": "https://schema.org",
@@ -62,22 +98,28 @@ export default async function ProductDetailPage({ params }) {
     "name": product.name,
     "image": product.images || [],
     "description": product.shortDescription || product.longDescription || product.name,
+    "sku": product.id || product.slug,
     "brand": {
       "@type": "Brand",
-      "name": product.brand
+      "name": product.brand || "Cinema Focus"
     },
     "offers": {
       "@type": "Offer",
-      "url": `https://www.cinemafocus.in/products/${product.slug}`,
-      "priceCurrency": "OMR",
+      "url": `https://cinemafocus.in/products/${product.slug}`,
+      "priceCurrency": "INR",
       "price": product.price || 0,
       "availability": "https://schema.org/InStock",
-      "itemCondition": "https://schema.org/NewCondition"
+      "itemCondition": "https://schema.org/NewCondition",
+      "seller": {
+        "@type": "Organization",
+        "name": "Cinema Focus"
+      }
     }
   };
 
   return (
     <>
+      <JsonLd data={breadcrumbSchema} />
       <JsonLd data={productSchema} />
       <ProductDetailClient product={product} />
     </>

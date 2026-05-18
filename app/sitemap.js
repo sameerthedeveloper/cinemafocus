@@ -1,7 +1,7 @@
 import { getProducts, getCategories } from '@/lib/cms';
 
 export default async function sitemap() {
-  const baseUrl = 'https://www.cinemafocus.in';
+  const baseUrl = 'https://cinemafocus.in';
 
   // 1. Static Routes
   const staticRoutes = [

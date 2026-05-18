@@ -1,6 +1,6 @@
 export default function robots() {
   const isProd = process.env.NEXT_PUBLIC_ENV === 'production' || process.env.NODE_ENV === 'production';
-  const siteUrl = 'https://www.cinemafocus.in';
+  const siteUrl = 'https://cinemafocus.in';
 
   if (!isProd) {
     // Block staging / vercel branch previews from double indexing
