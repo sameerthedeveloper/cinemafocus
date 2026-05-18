@@ -138,7 +138,7 @@ export default function PublicLayout({ children }) {
           </div>
           
           <div className="text-[10px] text-zinc-700">
-            © {new Date().getFullYear()} Cinema Focus Oman. All rights reserved.
+            © {new Date().getFullYear()} Cinema Focus . All rights reserved.
             {isLocal && (
               <div className="mt-3">
                 <Link href="/admin" className="text-zinc-600 hover:text-white transition-colors underline font-medium">
