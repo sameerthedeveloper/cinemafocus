@@ -195,7 +195,7 @@ const Hero = ({
 
         // Render Split Layout
         if (slide.layout === 'split-left' || slide.layout === 'split-right') {
-          const isRightSplit = slide.layout === 'split-right';
+          const isRightSplit = slide.layout === 'split-right' ? idx % 2 === 0 : idx % 2 === 1;
           return (
             <div 
               key={`slide-${idx}`}
@@ -241,7 +241,10 @@ const Hero = ({
                      alt={slide.title || "Hero Image"} 
                      fill
                      priority={idx === 0}
-                     className="object-cover transition-all duration-500"
+                     className={clsx(
+                       "object-cover transition-all ease-out",
+                       isActive ? "scale-105 duration-[8000ms]" : "scale-100 duration-500"
+                     )}
                      style={{ 
                        objectPosition: slide.imagePosition || 'center',
                        filter: `brightness(${slide.imageBrightness !== undefined ? slide.imageBrightness : 100}%) blur(${slide.imageBlur !== undefined ? slide.imageBlur : 0}px)`,
@@ -322,7 +325,10 @@ const Hero = ({
                   alt={slide.title || "Cinema Focus Hero"} 
                   fill
                   priority={idx === 0}
-                  className="object-cover transition-all duration-500"
+                  className={clsx(
+                    "object-cover transition-all ease-out",
+                    isActive ? "scale-105 duration-[8000ms]" : "scale-100 duration-500"
+                  )}
                   style={{ 
                     objectPosition: slide.imagePosition || 'center',
                     filter: `brightness(${slide.imageBrightness !== undefined ? slide.imageBrightness : 100}%) blur(${slide.imageBlur !== undefined ? slide.imageBlur : 0}px)`,
