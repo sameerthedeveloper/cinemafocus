@@ -7,6 +7,11 @@ import ScrollToTop from "@/components/ScrollToTop";
 import { createClient } from '@/lib/supabase/client';
 import { Loader2, Hammer, Mail, PhoneCall } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import clsx from 'clsx';
+
+const logo = '/images/logo.png';
+const logoLight = '/images/logo-light.webp';
 
 export default function PublicLayout({ children }) {
   const [maintenance, setMaintenance] = useState(null);
@@ -63,6 +68,7 @@ export default function PublicLayout({ children }) {
   const shouldShowMaintenance = maintenance?.enabled && (!isLocal || maintenance?.activeInDev);
 
   if (shouldShowMaintenance) {
+    const useLightContent = true;
     return (
       <div className="bg-[#0a0a0a] text-white flex flex-col justify-between min-h-screen px-6 py-12 relative overflow-hidden select-none">
         
@@ -72,17 +78,39 @@ export default function PublicLayout({ children }) {
         {/* Top brand header */}
         <div className="max-w-4xl mx-auto w-full z-10 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center p-1 shadow-sm">
-              <svg className="w-5 h-5 text-black" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
-                <path d="M12 7v10M7 12h10" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
-            <span className="font-bold text-sm tracking-widest uppercase">Cinema Focus</span>
+            
+            <Link href="/" className="block hover:opacity-80 transition-opacity z-50" aria-label="Cinema Focus Home">
+          {/* Mobile Logo (Always Dark/Standard) */}
+          <div className="h-10 w-48 relative md:hidden">
+            <Image 
+              src={logo} 
+              alt="Cinema Focus Logo" 
+              fill
+              priority
+              className="object-contain object-left"
+              sizes="240px"
+            />
+          </div>
+          
+          {/* Desktop Logo (Dynamic) */}
+          <div className={clsx(
+              "hidden md:block relative transition-all duration-500",
+              useLightContent ? "h-14 md:h-16 w-64" : "h-10 md:h-12 w-48"
+            )}>
+            <Image 
+              src={useLightContent ? logoLight : logo} 
+              alt="Cinema Focus Logo" 
+              fill
+              priority
+              className="object-contain object-left"
+              sizes="300px"
+            />
+          </div>
+        </Link>
           </div>
           <span className="text-[10px] md:text-xs text-zinc-400 border border-zinc-800 rounded-full px-4 py-1.5 bg-zinc-900/40 backdrop-blur-md flex items-center gap-1.5">
             <Hammer size={12} className="text-amber-500 animate-bounce" />
-            Studio Upgrade
+            Website Upgrade
           </span>
         </div>
 
