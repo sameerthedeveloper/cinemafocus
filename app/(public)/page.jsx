@@ -22,21 +22,21 @@ export default async function Home() {
     "@type": "LocalBusiness",
     "name": "Cinema Focus",
     "image": "https://www.cinemafocus.in/logo.svg",
-    "description": "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Oman.",
+    "description": "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Chennai, India.",
     "@id": "https://www.cinemafocus.in/#localbusiness",
     "url": "https://www.cinemafocus.in",
-    "telephone": "+96824498303",
+    "telephone": "+919841035821",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Al Khuwair",
-      "addressLocality": "Muscat",
-      "postalCode": "113",
-      "addressCountry": "OM"
+      "streetAddress": "New Decor Towers, 71 Dr. Radhakrishnan Salai, Mylapore",
+      "addressLocality": "Chennai",
+      "postalCode": "600004",
+      "addressCountry": "IN"
     },
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": 23.5952,
-      "longitude": 58.4112
+      "latitude": 13.0401,
+      "longitude": 80.2662
     },
     "openingHoursSpecification": {
       "@type": "OpeningHoursSpecification",

@@ -8,8 +8,8 @@ const speakersImg = '/images/speakers.webp';
 
 export const metadata = {
   title: "About",
-  description: "We are more than just a retailer — we are a destination for those who seek to experience music and film exactly as the artist intended. Visit our showroom in Oman.",
-  keywords: "about Cinema Focus, premium audio showroom, hi-fi retailer Oman, home cinema specialist",
+  description: "We are more than just a retailer — we are a destination for those who seek to experience music and film exactly as the artist intended. Visit our showroom in Chennai, India.",
+  keywords: "about Cinema Focus, premium audio showroom, hi-fi retailer Chennai, home cinema specialist",
 };
 
 export default function AboutPage() {

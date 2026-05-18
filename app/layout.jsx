@@ -19,31 +19,31 @@ export const metadata = {
     default: "Cinema Focus - Premium Audio & Home Cinema Systems",
     template: "%s - Cinema Focus"
   },
-  description: "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Oman. Explore our curated collection of speakers, subwoofers, amplifiers, and turntables.",
-  keywords: "home cinema, hi-fi audio, speakers, subwoofers, amplifiers, turntables, premium audio, Oman, Cinema Focus",
+  description: "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Chennai, India. Explore our curated collection of speakers, subwoofers, amplifiers, and turntables.",
+  keywords: "home cinema, hi-fi audio, speakers, subwoofers, amplifiers, turntables, premium audio, Chennai, India, Cinema Focus",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Cinema Focus - Premium Audio & Home Cinema Systems",
-    description: "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Oman.",
-    url: "https://www.cinemafocus.in",
+    title: "Cinema Focus | Ultimate Audio & Visual Experiences",
+    description: "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Chennai, India.",
+    url: "https://cinemafocus.in",
     siteName: "Cinema Focus",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "/images/default-og.jpg",
+        url: "/images/og-image.jpg", // Replace with your actual OG image path
         width: 1200,
         height: 630,
-        alt: "Cinema Focus - Premium Audio & Home Cinema Systems",
+        alt: "Cinema Focus - Premium Home Cinema & Audio",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cinema Focus - Premium Audio & Home Cinema Systems",
-    description: "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Oman.",
+    title: "Cinema Focus | Ultimate Audio & Visual Experiences",
+    description: "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Chennai, India.",
     site: "@cinemafocus",
     images: ["/images/default-og.jpg"],
   },
@@ -55,6 +55,9 @@ export const metadata = {
   icons: {
     icon: "/favi.png",
     apple: "/favi.png",
+  },
+  verification: {
+    google: "YOLdFRVvcOEOjjo66oERr9NlrwHPjUofprZheVZkajU",
   },
   other: {
     "dns-prefetch": "https://xdvzchxtbwfdmlxhnzpo.supabase.co",

@@ -27,9 +27,9 @@ const DEFAULT_SETTINGS = [
     id: 'seo',
     data: {
       siteTitle: 'Cinema Focus',
-      titleSuffix: '| Premium Audio',
-      defaultDescription: 'Experience the ultimate in high-fidelity audio.',
-      defaultKeywords: 'audio, hifi, speakers'
+      titleSuffix: '| Ultimate Audio & Visual Experiences',
+      defaultDescription: 'Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Chennai, India. Explore our curated collection of high-end speakers, subwoofers, amplifiers, and turntables.',
+      defaultKeywords: 'home cinema, hi-fi audio, premium audio showroom, Chennai, India, ATC, Aurender, home theater'
     }
   },
   {
@@ -45,10 +45,10 @@ const DEFAULT_SETTINGS = [
   {
     id: 'footer',
     data: {
-      address: 'Muscat, Oman',
-      phones: ['+968 1234 5678'],
-      email: 'info@cinemafocus.om',
-      workingHours: 'Sun - Thu: 9am - 6pm'
+      address: 'New Decor Towers, No. 71, Dr. Radhakrishnan Salai, Mylapore, Chennai 600004, India',
+      phones: ['+91 98410 35821', '044-28117722'],
+      email: 'info@cinemafocus.in',
+      workingHours: 'Mon - Sat: 11:00 AM - 8:00 PM'
     }
   },
   {
