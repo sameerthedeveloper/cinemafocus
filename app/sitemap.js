@@ -1,4 +1,4 @@
-import { getProducts, getCategories } from '@/lib/cms';
+import { getProducts, getCategories, getPressReleases } from '@/lib/cms';
 
 export default async function sitemap() {
   const baseUrl = 'https://cinemafocus.in';
@@ -50,5 +50,21 @@ export default async function sitemap() {
     console.error('Error compiling sitemap categories:', error);
   }
 
-  return [...staticRoutes, ...productRoutes, ...categoryRoutes];
+  // 4. Fetch Dynamic Press Releases
+  let pressRoutes = [];
+  try {
+    const press = await getPressReleases();
+    if (press) {
+      pressRoutes = press.map((pr) => ({
+        url: `${baseUrl}/press/${pr.id}`,
+        lastModified: new Date(pr.updatedAt || pr.created_at || new Date()),
+        changeFrequency: 'weekly',
+        priority: 0.5,
+      }));
+    }
+  } catch (error) {
+    console.error('Error compiling sitemap press releases:', error);
+  }
+
+  return [...staticRoutes, ...productRoutes, ...categoryRoutes, ...pressRoutes];
 }
