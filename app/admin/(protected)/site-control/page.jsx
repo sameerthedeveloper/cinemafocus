@@ -2,12 +2,143 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Loader2, Save, Upload, Database, LayoutTemplate, Info, Phone, Shield, Globe, Plus, Trash2, AlignLeft, AlignCenter, AlignRight, Sparkles, Eye, Hammer, AlertTriangle } from 'lucide-react';
+import { 
+  Loader2, 
+  Save, 
+  Upload, 
+  Database, 
+  LayoutTemplate, 
+  Info, 
+  Phone, 
+  Shield, 
+  Globe, 
+  Plus, 
+  Trash2, 
+  AlignLeft, 
+  AlignCenter, 
+  AlignRight, 
+  Sparkles, 
+  Eye, 
+  Hammer, 
+  AlertTriangle 
+} from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import BackupTools from '@/components/admin/BackupTools';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import clsx from 'clsx';
 import { seedDatabase } from '@/lib/seeder';
 import { revalidateData } from '@/lib/actions';
+
+// Extract all valid icon names from the lucide-react package
+const ALL_ICONS = Object.keys(LucideIcons)
+  .filter(name => {
+    // Only allow components starting with an uppercase letter and excluding helpers/internal types
+    return /^[A-Z]/.test(name) && 
+           name !== 'createLucideIcon' && 
+           name !== 'LucideIcon' && 
+           name !== 'Icon' && 
+           name !== 'HelpCircle' &&
+           (typeof LucideIcons[name] === 'function' || typeof LucideIcons[name] === 'object');
+  })
+  .sort();
+
+// Let's create a curated/popular list of icons to show when search is empty
+const POPULAR_ICONS = [
+  'ShieldCheck', 'Award', 'Trophy', 'Crown', 'Headphones', 'Clock', 'Truck', 
+  'Package', 'RotateCcw', 'Heart', 'Star', 'ThumbsUp', 'Sparkles', 'Gem', 
+  'Globe', 'Activity', 'Zap', 'Shield', 'Mail', 'Phone', 'MapPin', 'Search', 
+  'Settings', 'Sliders', 'HelpCircle'
+];
+
+function IconSelector({ value, onChange }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  
+  // If search is empty, show POPULAR_ICONS. Otherwise, filter all 1,400+ icon names.
+  const filteredIconNames = search === ''
+    ? POPULAR_ICONS
+    : ALL_ICONS.filter(name => name.toLowerCase().includes(search.toLowerCase()));
+
+  // Limit rendering to first 50 results for stellar UX performance
+  const displayedIconNames = filteredIconNames.slice(0, 50);
+
+  const SelectedIcon = LucideIcons[value] || LucideIcons.HelpCircle;
+  
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-2.5 bg-background rounded-lg border border-border text-sm outline-none focus:border-primary text-left cursor-pointer hover:bg-secondary/10 transition-all shadow-sm"
+      >
+        <div className="flex items-center gap-2.5">
+          <SelectedIcon size={16} className="text-primary" />
+          <span className="font-medium text-foreground">{value || 'Select Icon'}</span>
+        </div>
+        <span className="text-muted-foreground text-[10px] uppercase font-semibold">change ▾</span>
+      </button>
+      
+      {isOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => {
+              setIsOpen(false);
+              setSearch('');
+            }}
+          />
+          <div className="absolute left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-xl z-50 p-2 space-y-2 max-h-64 flex flex-col">
+            <input
+              type="text"
+              placeholder="Search all 1,400+ icons..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full p-2 bg-background rounded-lg border border-border text-xs outline-none focus:border-primary text-foreground"
+              autoFocus
+            />
+            <div className="overflow-y-auto flex-grow space-y-0.5 pr-1">
+              {displayedIconNames.map(name => {
+                const IconComp = LucideIcons[name] || LucideIcons.HelpCircle;
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => {
+                      onChange(name);
+                      setIsOpen(false);
+                      setSearch('');
+                    }}
+                    className={`w-full flex items-center gap-3 p-2 rounded-lg text-xs hover:bg-primary/10 transition-colors text-left ${
+                      value === name ? 'bg-primary/5 text-primary' : 'text-foreground'
+                    }`}
+                  >
+                    <IconComp size={16} className={value === name ? 'text-primary' : 'text-muted-foreground'} />
+                    <div className="flex-grow">
+                      <div className="font-medium">{name}</div>
+                      {search === '' && (
+                        <div className="text-[9px] text-muted-foreground font-light">Popular Selection</div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+              {filteredIconNames.length === 0 && (
+                <div className="text-[11px] text-muted-foreground text-center py-4 italic">
+                  No icons found for "{search}"
+                </div>
+              )}
+              {filteredIconNames.length > 50 && (
+                <div className="text-[9px] text-muted-foreground text-center py-1.5 border-t border-border/40 font-light mt-1">
+                  Showing top 50 of {filteredIconNames.length} results. Refine search to see more.
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function AdminSiteControlPage() {
   const [activeTab, setActiveTab] = useState('hero');
@@ -1280,7 +1411,7 @@ export default function AdminSiteControlPage() {
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-1">
                           <label className="text-xs font-medium">Icon Name</label>
-                          <input value={badge.icon} onChange={e => handleTrustChange(idx, 'icon', e.target.value)} className="w-full p-2 bg-background rounded border border-border text-sm outline-none focus:border-primary" />
+                          <IconSelector value={badge.icon} onChange={val => handleTrustChange(idx, 'icon', val)} />
                         </div>
                         <div className="space-y-1">
                           <label className="text-xs font-medium">Title</label>

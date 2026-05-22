@@ -11,7 +11,7 @@ const HomeGallery = dynamic(() => import('./HomeGallery'), {
   ssr: true,
   loading: () => <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-[400px] bg-white/5 animate-pulse rounded-2xl" />
 });
-import { Globe, ShieldCheck, Headphones, Award } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { 
   getCategories, 
   getFeaturedProducts, 
@@ -20,15 +20,8 @@ import {
   getPressReleases 
 } from '@/lib/cms';
 
-const iconMap = {
-  Globe,
-  ShieldCheck,
-  Headphones,
-  Award
-};
-
 const CustomIcon = ({ name, ...props }) => {
-  const LucideIcon = iconMap[name];
+  const LucideIcon = LucideIcons[name];
   return LucideIcon ? <LucideIcon {...props} /> : null;
 };
 

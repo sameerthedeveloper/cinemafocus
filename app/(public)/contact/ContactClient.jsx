@@ -10,6 +10,8 @@ export default function ContactClient({ initialInfo }) {
   const [contactInfo] = useState(initialInfo);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapHovered, setMapHovered] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -114,8 +116,42 @@ export default function ContactClient({ initialInfo }) {
               </div>
             </div>
 
-            <div className="aspect-video bg-secondary/10 rounded-xl w-full flex items-center justify-center border border-border">
-               <span className="text-muted-foreground">Google Map Placeholder</span>
+            <div className="relative w-full h-[350px] rounded-2xl overflow-hidden border border-border bg-secondary/5 group shadow-lg">
+              {!mapLoaded && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-card animate-pulse">
+                  <Loader2 className="animate-spin text-primary mb-2" size={32} />
+                  <span className="text-muted-foreground text-sm font-medium">Loading Interactive Map...</span>
+                </div>
+              )}
+              <iframe
+                title="Cinema Focus Showroom Location"
+                src="https://maps.google.com/maps?q=Cinema%20Focus%2C%20Dr.%20Radhakrishnan%20Salai%2C%20Mylapore%2C%20Chennai%2C%20Tamil%20Nadu%20600004&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                className={`w-full h-full border-0 transition-all duration-700 ${
+                  mapLoaded ? 'opacity-85' : 'opacity-0'
+                }`}
+                style={{
+                  filter: mapHovered 
+                    ? 'none' 
+                    : 'grayscale(0.8) invert(0.92) contrast(1.1) brightness(0.85) saturate(0.5)',
+                }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                onLoad={() => setMapLoaded(true)}
+                onMouseEnter={() => setMapHovered(true)}
+                onMouseLeave={() => setMapHovered(false)}
+              ></iframe>
+              <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none sm:pointer-events-auto">
+                <a 
+                  href="https://maps.google.com/?q=Cinema+Focus+Mylapore+Chennai" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-background/90 backdrop-blur-md border border-border text-foreground hover:text-primary rounded-xl text-sm font-medium shadow-md transition-all duration-300 transform hover:scale-105"
+                >
+                  <MapPin size={16} className="text-primary" />
+                  <span>Get Directions</span>
+                </a>
+              </div>
             </div>
           </div>
 
