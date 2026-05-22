@@ -19,7 +19,18 @@ export default function AdminSiteControlPage() {
   // States
   const [hero, setHero] = useState({ slides: [] });
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-  const [philosophy, setPhilosophy] = useState({ title: '', text: '' });
+  const [philosophy, setPhilosophy] = useState({
+    title: '',
+    intro: '',
+    philosophyTitle: '',
+    philosophyText1: '',
+    philosophyText2: '',
+    philosophyImage: '',
+    experienceTitle: '',
+    experienceText: '',
+    experienceImage: '',
+    experienceBullets: []
+  });
   const [footer, setFooter] = useState({ address: '', phones: [], email: '', facebook: '', instagram: '', twitter: '', workingHours: '' });
   const [trustBadges, setTrustBadges] = useState([]);
   const [maintenance, setMaintenance] = useState({
@@ -97,7 +108,25 @@ export default function AdminSiteControlPage() {
           }
           setActiveSlideIndex(0);
         }
-        else if (activeTab === 'philosophy') setPhilosophy(prev => ({...prev, ...val}));
+        else if (activeTab === 'philosophy') {
+          setPhilosophy(prev => ({
+            title: val.title || 'About Cinema Focus',
+            intro: val.intro || 'We are more than just a retailer — we are a destination for those who seek to experience music and film exactly as the artist intended. Visit our showroom in Chennai, India.',
+            philosophyTitle: val.philosophyTitle || 'Our Philosophy',
+            philosophyText1: val.philosophyText1 || 'At Cinema Focus, we believe that high-fidelity sound is a gateway to emotion. Whether it\'s the subtle breath of a vocalist or the thunderous roar of a cinematic explosion, every detail matters. Our curated selection represents the pinnacle of audio engineering.',
+            philosophyText2: val.philosophyText2 || 'Founded in 2010, we have spent over a decade perfecting the art of system matching—pairing speakers, amplifiers, and sources that synergize to create magic.',
+            philosophyImage: val.philosophyImage || '/images/hero-light.webp',
+            experienceTitle: val.experienceTitle || 'The Experience',
+            experienceText: val.experienceText || 'Our showroom is designed as a sanctuary for the senses. We invite you to bring your favorite music and get lost in the sound. Our expert consultants are here not to sell, but to guide you on your journey to sonic nirvana.',
+            experienceImage: val.experienceImage || '/images/speakers.webp',
+            experienceBullets: val.experienceBullets || [
+              'Private Listening Rooms',
+              'Expert Calibration Services',
+              'Home Installation & Support'
+            ],
+            ...val
+          }));
+        }
         else if (activeTab === 'footer') setFooter(prev => ({...prev, ...val}));
         else if (activeTab === 'trust') setTrustBadges(val.items || []);
         else if (activeTab === 'maintenance') setMaintenance(prev => ({...prev, ...val}));
@@ -263,6 +292,62 @@ export default function AdminSiteControlPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAboutImageUpload = async (e, field) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setLoading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `about/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('images')
+        .getPublicUrl(fileName);
+
+      setPhilosophy(prev => ({
+        ...prev,
+        [field]: publicUrl
+      }));
+      setMessage("Image uploaded! Don't forget to save changes.");
+      
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setMessage("Failed to upload image.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulletChange = (index, value) => {
+    setPhilosophy(prev => {
+      const bullets = [...(prev.experienceBullets || [])];
+      bullets[index] = value;
+      return { ...prev, experienceBullets: bullets };
+    });
+  };
+
+  const addBullet = () => {
+    setPhilosophy(prev => {
+      const bullets = [...(prev.experienceBullets || [])];
+      bullets.push('');
+      return { ...prev, experienceBullets: bullets };
+    });
+  };
+
+  const removeBullet = (index) => {
+    setPhilosophy(prev => {
+      const bullets = (prev.experienceBullets || []).filter((_, idx) => idx !== index);
+      return { ...prev, experienceBullets: bullets };
+    });
   };
 
   const saveSection = (id, data) => handleSave(id, data);
@@ -949,24 +1034,232 @@ export default function AdminSiteControlPage() {
             </div>
           );
         })()}
-        
-        {/* PHILOSOPHY TAB */}
+         {/* PHILOSOPHY TAB */}
         {activeTab === 'philosophy' && (
-          <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
-             <p className="text-sm text-muted-foreground mb-4">Edit text for specific site sections.</p>
-             
-             <div className="space-y-2">
-               <label className="text-sm font-medium">Section Title</label>
-               <input value={philosophy.title} onChange={e => setPhilosophy({...philosophy, title: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary" placeholder="Our Mission" />
-             </div>
-             <div className="space-y-2">
-               <label className="text-sm font-medium">Content Text</label>
-               <textarea value={philosophy.text} onChange={e => setPhilosophy({...philosophy, text: e.target.value})} rows={4} className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary" placeholder="Text content..." />
-             </div>
+          <div className="space-y-6">
+            
+            {/* Header & Intro Settings Card */}
+            <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
+              <div>
+                <h3 className="font-semibold text-lg flex items-center gap-2 text-foreground">
+                  <Globe className="text-primary" size={18} />
+                  Page Header & Intro
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Customize the main hero title and description at the top of the About page.</p>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Header Title</label>
+                  <input 
+                    value={philosophy.title || ''} 
+                    onChange={e => setPhilosophy({...philosophy, title: e.target.value})} 
+                    className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all" 
+                    placeholder="About Cinema Focus" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Intro Paragraph</label>
+                  <textarea 
+                    value={philosophy.intro || ''} 
+                    onChange={e => setPhilosophy({...philosophy, intro: e.target.value})} 
+                    rows={3} 
+                    className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all resize-none" 
+                    placeholder="Intro paragraph text..." 
+                  />
+                </div>
+              </div>
+            </div>
 
-             <button onClick={() => saveSection("philosophy", philosophy)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50">
-               {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Section
-             </button>
+            {/* Philosophy Section Card */}
+            <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
+              <div>
+                <h3 className="font-semibold text-lg flex items-center gap-2 text-foreground">
+                  <Info className="text-primary" size={18} />
+                  Philosophy Section
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Configure the first layout block with a title, two-paragraph text, and a focal image.</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Section Title</label>
+                  <input 
+                    value={philosophy.philosophyTitle || ''} 
+                    onChange={e => setPhilosophy({...philosophy, philosophyTitle: e.target.value})} 
+                    className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all" 
+                    placeholder="Our Philosophy" 
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Paragraph 1</label>
+                    <textarea 
+                      value={philosophy.philosophyText1 || ''} 
+                      onChange={e => setPhilosophy({...philosophy, philosophyText1: e.target.value})} 
+                      rows={5} 
+                      className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all resize-none" 
+                      placeholder="Primary philosophy body text..." 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Paragraph 2</label>
+                    <textarea 
+                      value={philosophy.philosophyText2 || ''} 
+                      onChange={e => setPhilosophy({...philosophy, philosophyText2: e.target.value})} 
+                      rows={5} 
+                      className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all resize-none" 
+                      placeholder="Secondary/supporting philosophy text..." 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-border/60">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Philosophy Section Image</label>
+                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                    <div className="w-32 h-20 bg-secondary rounded-lg overflow-hidden border border-border flex-shrink-0 relative shadow-sm">
+                      {philosophy.philosophyImage ? (
+                        <img src={philosophy.philosophyImage} className="w-full h-full object-cover" alt="Philosophy Preview" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] text-muted-foreground">No Image</div>
+                      )}
+                    </div>
+                    <div className="space-y-2 flex-grow w-full">
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          value={philosophy.philosophyImage || ''} 
+                          onChange={e => setPhilosophy({...philosophy, philosophyImage: e.target.value})} 
+                          className="flex-grow p-2 bg-secondary/20 border border-border text-xs rounded outline-none focus:border-primary text-sm" 
+                          placeholder="/images/hero-light.webp" 
+                        />
+                        <label className="cursor-pointer bg-secondary px-3 py-2 rounded-lg text-xs font-medium hover:bg-secondary/70 flex items-center gap-1.5 border border-border transition-colors flex-shrink-0 select-none">
+                          <Upload size={14} /> Upload
+                          <input type="file" className="hidden" accept="image/*" onChange={e => handleAboutImageUpload(e, 'philosophyImage')} />
+                        </label>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">Provide a public URL path or upload a new hi-res landscape asset.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Experience Section Card */}
+            <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
+              <div>
+                <h3 className="font-semibold text-lg flex items-center gap-2 text-foreground">
+                  <Sparkles className="text-primary" size={18} />
+                  Experience & Services
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Customize the second layout block details, focal image, and checkmark features list.</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Section Title</label>
+                  <input 
+                    value={philosophy.experienceTitle || ''} 
+                    onChange={e => setPhilosophy({...philosophy, experienceTitle: e.target.value})} 
+                    className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all" 
+                    placeholder="The Experience" 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Experience Paragraph</label>
+                  <textarea 
+                    value={philosophy.experienceText || ''} 
+                    onChange={e => setPhilosophy({...philosophy, experienceText: e.target.value})} 
+                    rows={3} 
+                    className="w-full p-3 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm transition-all resize-none" 
+                    placeholder="Describe the showroom listening experience..." 
+                  />
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-border/60">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Experience Section Image</label>
+                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                    <div className="w-32 h-20 bg-secondary rounded-lg overflow-hidden border border-border flex-shrink-0 relative shadow-sm">
+                      {philosophy.experienceImage ? (
+                        <img src={philosophy.experienceImage} className="w-full h-full object-cover" alt="Experience Preview" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] text-muted-foreground">No Image</div>
+                      )}
+                    </div>
+                    <div className="space-y-2 flex-grow w-full">
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          value={philosophy.experienceImage || ''} 
+                          onChange={e => setPhilosophy({...philosophy, experienceImage: e.target.value})} 
+                          className="flex-grow p-2 bg-secondary/20 border border-border text-xs rounded outline-none focus:border-primary text-sm" 
+                          placeholder="/images/speakers.webp" 
+                        />
+                        <label className="cursor-pointer bg-secondary px-3 py-2 rounded-lg text-xs font-medium hover:bg-secondary/70 flex items-center gap-1.5 border border-border transition-colors flex-shrink-0 select-none">
+                          <Upload size={14} /> Upload
+                          <input type="file" className="hidden" accept="image/*" onChange={e => handleAboutImageUpload(e, 'experienceImage')} />
+                        </label>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">Provide a public URL path or upload a new hi-res landscape asset.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bullet Points checklist manager */}
+                <div className="space-y-3 pt-4 border-t border-border/60">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Showroom Checkmark Features</label>
+                    <button 
+                      type="button" 
+                      onClick={addBullet} 
+                      className="flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-md hover:bg-primary/25 transition-all cursor-pointer select-none"
+                    >
+                      <Plus size={12} /> Add Feature Bullet
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {(philosophy.experienceBullets || []).map((bullet, index) => (
+                      <div key={`bullet-${index}`} className="flex gap-2 items-center">
+                        <span className="text-emerald-500 font-bold text-sm select-none">✓</span>
+                        <input 
+                          value={bullet || ''} 
+                          onChange={e => handleBulletChange(index, e.target.value)} 
+                          className="flex-grow p-2 bg-secondary/25 border border-border text-sm rounded-lg outline-none focus:border-primary" 
+                          placeholder={`Feature ${index + 1} description`} 
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => removeBullet(index)}
+                          className="text-destructive hover:bg-destructive/10 p-2 rounded-lg transition-colors cursor-pointer border border-border/40 select-none"
+                          title="Delete bullet"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                    {(philosophy.experienceBullets || []).length === 0 && (
+                      <p className="text-xs text-muted-foreground italic text-center py-2 bg-secondary/10 rounded-lg">No bullet items defined yet. Click Add to insert one.</p>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Global Actions */}
+            <div className="flex items-center gap-4 pt-2">
+              <button 
+                onClick={() => saveSection("philosophy", philosophy)} 
+                disabled={loading} 
+                className="px-8 py-3 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50 shadow-md cursor-pointer text-sm select-none"
+              >
+                {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save About Section
+              </button>
+            </div>
+
           </div>
         )}
         
