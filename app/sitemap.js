@@ -1,8 +1,28 @@
 import { getProducts, getCategories, getPressReleases } from '@/lib/cms';
 
-export default async function sitemap() {
-  const baseUrl = 'https://cinemafocus.in';
+const BASE_URL = 'https://cinemafocus.in';
 
+/**
+ * Reusable helper to safely fetch database records and map them to standard sitemap objects.
+ */
+async function fetchSitemapEntries(fetcher, pathPrefix, priority, key = 'slug') {
+  try {
+    const items = await fetcher();
+    if (!items || !Array.isArray(items)) return [];
+
+    return items.map((item) => ({
+      url: `${BASE_URL}${pathPrefix}/${item[key]}`,
+      lastModified: new Date(item.updatedAt || item.created_at || new Date()),
+      changeFrequency: 'weekly',
+      priority,
+    }));
+  } catch (error) {
+    console.error(`Error compiling sitemap entries for ${pathPrefix}:`, error);
+    return [];
+  }
+}
+
+export default async function sitemap() {
   // 1. Static Routes
   const staticRoutes = [
     '',
@@ -12,59 +32,18 @@ export default async function sitemap() {
     '/press',
     '/products'
   ].map((route) => ({
-    url: `${baseUrl}${route}`,
+    url: `${BASE_URL}${route}`,
     lastModified: new Date(),
     changeFrequency: 'daily',
     priority: route === '' ? 1.0 : 0.8,
   }));
 
-  // 2. Fetch Dynamic Products
-  let productRoutes = [];
-  try {
-    const products = await getProducts();
-    if (products) {
-      productRoutes = products.map((prod) => ({
-        url: `${baseUrl}/products/${prod.slug}`,
-        lastModified: new Date(prod.updatedAt || prod.created_at || new Date()),
-        changeFrequency: 'weekly',
-        priority: 0.7,
-      }));
-    }
-  } catch (error) {
-    console.error('Error compiling sitemap products:', error);
-  }
-
-  // 3. Fetch Dynamic Categories
-  let categoryRoutes = [];
-  try {
-    const categories = await getCategories();
-    if (categories) {
-      categoryRoutes = categories.map((cat) => ({
-        url: `${baseUrl}/brand/${cat.slug}`,
-        lastModified: new Date(cat.updatedAt || cat.created_at || new Date()),
-        changeFrequency: 'weekly',
-        priority: 0.6,
-      }));
-    }
-  } catch (error) {
-    console.error('Error compiling sitemap categories:', error);
-  }
-
-  // 4. Fetch Dynamic Press Releases
-  let pressRoutes = [];
-  try {
-    const press = await getPressReleases();
-    if (press) {
-      pressRoutes = press.map((pr) => ({
-        url: `${baseUrl}/press/${pr.id}`,
-        lastModified: new Date(pr.updatedAt || pr.created_at || new Date()),
-        changeFrequency: 'weekly',
-        priority: 0.5,
-      }));
-    }
-  } catch (error) {
-    console.error('Error compiling sitemap press releases:', error);
-  }
+  // 2. Fetch Dynamic Routes Concurrently to Optimize Server Response Time
+  const [productRoutes, categoryRoutes, pressRoutes] = await Promise.all([
+    fetchSitemapEntries(getProducts, '/products', 0.7),
+    fetchSitemapEntries(getCategories, '/brand', 0.6),
+    fetchSitemapEntries(getPressReleases, '/press', 0.5, 'id')
+  ]);
 
   return [...staticRoutes, ...productRoutes, ...categoryRoutes, ...pressRoutes];
 }
