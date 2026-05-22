@@ -52,6 +52,23 @@ export default async function Home() {
     }
   };
 
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Cinema Focus",
+    "alternateName": ["CinemaFocus", "Cinema Focus India"],
+    "url": "https://cinemafocus.in",
+    "logo": "https://cinemafocus.in/favico.png"
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Cinema Focus",
+    "url": "https://cinemafocus.in",
+    "logo": "https://cinemafocus.in/favico.png"
+  };
+
   // ONLY fetch critical LCP data upfront to minimize server response time
   const [heroData, newLaunchesData] = await Promise.all([
     getHero(),
@@ -88,6 +105,8 @@ export default async function Home() {
   return (
     <div className="pb-20">
       <JsonLd data={businessSchema} />
+      <JsonLd data={websiteSchema} />
+      <JsonLd data={organizationSchema} />
       {/* Critical LCP Section - Rendered immediately without animation to minimize LCP delay */}
       {newLaunchesData && newLaunchesData.length > 0 ? (
         <NewLaunches products={newLaunchesData} /> 

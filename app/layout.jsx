@@ -31,7 +31,7 @@ export async function generateMetadata() {
   const googleVerification = seoData?.googleVerification || "YOLdFRVvcOEOjjo66oERr9NlrwHPjUofprZheVZkajU";
 
   return {
-    metadataBase: new URL("https://www.cinemafocus.in"),
+    metadataBase: new URL("https://cinemafocus.in"),
     title: {
       default: `${siteTitle} - Premium Audio & Home Cinema Systems`,
       template: `%s ${titleSuffix}`
