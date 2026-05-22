@@ -22,6 +22,17 @@ export default function ProductDetailClient({ product }) {
     }
   }, [product]);
 
+  // Auto-play slideshow: cycle every 4 seconds, resetting on interaction
+  useEffect(() => {
+    if (!product?.images || product.images.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [activeIndex, product?.images]);
+
   if (!product) return null;
 
   return (
@@ -87,7 +98,14 @@ export default function ProductDetailClient({ product }) {
                        onClick={() => setActiveIndex(idx)}
                        className={`aspect-square bg-white overflow-hidden rounded-xl cursor-pointer transition-all duration-300 flex items-center justify-center border-2 p-1 ${idx === activeIndex ? 'border-primary opacity-100 ring-4 ring-primary/5' : 'border-transparent opacity-60 hover:opacity-100 shadow-sm'}`}
                      >
-                       <LazyImage src={img} alt={`${product.name} ${idx}`} className="" objectFit="contain" />
+                       <LazyImage 
+                         src={img} 
+                         alt={`${product.name} ${idx}`} 
+                         className="" 
+                         objectFit="contain" 
+                         aspectRatio="w-full h-full"
+                         containerClassName="bg-transparent"
+                       />
                      </button>
                    ))}
                  </div>
