@@ -20,7 +20,7 @@ export async function proxy(request) {
     !pathname.startsWith('/api') && 
     !pathname.startsWith('/_next') && 
     pathname !== '/favicon.ico' &&
-    pathname !== '/favi.png';
+    pathname !== '/favico.png';
 
   if (isPublicRoute) {
     try {
