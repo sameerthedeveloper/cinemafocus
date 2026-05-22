@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { revalidateData } from '@/lib/actions';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function AdminSEOPage() {
   const [loading, setLoading] = useState(false);
@@ -297,28 +298,46 @@ export default function AdminSEOPage() {
                Social Media (Open Graph)
              </h2>
              
-             <div className="space-y-4">
-               <div className="space-y-2">
-                 <label className="text-sm font-medium">Default Share Image (OG Image)</label>
-                 <input 
-                   name="ogImage"
-                   value={seo.ogImage} 
-                   onChange={handleChange} 
-                   className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" 
-                   placeholder="https://cinemafocus.in/images/og-default.jpg" 
-                 />
-                 <p className="text-xs text-muted-foreground">URL of the image used when sharing. Must be an absolute URL.</p>
-               </div>
-               
-               {seo.ogImage && (
-                 <div className="mt-4">
-                   <p className="text-sm font-medium mb-2">Preview:</p>
-                   <div className="aspect-[1.91/1] w-full max-w-sm bg-secondary/20 rounded-lg overflow-hidden border border-border">
-                     <img src={seo.ogImage} alt="OG Preview" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
-                   </div>
-                 </div>
-               )}
-             </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium mb-1 block">Default Share Image (OG Image)</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-secondary/10 p-4 rounded-xl border border-border/50">
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-muted-foreground">Image URL</label>
+                        <input 
+                          name="ogImage"
+                          value={seo.ogImage} 
+                          onChange={handleChange} 
+                          className="w-full p-3 bg-background rounded-lg border border-border focus:border-primary outline-none text-sm" 
+                          placeholder="https://cinemafocus.in/images/og-default.jpg" 
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        The absolute URL of the image displayed when sharing the site link on social media. 
+                        You can paste an absolute URL here, or upload an image directly.
+                      </p>
+                      
+                      {seo.ogImage && (
+                        <div className="space-y-1.5">
+                          <span className="text-xs font-semibold text-muted-foreground block">Preview</span>
+                          <div className="aspect-[1.91/1] w-full bg-background rounded-lg overflow-hidden border border-border relative group">
+                            <img src={seo.ogImage} alt="OG Preview" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-col justify-center">
+                      <span className="text-xs font-semibold text-muted-foreground block mb-2">Upload Share Image</span>
+                      <ImageUpload 
+                        initialImage={seo.ogImage}
+                        onUploadComplete={(url) => setSeo(prev => ({ ...prev, ogImage: url }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
           </div>
 
           {/* Advanced & Custom Ops */}
