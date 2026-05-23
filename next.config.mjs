@@ -23,8 +23,17 @@ const nextConfig = {
         pathname: '/**',
       }
     ],
-    qualities: [75, 90],
-    unoptimized: false,
+    // Deliverable 1: Move from runtime image optimization -> upload-time optimization.
+    // Setting unoptimized: true disables global Vercel/Next.js runtime image transformations.
+    // 
+    // EDGE CASE NOTE:
+    // If you plan to dynamically switch between 'runtime' or 'hybrid' modes from the Admin panel
+    // without rebuilding/redeploying, unoptimized must be set to false (or commented out).
+    // When unoptimized is true here, the unoptimized prop is forced on all Next.js <Image> tags,
+    // rendering the database/admin mode toggle ineffective for runtime transformations.
+    // To allow full dynamic toggling, keep unoptimized: false here and let the OptimizedImage
+    // component manually apply the unoptimized prop based on the selected mode.
+    unoptimized: true,
   },
   async redirects() {
     return [

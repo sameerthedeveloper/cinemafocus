@@ -8,10 +8,11 @@ const SiteSettingsContext = createContext();
 
 export const useSiteSettings = () => useContext(SiteSettingsContext);
 
-export const SiteSettingsProvider = ({ children }) => {
+export const SiteSettingsProvider = ({ children, initialImageOptimizationMode = 'upload' }) => {
   const [theme, setTheme] = useState('light');
   const [showDesktopMenu, setShowDesktopMenu] = useState(true);
   const [showPrice, setShowPrice] = useState(true);
+  const [imageOptimizationMode, setImageOptimizationMode] = useState(initialImageOptimizationMode);
   const [loading, setLoading] = useState(true);
   const [supabase] = useState(() => createClient());
 
@@ -48,6 +49,7 @@ export const SiteSettingsProvider = ({ children }) => {
             if (row.id === 'general') {
               if (row.data.showDesktopMenu !== undefined) setShowDesktopMenu(row.data.showDesktopMenu);
               if (row.data.showPrice !== undefined) setShowPrice(row.data.showPrice);
+              if (row.data.imageOptimizationMode !== undefined) setImageOptimizationMode(row.data.imageOptimizationMode);
             }
             if (row.id === 'seo') {
               setSeoSettings(prev => ({ ...prev, ...row.data }));
@@ -74,6 +76,7 @@ export const SiteSettingsProvider = ({ children }) => {
           if (id === 'general') {
              if (newData.showDesktopMenu !== undefined) setShowDesktopMenu(newData.showDesktopMenu);
              if (newData.showPrice !== undefined) setShowPrice(newData.showPrice);
+             if (newData.imageOptimizationMode !== undefined) setImageOptimizationMode(newData.imageOptimizationMode);
           }
           if (id === 'seo') {
              setSeoSettings(prev => ({ ...prev, ...newData }));
@@ -96,7 +99,7 @@ export const SiteSettingsProvider = ({ children }) => {
         .eq('id', 'general')
         .single();
 
-      const baseData = current?.data || { showDesktopMenu: true, showPrice: true };
+      const baseData = current?.data || { showDesktopMenu: true, showPrice: true, imageOptimizationMode: 'upload' };
       const mergedData = { ...baseData, ...partialSettings };
 
       // 2. Upsert to save safely
@@ -112,6 +115,7 @@ export const SiteSettingsProvider = ({ children }) => {
       // 3. Optimistic local update for zero-latency feel
       if (mergedData.showDesktopMenu !== undefined) setShowDesktopMenu(mergedData.showDesktopMenu);
       if (mergedData.showPrice !== undefined) setShowPrice(mergedData.showPrice);
+      if (mergedData.imageOptimizationMode !== undefined) setImageOptimizationMode(mergedData.imageOptimizationMode);
       
     } catch (error) {
       console.error("Error updating settings:", error);
@@ -150,8 +154,20 @@ export const SiteSettingsProvider = ({ children }) => {
   };
 
   return (
-    <SiteSettingsContext.Provider value={{ theme, showDesktopMenu, showPrice, seoSettings, updateSettings, updateSeoSettings, updateTheme, loading }}>
+    <SiteSettingsContext.Provider value={{ theme, showDesktopMenu, showPrice, imageOptimizationMode, seoSettings, updateSettings, updateSeoSettings, updateTheme, loading }}>
       {children}
     </SiteSettingsContext.Provider>
   );
+};
+
+export const useImageOptimizationMode = () => {
+  const context = useContext(SiteSettingsContext);
+  if (!context) {
+    throw new Error('useImageOptimizationMode must be used within a SiteSettingsProvider');
+  }
+  return {
+    mode: context.imageOptimizationMode || 'upload',
+    setMode: (mode) => context.updateSettings({ imageOptimizationMode: mode }),
+    loading: context.loading
+  };
 };

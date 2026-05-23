@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import OptimizedImage from './OptimizedImage';
 import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import LazyImage from './LazyImage';
@@ -100,7 +100,7 @@ export default function HomeGallery({ projects }) {
                 onClick={(e) => e.stopPropagation()} 
             >
                 <div className="relative w-full h-full">
-                    <Image 
+                    <OptimizedImage 
                         src={displayedProjects[lightboxIndex].imageUrl} 
                         alt={displayedProjects[lightboxIndex].title}
                         fill

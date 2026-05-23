@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import Image from 'next/image';
+import OptimizedImage from './OptimizedImage';
 import clsx from 'clsx';
 import Button from './Button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
@@ -140,12 +140,11 @@ const NewLaunches = ({ products }) => {
                  isTransitioning ? "opacity-0 scale-90 translate-x-12 blur-sm" : "opacity-100 scale-100 translate-x-0 blur-0"
                )}
             >
-               <Image 
+               <OptimizedImage 
                  src={currentProduct.images?.[0] || '/images/products/speaker-transparent.png'} 
                  alt={currentProduct.name}
                  fill
                  priority={currentIndex === 0}
-                 fetchPriority={currentIndex === 0 ? "high" : "auto"}
                  className="object-contain drop-shadow-2xl animate-float mt-0 md:mt-0"
                  style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }}
                  sizes="(max-width: 768px) 90vw, 40vw"

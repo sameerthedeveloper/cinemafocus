@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google';
 import "./globals.css";
 // Root Layout base
 import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
+import { getImageSettings } from "@/lib/getImageSettings";
 
 import { getSeo } from "@/lib/cms";
 
@@ -91,11 +92,18 @@ export async function generateMetadata() {
   };
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  let imageSettings = { imageOptimizationMode: 'upload' };
+  try {
+    imageSettings = await getImageSettings();
+  } catch (error) {
+    console.error("Failed to load initial image settings in layout:", error);
+  }
+
   return (
     <html lang="en" className="h-full">
       <body className={`${inter.variable} flex flex-col min-h-screen bg-background text-foreground antialiased selection:bg-black/10`}>
-        <SiteSettingsProvider>
+        <SiteSettingsProvider initialImageOptimizationMode={imageSettings?.imageOptimizationMode || 'upload'}>
           {children}
         </SiteSettingsProvider>
       </body>

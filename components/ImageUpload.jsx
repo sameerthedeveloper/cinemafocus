@@ -1,81 +1,39 @@
 "use client";
-
 import React, { useState, useId } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { Upload, X, Loader2 } from 'lucide-react';
 
-const BUCKET = 'images';
-
-export default function ImageUpload({ onUploadComplete, initialImage = '' }) {
+export default function ImageUpload({ onUploadComplete, initialImage = '', type = 'product' }) {
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState(initialImage);
   const inputId = useId();
-  const supabase = createClient();
-
-  const compressImage = (file) => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target.result;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const MAX_SIZE = 1920;
-
-          if (width > height) {
-            if (width > MAX_SIZE) {
-              height *= MAX_SIZE / width;
-              width = MAX_SIZE;
-            }
-          } else {
-            if (height > MAX_SIZE) {
-              width *= MAX_SIZE / height;
-              height = MAX_SIZE;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          canvas.toBlob((blob) => {
-            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-          }, 'image/jpeg', 0.8);
-        };
-      };
-    });
-  };
 
   const handleFileChange = async (e) => {
-    let file = e.target.files[0];
+    const file = e.target.files[0];
     if (!file) return;
 
     setUploading(true);
     try {
-      if (file.type.startsWith('image/')) {
-        file = await compressImage(file);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', type); // classification for Sharp max-width resizing (thumbnail, product, hero)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload image');
       }
 
-      const fileName = `uploads/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-      
-      const { data, error } = await supabase.storage
-        .from(BUCKET)
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      const result = await response.json();
+      if (!result.publicUrl) {
+        throw new Error('API response did not return publicUrl');
+      }
 
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(fileName);
-
-      setImageUrl(publicUrl);
-      onUploadComplete(publicUrl);
+      setImageUrl(result.publicUrl);
+      onUploadComplete(result.publicUrl);
     } catch (error) {
       console.error("Error uploading image:", error);
       alert("Failed to upload image: " + error.message);

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import OptimizedImage from './OptimizedImage';
 import clsx from 'clsx';
 
 /**
@@ -49,14 +49,12 @@ const LazyImage = ({
         <div className="absolute inset-0 bg-secondary/40 animate-pulse z-10" />
       )}
 
-      {/* Optimized next/image */}
-      <Image
+      {/* Optimized custom OptimizedImage */}
+      <OptimizedImage
         src={hasError ? '/images/placeholder.svg' : imageSrc}
-        unoptimized={hasError || (imageSrc && typeof imageSrc === 'string' && imageSrc.endsWith('.svg'))}
         alt={alt || "Cinema Focus Asset"}
         fill
         priority={priority}
-        fetchPriority={priority ? "high" : "auto"}
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
         sizes={sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"}
