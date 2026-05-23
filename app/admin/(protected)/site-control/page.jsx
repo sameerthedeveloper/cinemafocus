@@ -520,7 +520,7 @@ export default function AdminSiteControlPage() {
   ];
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20 md:pb-8">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in pb-20 md:pb-8">
       <header className="mb-8 md:mb-10">
          <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Site Control</h1>
          <p className="text-muted-foreground mt-1 text-sm md:text-base">Customize global website content.</p>

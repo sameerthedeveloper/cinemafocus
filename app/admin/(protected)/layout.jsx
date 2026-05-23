@@ -6,6 +6,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, Tag, Users, MessageSquare, Image, Search, Newspaper, Sparkles, Menu, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import clsx from 'clsx';
+import logoPng from '@/assets/images/logo.png';
+
 
 export default function AdminLayout({ children }) {
   const router = useRouter();
@@ -109,7 +111,7 @@ export default function AdminLayout({ children }) {
     <div className="min-h-screen bg-secondary/30 flex flex-col md:flex-row">
       <div className="md:hidden bg-background border-b border-border p-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
          <div className="flex items-center gap-3">
-             <img src="/images/logo.webp" alt="Cinema Focus" className="h-6 w-auto" />
+             <img src={logoPng.src} alt="Cinema Focus" className="h-10 w-auto" />
              <span className="font-medium text-sm text-foreground uppercase tracking-widest">Admin</span>
          </div>
          <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 -mr-2 text-foreground hover:bg-secondary rounded-lg">
@@ -126,13 +128,13 @@ export default function AdminLayout({ children }) {
 
       <aside 
         className={clsx(
-            "fixed inset-y-0 left-0 z-50 w-64 bg-background border-r border-border flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 md:static h-full shadow-2xl md:shadow-none",
+            "fixed inset-y-0 left-0 z-50 w-64 bg-background border-r border-border flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 md:sticky md:top-0 md:left-auto md:bottom-auto md:h-screen shadow-2xl md:shadow-none",
             isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="p-6 border-b border-border flex items-center justify-between">
            <div className="flex items-center gap-3">
-             <img src="/images/logo.webp" alt="Cinema Focus Admin" className="h-6 w-auto" />
+             <img src={logoPng.src} alt="Cinema Focus Admin" className="h-10 w-auto" />
              <span className="font-medium text-sm text-muted-foreground uppercase tracking-widest">Admin</span>
            </div>
            <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-muted-foreground hover:text-foreground">
@@ -164,16 +166,37 @@ export default function AdminLayout({ children }) {
           })}
         </nav>
 
-        <div className="p-6 border-t border-border space-y-2">
-           <Link href="/" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary rounded-lg transition-colors">
+        <div className="p-6 border-t border-border space-y-2 mt-auto">
+           <Link 
+             href="/" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary rounded-lg transition-colors"
+           >
               <ArrowLeft size={18} />
               Back to Site
            </Link>
            <button 
              onClick={handleLogout}
+             type="button"
              className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
            >
-             <LogOut size={18} />
+             <svg 
+               xmlns="http://www.w3.org/2000/svg" 
+               width="18" 
+               height="18" 
+               viewBox="0 0 24 24" 
+               fill="none" 
+               stroke="currentColor" 
+               strokeWidth="2" 
+               strokeLinecap="round" 
+               strokeLinejoin="round" 
+               className="lucide lucide-log-out"
+             >
+               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+               <polyline points="16 17 21 12 16 7" />
+               <line x1="21" x2="9" y1="12" y2="12" />
+             </svg>
              Logout
            </button>
         </div>
