@@ -24,7 +24,7 @@ const nextConfig = {
       }
     ],
     qualities: [75, 90],
-    unoptimized: true,
+    unoptimized: false,
   },
   async redirects() {
     return [
