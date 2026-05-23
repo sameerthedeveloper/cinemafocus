@@ -7,18 +7,41 @@ import { X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function GalleryClient({ projects }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
   const openLightbox = (index) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
   
   const nextImage = (e) => {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
     setLightboxIndex((prev) => (prev + 1) % projects.length);
   };
   
   const prevImage = (e) => {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
     setLightboxIndex((prev) => (prev - 1 + projects.length) % projects.length);
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    if (isLeftSwipe) {
+      nextImage();
+    } else if (isRightSwipe) {
+      prevImage();
+    }
   };
 
   useEffect(() => {
@@ -85,7 +108,12 @@ export default function GalleryClient({ projects }) {
       </div>
 
       {lightboxIndex !== null && createPortal(
-        <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center animate-in fade-in duration-300 pointer-events-auto">
+        <div 
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center animate-in fade-in duration-300 pointer-events-auto"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
            <button 
              onClick={closeLightbox}
              className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors p-2 z-50 rounded-full hover:bg-white/10"

@@ -9,6 +9,8 @@ import LazyImage from './LazyImage';
 export default function HomeGallery({ projects }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -20,16 +22,37 @@ export default function HomeGallery({ projects }) {
   const displayedProjects = projects.slice(0, 3);
 
   const nextImage = (e) => {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
     if (displayedProjects.length > 0) {
       setLightboxIndex((prev) => (prev + 1) % displayedProjects.length);
     }
   };
   
   const prevImage = (e) => {
-    e.stopPropagation();
+    if (e) e.stopPropagation();
     if (displayedProjects.length > 0) {
       setLightboxIndex((prev) => (prev - 1 + displayedProjects.length) % displayedProjects.length);
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    if (isLeftSwipe) {
+      nextImage();
+    } else if (isRightSwipe) {
+      prevImage();
     }
   };
 
@@ -73,7 +96,12 @@ export default function HomeGallery({ projects }) {
       </div>
 
       {lightboxIndex !== null && isMounted && createPortal(
-        <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center">
+        <div 
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
             <button 
               onClick={closeLightbox}
               className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors p-2 z-50 rounded-full hover:bg-white/10"
