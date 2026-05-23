@@ -72,11 +72,11 @@ export async function generateMetadata() {
     },
     icons: {
       icon: [
-        { url: "/favico.png", type: "image/png" },
+        { url: "/logo.svg", type: "image/svg+xml" },
         { url: "/favicon.ico", type: "image/x-icon" }
       ],
       apple: [
-        { url: "/favico.png", type: "image/png" }
+        { url: "/logo.svg", type: "image/svg+xml" }
       ]
     },
     verification: {

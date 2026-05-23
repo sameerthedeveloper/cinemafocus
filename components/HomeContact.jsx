@@ -34,10 +34,12 @@ export default function HomeContact({ initialInfo }) {
       const { error } = await supabase
         .from('messages')
         .insert({
+          id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15),
           name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
-          message: `[Subject: ${formData.subject}]\n\n${formData.message}`,
-          read: false,
+          subject: formData.subject,
+          text: formData.message,
+          status: 'unread',
         });
 
       if (error) throw error;

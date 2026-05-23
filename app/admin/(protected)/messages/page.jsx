@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Trash2, Mail, CheckCircle, Loader2 } from 'lucide-react';
+import { Trash2, Mail, CheckCircle, Loader2, Reply } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function AdminMessagesPage() {
@@ -35,11 +35,11 @@ export default function AdminMessagesPage() {
     try {
       const { error } = await supabase
         .from('messages')
-        .update({ read: true })
+        .update({ status: 'read' })
         .eq('id', id);
       
       if (error) throw error;
-      setMessages(messages.map(m => m.id === id ? { ...m, read: true } : m));
+      setMessages(messages.map(m => m.id === id ? { ...m, status: 'read' } : m));
     } catch (error) {
       console.error("Error updating message:", error);
     }
@@ -81,23 +81,23 @@ export default function AdminMessagesPage() {
            messages.map((message) => (
              <div 
                key={message.id} 
-               onClick={() => handleMarkAsRead(message.id, message.read)}
+               onClick={() => handleMarkAsRead(message.id, message.status === 'read')}
                className={clsx(
                  "bg-background p-6 rounded-2xl border transition-all cursor-pointer group",
-                 message.read ? "border-border opacity-75" : "border-primary/50 shadow-sm bg-primary/5"
+                 message.status === 'read' ? "border-border opacity-75" : "border-primary/50 shadow-sm bg-primary/5"
                )}
              >
                <div className="flex justify-between items-start gap-4">
                  
                  <div className="flex-1 space-y-2">
                    <div className="flex items-center gap-3">
-                     <span className={clsx("font-medium text-lg", !message.read && "text-primary")}>
+                     <span className={clsx("font-medium text-lg", message.status !== 'read' && "text-primary")}>
                        {message.name}
                      </span>
                      <span className="text-sm text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                       {message.message.includes('[Subject:') ? message.message.split(']')[0].replace('[Subject: ', '') : 'New Inquery'}
+                       {message.subject || 'New Inquiry'}
                      </span>
-                     {!message.read && <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>}
+                     {message.status !== 'read' && <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>}
                    </div>
                    
                    <p className="text-muted-foreground text-sm flex items-center gap-2">
@@ -105,11 +105,21 @@ export default function AdminMessagesPage() {
                    </p>
                    
                    <p className="text-foreground mt-2 leading-relaxed">
-                     {message.message}
+                     {message.text}
                    </p>
                  </div>
 
                  <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <a 
+                      href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(message.email)}&su=${encodeURIComponent(`Re: ${message.subject || 'Inquiry'} - Cinema Focus`)}&body=${encodeURIComponent(`Hello ${message.name},\n\nRegarding the message you sent:\n"${message.text}"\n\n`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors border border-transparent hover:border-primary/20 flex items-center justify-center"
+                      title="Reply via Gmail"
+                    >
+                      <Reply size={18} />
+                    </a>
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleDelete(message.id); }}
                       className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20"
@@ -117,7 +127,7 @@ export default function AdminMessagesPage() {
                     >
                       <Trash2 size={18} />
                     </button>
-                    {message.read && (
+                    {message.status === 'read' && (
                       <div className="p-2 text-green-500" title="Read">
                         <CheckCircle size={18} />
                       </div>

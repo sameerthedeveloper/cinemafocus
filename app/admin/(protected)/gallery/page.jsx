@@ -79,6 +79,7 @@ export default function AdminGalleryPage() {
       const { error: dbError } = await supabase
         .from('projects')
         .insert({
+          id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15),
           title: newProject.title,
           category: 'Residential', // Default category
           image_url: publicUrl,
