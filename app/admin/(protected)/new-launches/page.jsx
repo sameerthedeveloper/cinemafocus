@@ -100,7 +100,7 @@ export default function AdminNewLaunchesPage() {
                   <Link href={`/admin/new-launches/edit/${launch.id}`} className="p-2 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-all" title="Edit">
                     <Edit size={18} />
                   </Link>
-                  <button onClick={() => handleDelete(launch.id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete">
+                  <button onClick={() => handleDelete(launch.id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all" title="Delete">
                     <Trash2 size={18} />
                   </button>
                 </td>

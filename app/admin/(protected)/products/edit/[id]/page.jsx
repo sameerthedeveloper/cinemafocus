@@ -296,7 +296,7 @@ export default function EditProductPage() {
                   onChange={(e) => handleSpecChange(index, 'value', e.target.value)} 
                   className="flex-1 p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" 
                 />
-                <button type="button" onClick={() => removeSpec(index)} className="p-3 text-red-500 hover:bg-red-50 rounded-lg">
+                <button type="button" onClick={() => removeSpec(index)} className="p-3 text-red-500 hover:bg-red-500/10 rounded-lg">
                   <Trash2 size={20} />
                 </button>
               </div>

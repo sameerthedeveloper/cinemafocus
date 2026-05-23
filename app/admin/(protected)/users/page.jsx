@@ -90,9 +90,9 @@ export default function AdminUsersPage() {
   };
 
   const getRoleBadgeClass = (role) => {
-    if (role === 'admin') return 'bg-purple-50 text-purple-700';
-    if (role === 'dealer') return 'bg-blue-50 text-blue-700';
-    return 'bg-gray-50 text-gray-700';
+    if (role === 'admin') return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+    if (role === 'dealer') return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+    return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20';
   };
 
   return (
@@ -158,7 +158,7 @@ export default function AdminUsersPage() {
                     {user.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Pending'}
                   </td>
                   <td className="p-4 text-right">
-                    <button onClick={() => handleDelete(user.id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Remove Record">
+                    <button onClick={() => handleDelete(user.id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all" title="Remove Record">
                       <Trash2 size={16} />
                     </button>
                   </td>
@@ -188,13 +188,13 @@ export default function AdminUsersPage() {
                  <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground">X</button>
               </div>
 
-              <div className="p-3 bg-blue-50 text-blue-700 text-[11px] rounded-lg border border-blue-100 flex gap-2 items-start">
+              <div className="p-3 bg-blue-500/10 text-blue-400 text-[11px] rounded-lg border border-blue-500/20 flex gap-2 items-start">
                  <AlertCircle size={14} className="shrink-0 mt-0.5" />
                  <p>This adds a role record to the <b>users</b> table. The user must still register or be added via the Supabase Dashboard to authenticate.</p>
               </div>
               
               {error && (
-                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+                <div className="p-3 bg-red-500/10 text-red-400 text-sm rounded-lg border border-red-500/20">
                   {error}
                 </div>
               )}

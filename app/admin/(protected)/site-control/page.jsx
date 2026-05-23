@@ -20,7 +20,10 @@ import {
   Sparkles, 
   Eye, 
   Hammer, 
-  AlertTriangle 
+  AlertTriangle,
+  Image as ImageIcon,
+  Zap,
+  HardDrive
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import BackupTools from '@/components/admin/BackupTools';
@@ -508,6 +511,7 @@ export default function AdminSiteControlPage() {
   const tabs = [
     { id: 'hero', label: 'Hero Section', icon: LayoutTemplate },
     { id: 'navigation', label: 'Navigation', icon: Globe },
+    { id: 'images', label: 'Image Optimization', icon: ImageIcon },
     { id: 'philosophy', label: 'About/Philosophy', icon: Info },
     { id: 'trust', label: 'Trust Badges', icon: Shield },
     { id: 'footer', label: 'Footer & Contact', icon: Phone },
@@ -1453,7 +1457,7 @@ export default function AdminSiteControlPage() {
                         <button onClick={() => {
                             const newPhones = footer.phones.filter((_, i) => i !== idx);
                             setFooter({...footer, phones: newPhones});
-                        }} className="p-3 text-red-500 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition-all">
+                        }} className="p-3 text-red-500 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/20 transition-all">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -1617,6 +1621,140 @@ export default function AdminSiteControlPage() {
                   </button>
                </div>
             </div>
+        )}
+
+        {/* IMAGES TAB */}
+        {activeTab === 'images' && (
+          <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6 animate-fade-in">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-lg">
+                <ImageIcon size={24} />
+              </div>
+              <div>
+                <h3 className="font-medium text-lg">Image Optimization Settings</h3>
+                <p className="text-sm text-muted-foreground">Configure how the website loads and processes images to optimize performance and control hosting costs.</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium mb-4">
+                  Optimization Pipeline Strategy
+                </label>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <button
+                    onClick={async () => {
+                      try {
+                        await themeContext.updateSettings({ imageOptimizationMode: 'upload' });
+                        await revalidateData('settings');
+                        setMessage('Optimization mode updated to Upload-Time!');
+                        setTimeout(() => setMessage(''), 3000);
+                      } catch (e) {
+                        setMessage('Failed to update: ' + e.message);
+                      }
+                    }}
+                    className={clsx(
+                      "relative flex flex-col justify-between p-5 rounded-xl border-2 text-left transition-all h-full cursor-pointer",
+                      themeContext.imageOptimizationMode === 'upload' || !themeContext.imageOptimizationMode
+                        ? "border-primary bg-primary/5 ring-1 ring-primary" 
+                        : "border-border hover:border-primary/30 hover:bg-secondary/50"
+                    )}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                        <HardDrive size={16} className="text-emerald-500" />
+                      </div>
+                      <div className="font-semibold text-foreground text-sm">Upload-Time</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground leading-relaxed mb-4">
+                      Pre-optimized WebP served directly via CDN. Eliminates Vercel runtime computation costs. Recommended for production.
+                    </div>
+                    {(themeContext.imageOptimizationMode === 'upload' || !themeContext.imageOptimizationMode) && (
+                      <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-primary" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      try {
+                        await themeContext.updateSettings({ imageOptimizationMode: 'hybrid' });
+                        await revalidateData('settings');
+                        setMessage('Optimization mode updated to Hybrid!');
+                        setTimeout(() => setMessage(''), 3000);
+                      } catch (e) {
+                        setMessage('Failed to update: ' + e.message);
+                      }
+                    }}
+                    className={clsx(
+                      "relative flex flex-col justify-between p-5 rounded-xl border-2 text-left transition-all h-full cursor-pointer",
+                      themeContext.imageOptimizationMode === 'hybrid' 
+                        ? "border-primary bg-primary/5 ring-1 ring-primary" 
+                        : "border-border hover:border-primary/30 hover:bg-secondary/50"
+                    )}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                        <Zap size={16} className="text-amber-500" />
+                      </div>
+                      <div className="font-semibold text-foreground text-sm">Hybrid Mode</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground leading-relaxed mb-4">
+                      Optimizes LCP hero slides at runtime on Vercel while serving standard content pre-processed to balance speeds.
+                    </div>
+                    {themeContext.imageOptimizationMode === 'hybrid' && (
+                      <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-primary" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      try {
+                        await themeContext.updateSettings({ imageOptimizationMode: 'runtime' });
+                        await revalidateData('settings');
+                        setMessage('Optimization mode updated to Runtime!');
+                        setTimeout(() => setMessage(''), 3000);
+                      } catch (e) {
+                        setMessage('Failed to update: ' + e.message);
+                      }
+                    }}
+                    className={clsx(
+                      "relative flex flex-col justify-between p-5 rounded-xl border-2 text-left transition-all h-full cursor-pointer",
+                      themeContext.imageOptimizationMode === 'runtime' 
+                        ? "border-primary bg-primary/5 ring-1 ring-primary text-white" 
+                        : "border-border hover:border-primary/30 hover:bg-secondary/50"
+                    )}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+                        <AlertTriangle size={16} className="text-rose-500" />
+                      </div>
+                      <div className="font-semibold text-foreground text-sm">Runtime (Vercel)</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground leading-relaxed mb-4">
+                      Standard Next.js Image optimization enabled everywhere on every request. Increases Vercel usage and costs.
+                    </div>
+                    {themeContext.imageOptimizationMode === 'runtime' && (
+                      <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-primary" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Dynamic Alert Banner */}
+              {(themeContext.imageOptimizationMode === 'runtime' || themeContext.imageOptimizationMode === 'hybrid') && (
+                <div className="flex gap-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 animate-fade-in text-amber-500">
+                  <AlertTriangle className="shrink-0 mt-0.5 animate-bounce-slow" size={20} />
+                  <div className="text-sm">
+                    <span className="font-semibold block mb-0.5">⚠️ Runtime Transformation Cost Warning</span>
+                    {themeContext.imageOptimizationMode === 'runtime' 
+                      ? "Every requested image will be processed dynamically on Vercel. This will rapidly increase monthly Vercel Image Transformation counts and may lead to additional hosting costs."
+                      : "Hero & above-fold banners will be processed dynamically at runtime. This balances load times for critical sections but will use some monthly Vercel Image Optimization quotas."}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {/* MAINTENANCE TAB */}

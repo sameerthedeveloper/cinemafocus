@@ -17,8 +17,10 @@ import {
   getFeaturedProducts, 
   getTrustBadges, 
   getProjects, 
-  getPressReleases 
+  getPressReleases,
+  getFooter
 } from '@/lib/cms';
+import HomeContact from './HomeContact';
 
 const CustomIcon = ({ name, ...props }) => {
   const LucideIcon = LucideIcons[name];
@@ -94,4 +96,9 @@ export async function GallerySection() {
       <HomeGallery projects={data} />
     </Section>
   );
+}
+
+export async function ContactSection() {
+  const info = await getFooter();
+  return <HomeContact initialInfo={info} />;
 }

@@ -171,7 +171,7 @@ export default function AdminLayout({ children }) {
            </Link>
            <button 
              onClick={handleLogout}
-             className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+             className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
            >
              <LogOut size={18} />
              Logout

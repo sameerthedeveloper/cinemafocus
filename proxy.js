@@ -78,8 +78,17 @@ export async function proxy(request) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title} | Cinema Focus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
+      --color-bg: #050505;
+      --color-accent: #dfb15b;
+      --color-text-primary: #f5f5f7;
+      --color-text-secondary: #a1a1aa;
+      --color-border: rgba(223, 177, 91, 0.1);
+      --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
     }
     * {
@@ -88,8 +97,8 @@ export async function proxy(request) {
       padding: 0;
     }
     body {
-      background-color: #0a0a0a;
-      color: #ffffff;
+      background-color: var(--color-bg);
+      color: var(--color-text-primary);
       font-family: var(--font-sans);
       min-height: 100vh;
       display: flex;
@@ -97,41 +106,108 @@ export async function proxy(request) {
       justify-content: space-between;
       padding: 3rem 1.5rem;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
       -webkit-user-select: none;
       user-select: none;
     }
-    /* Soft background ambient glow */
-    .glow {
+    /* Subtle background grid pattern */
+    .grid-backdrop {
       position: absolute;
-      top: 25%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(239, 68, 68, 0.05) 0%, rgba(245, 158, 11, 0.03) 50%, rgba(0, 0, 0, 0) 70%);
-      border-radius: 50%;
+      inset: 0;
+      background-image: radial-gradient(rgba(223, 177, 91, 0.04) 1px, transparent 1px);
+      background-size: 24px 24px;
       pointer-events: none;
+      z-index: 1;
+    }
+    /* Ambient tube-glowing lights */
+    .glow-container {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .glow-1 {
+      position: absolute;
+      top: -10%;
+      right: -10%;
+      width: 55vw;
+      height: 55vw;
+      min-width: 400px;
+      background: radial-gradient(circle, rgba(223, 177, 91, 0.08) 0%, rgba(223, 177, 91, 0.02) 50%, transparent 70%);
       filter: blur(80px);
-      animation: pulse 8s infinite ease-in-out;
+      border-radius: 50%;
+      animation: drift-slow 15s infinite ease-in-out alternate;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.9); }
-      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    .glow-2 {
+      position: absolute;
+      bottom: -10%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      min-width: 500px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.04) 0%, rgba(223, 177, 91, 0.01) 60%, transparent 80%);
+      filter: blur(100px);
+      border-radius: 50%;
+      animation: drift-slow-reverse 20s infinite ease-in-out alternate;
     }
+    @keyframes drift-slow {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-5%, 5%) scale(1.1); }
+    }
+    @keyframes drift-slow-reverse {
+      0% { transform: translate(0, 0) scale(1.1); }
+      100% { transform: translate(5%, -5%) scale(0.9); }
+    }
+    /* Animation keyframes */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-down {
+      animation: fadeInDown 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      z-index: 10;
+    }
+    .animate-up {
+      animation: fadeInUp 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      z-index: 10;
+    }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.35s; }
+    .delay-3 { animation-delay: 0.55s; }
+    .delay-4 { animation-delay: 0.75s; }
+    
     .header {
-      max-width: 56rem;
+      max-width: 62rem;
       width: 100%;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 10;
+      position: relative;
     }
     .logo-container {
       display: block;
-      height: 3.5rem;
-      width: 16rem;
+      height: 2.75rem;
       position: relative;
     }
     .logo-img {
@@ -139,162 +215,225 @@ export async function proxy(request) {
       width: auto;
       object-fit: contain;
     }
-    .tag {
-      font-size: 0.75rem;
-      color: #a1a1aa;
-      border: 1px solid #27272a;
+    .status-tag {
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      border: 1px solid var(--color-border);
       border-radius: 9999px;
-      padding: 0.375rem 1rem;
-      background-color: rgba(24, 24, 27, 0.4);
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-      display: flex;
+      padding: 0.4rem 1rem;
+      background: rgba(223, 177, 91, 0.03);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: inline-flex;
       align-items: center;
-      gap: 0.375rem;
+      gap: 0.5rem;
       font-weight: 500;
     }
-    .tag-icon {
-      width: 8px;
-      height: 8px;
-      background-color: #f59e0b;
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--color-accent);
       border-radius: 50%;
-      animation: bounce 1.2s infinite ease-in-out;
+      box-shadow: 0 0 8px var(--color-accent);
+      animation: pulse-dot 2s infinite ease-in-out;
     }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.2); }
     }
-    .content {
-      max-width: 42rem;
+    .content-wrapper {
+      max-width: 48rem;
       width: 100%;
       margin: auto auto;
       text-align: center;
-      z-index: 10;
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1.5rem;
-      padding-top: 3rem;
+      padding: 3rem 1rem;
     }
-    .title {
-      font-size: 2.25rem;
+    .display-title {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
       font-weight: 500;
-      letter-spacing: -0.025em;
-      line-height: 1.2;
-      color: #ffffff;
+      line-height: 1.1;
+      color: var(--color-text-primary);
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.03em;
     }
     @media (min-width: 768px) {
-      .title {
+      .display-title {
         font-size: 3.75rem;
       }
     }
-    .message {
-      font-size: 0.875rem;
-      color: #a1a1aa;
+    .description {
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
       font-weight: 300;
-      line-height: 1.6;
+      line-height: 1.7;
+      color: var(--color-text-secondary);
       max-width: 32rem;
       margin: 0 auto;
+      letter-spacing: -0.01em;
     }
     @media (min-width: 768px) {
-      .message {
-        font-size: 1rem;
+      .description {
+        font-size: 1.05rem;
       }
     }
-    .divider {
+    .decorative-accent {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 2.25rem 0;
+    }
+    .accent-line {
       height: 1px;
-      width: 4rem;
-      background-color: #27272a;
-      margin: 2rem auto;
+      width: 5rem;
+      background: linear-gradient(90deg, transparent, var(--color-border), var(--color-accent), var(--color-border), transparent);
+    }
+    .contact-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 28rem;
+      margin: 0 auto;
+    }
+    @media (min-width: 640px) {
+      .contact-container {
+        flex-direction: row;
+        justify-content: center;
+      }
+    }
+    .contact-card {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.01);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .contact-card:hover {
+      border-color: rgba(223, 177, 91, 0.3);
+      background: rgba(223, 177, 91, 0.03);
+      color: var(--color-text-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(223, 177, 91, 0.05);
+    }
+    .contact-card svg {
+      transition: transform 0.4s ease;
+      stroke: var(--color-accent);
+    }
+    .contact-card:hover svg {
+      transform: scale(1.1);
     }
     .footer {
-      max-width: 56rem;
+      max-width: 62rem;
       width: 100%;
       margin: 0 auto;
       text-align: center;
-      z-index: 10;
+      position: relative;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
-    }
-    .contacts {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
       align-items: center;
-      gap: 1.5rem;
-      font-size: 0.75rem;
-      color: #71717a;
-    }
-    .contacts a {
-      color: #71717a;
-      text-decoration: none;
-      transition: color 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.375rem;
-    }
-    .contacts a:hover {
-      color: #ffffff;
-    }
-    .bullet {
-      color: #27272a;
+      gap: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.02);
+      padding-top: 2rem;
     }
     .copyright {
-      font-size: 0.625rem;
-      color: #404040;
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+      color: rgba(255, 255, 255, 0.3);
+    }
+    .admin-link-wrapper {
+      margin-top: 0.5rem;
     }
     .admin-link {
-      margin-top: 0.75rem;
-      display: inline-block;
-      color: #52525b;
-      text-decoration: underline;
-      transition: color 0.2s;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.4);
+      text-decoration: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
     }
     .admin-link:hover {
-      color: #ffffff;
+      color: var(--color-accent);
+      border-color: var(--color-border);
+      background: rgba(223, 177, 91, 0.02);
     }
   </style>
 </head>
 <body>
-  <div class="glow"></div>
-  <div class="header">
+  <div class="grid-backdrop"></div>
+  <div class="glow-container">
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+  </div>
+
+  <header class="header animate-down delay-1">
     <div class="logo-container">
       <img class="logo-img" src="/images/logo-light.webp" alt="Cinema Focus Logo" />
     </div>
-    <span class="tag">
-      <span class="tag-icon"></span>
-      Website Upgrade
-    </span>
-  </div>
+    <div class="status-tag">
+      <span class="status-dot"></span>
+      <span class="status-text">Studio Upgrade</span>
+    </div>
+  </header>
   
-  <div class="content">
-    <h1 class="title">${title}</h1>
-    <p class="message">${message}</p>
-    <div class="divider"></div>
-  </div>
-  
-  <div class="footer">
-    <div class="contacts">
-      <a href="mailto:support@cinemafocus.in">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+  <main class="content-wrapper animate-up delay-2">
+    <h1 class="display-title">${title}</h1>
+    <p class="description">${message}</p>
+    
+    <div class="decorative-accent animate-up delay-3">
+      <div class="accent-line"></div>
+    </div>
+
+    <div class="contact-container animate-up delay-4">
+      <a class="contact-card" href="mailto:support@cinemafocus.in">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
         support@cinemafocus.in
       </a>
-      <span class="bullet">•</span>
-      <a href="tel:+96899999999">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <a class="contact-card" href="tel:+96899999999">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         Contact Advisor
       </a>
     </div>
+  </main>
+  
+  <footer class="footer animate-up delay-4">
     <div class="copyright">
       &copy; ${new Date().getFullYear()} Cinema Focus. All rights reserved.
-      ${isLocal ? `
-      <div>
-        <a href="/admin" class="admin-link">Return to Admin Dashboard (Local)</a>
-      </div>
-      ` : ''}
     </div>
-  </div>
+    ${isLocal ? `
+    <div class="admin-link-wrapper">
+      <a href="/admin" class="admin-link">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Return to Admin Dashboard (Local)
+      </a>
+    </div>
+    ` : ''}
+  </footer>
 </body>
 </html>`;
 

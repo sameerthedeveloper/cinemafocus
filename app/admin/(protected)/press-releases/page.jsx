@@ -82,7 +82,7 @@ export default function AdminPressReleasesPage() {
                       <Link href={`/admin/press-releases/edit/${release.id}`} className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
                         <Edit size={18} />
                       </Link>
-                      <button onClick={() => handleDelete(release.id)} className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
+                      <button onClick={() => handleDelete(release.id)} className="p-2 text-red-500 hover:text-red-700 hover:bg-red-500/10 rounded-lg transition-colors">
                         <Trash2 size={18} />
                       </button>
                    </div>

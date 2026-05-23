@@ -547,7 +547,7 @@ export default function AdminProductsPage() {
                           </Link>
                           <button
                             onClick={() => handleDelete(product.id)}
-                            className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-2 text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -790,7 +790,7 @@ export default function AdminProductsPage() {
                 </label>
                 {bulkEditFields.updatePrice && (
                   <div className="relative animate-fade-in">
-                    <span className="absolute left-3.5 top-2.5 text-xs text-muted-foreground font-mono">OMR</span>
+                    <span className="absolute left-3.5 top-2.5 text-xs text-muted-foreground font-mono">INR</span>
                     <input 
                       type="number" 
                       step="any"

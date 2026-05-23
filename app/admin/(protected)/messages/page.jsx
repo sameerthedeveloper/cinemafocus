@@ -112,7 +112,7 @@ export default function AdminMessagesPage() {
                  <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={(e) => { e.stopPropagation(); handleDelete(message.id); }}
-                      className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                      className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20"
                       title="Delete"
                     >
                       <Trash2 size={18} />

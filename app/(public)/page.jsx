@@ -12,7 +12,8 @@ import {
   CollectionSection, 
   FeaturedSection, 
   TrustSection, 
-  GallerySection 
+  GallerySection,
+  ContactSection
 } from '@/components/HomeSections';
 import JsonLd from '@/components/JsonLd';
 
@@ -103,7 +104,7 @@ export default async function Home() {
       };
 
   return (
-    <div className="pb-20">
+    <div>
       <JsonLd data={businessSchema} />
       <JsonLd data={websiteSchema} />
       <JsonLd data={organizationSchema} />
@@ -218,6 +219,36 @@ export default async function Home() {
           </div>
         }>
           <GallerySection />
+        </Suspense>
+
+        <Suspense fallback={
+          <div className="py-24 bg-secondary/5">
+            <div className="container mx-auto px-6">
+              <div className="mb-16 text-center space-y-4">
+                <div className="h-12 w-48 bg-white/10 animate-pulse rounded mx-auto" />
+                <div className="h-6 w-32 bg-white/10 animate-pulse rounded mx-auto" />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+                <div className="lg:col-span-5 space-y-8">
+                  <div className="space-y-6">
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} className="flex items-start gap-4">
+                        <div className="h-12 w-12 bg-white/10 animate-pulse rounded-xl shrink-0" />
+                        <div className="space-y-2 py-1 flex-grow">
+                          <div className="h-4 w-24 bg-white/10 animate-pulse rounded" />
+                          <div className="h-4 w-40 bg-white/10 animate-pulse rounded" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-[320px] bg-white/5 animate-pulse rounded-2xl" />
+                </div>
+                <div className="lg:col-span-7 h-[550px] bg-white/5 animate-pulse rounded-2xl" />
+              </div>
+            </div>
+          </div>
+        }>
+          <ContactSection />
         </Suspense>
       </div>
     </div>

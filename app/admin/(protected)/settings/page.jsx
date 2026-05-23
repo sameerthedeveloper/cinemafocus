@@ -2,26 +2,17 @@
 
 import React, { useState } from 'react';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
-import { Monitor, Moon, Sun, Loader2, Image as ImageIcon, AlertTriangle, Zap, HardDrive } from 'lucide-react';
+import { Monitor, Moon, Sun, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function AdminSettingsPage() {
-  const { theme, imageOptimizationMode, updateSettings, loading } = useSiteSettings();
+  const { theme, updateSettings, loading } = useSiteSettings();
   const [updating, setUpdating] = useState(false);
 
   const handleThemeChange = async (newTheme) => {
     setUpdating(true);
     try {
         await updateSettings({ theme: newTheme });
-    } finally {
-        setUpdating(false);
-    }
-  };
-
-  const handleModeChange = async (newMode) => {
-    setUpdating(true);
-    try {
-        await updateSettings({ imageOptimizationMode: newMode });
     } finally {
         setUpdating(false);
     }
@@ -57,7 +48,7 @@ export default function AdminSettingsPage() {
                         onClick={() => handleThemeChange('light')}
                         disabled={updating}
                         className={clsx(
-                            "relative flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all",
+                            "relative flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all cursor-pointer",
                             theme === 'light' 
                                 ? "border-primary bg-primary/5 ring-1 ring-primary" 
                                 : "border-border hover:border-primary/30 hover:bg-secondary/50"
@@ -79,7 +70,7 @@ export default function AdminSettingsPage() {
                         onClick={() => handleThemeChange('dark')}
                         disabled={updating}
                         className={clsx(
-                            "relative flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all",
+                            "relative flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all cursor-pointer",
                             theme === 'dark' 
                                 ? "border-primary bg-zinc-900 ring-1 ring-primary text-white" 
                                 : "border-border hover:border-primary/30 hover:bg-zinc-900/5 dark:hover:bg-zinc-800"
@@ -100,114 +91,6 @@ export default function AdminSettingsPage() {
                     </button>
                  </div>
             </div>
-        </div>
-      </div>
-
-      {/* Deliverable 6: Image Optimization Mode Panel */}
-      <div className="bg-background rounded-2xl border border-border shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-border">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-                <ImageIcon size={20} className="text-muted-foreground" />
-                Image Optimization
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-                Configure how the website loads and processes images to optimize performance and control hosting costs.
-            </p>
-        </div>
-        
-        <div className="p-6 space-y-6">
-            <div>
-                <label className="block text-sm font-medium mb-4">
-                    Optimization Pipeline Strategy
-                </label>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <button
-                        onClick={() => handleModeChange('upload')}
-                        disabled={updating}
-                        className={clsx(
-                            "relative flex flex-col justify-between p-5 rounded-xl border-2 text-left transition-all h-full cursor-pointer",
-                            imageOptimizationMode === 'upload' || !imageOptimizationMode
-                                ? "border-primary bg-primary/5 ring-1 ring-primary" 
-                                : "border-border hover:border-primary/30 hover:bg-secondary/50"
-                        )}
-                    >
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                                <HardDrive size={16} className="text-emerald-500" />
-                            </div>
-                            <div className="font-semibold text-foreground text-sm">Upload-Time</div>
-                        </div>
-                        <div className="text-xs text-muted-foreground leading-relaxed mb-4">
-                            Pre-optimized WebP served directly via CDN. Eliminates runtime computation costs. Recommended for production.
-                        </div>
-                        {(imageOptimizationMode === 'upload' || !imageOptimizationMode) && (
-                            <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-primary" />
-                        )}
-                    </button>
-
-                    <button
-                        onClick={() => handleModeChange('hybrid')}
-                        disabled={updating}
-                        className={clsx(
-                            "relative flex flex-col justify-between p-5 rounded-xl border-2 text-left transition-all h-full cursor-pointer",
-                            imageOptimizationMode === 'hybrid' 
-                                ? "border-primary bg-primary/5 ring-1 ring-primary" 
-                                : "border-border hover:border-primary/30 hover:bg-secondary/50"
-                        )}
-                    >
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                                <Zap size={16} className="text-amber-500" />
-                            </div>
-                            <div className="font-semibold text-foreground text-sm">Hybrid Mode</div>
-                        </div>
-                        <div className="text-xs text-muted-foreground leading-relaxed mb-4">
-                            Optimizes LCP hero slides at runtime on Vercel while serving standard content pre-processed to balance speeds.
-                        </div>
-                        {imageOptimizationMode === 'hybrid' && (
-                            <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-primary" />
-                        )}
-                    </button>
-
-                    <button
-                        onClick={() => handleModeChange('runtime')}
-                        disabled={updating}
-                        className={clsx(
-                            "relative flex flex-col justify-between p-5 rounded-xl border-2 text-left transition-all h-full cursor-pointer",
-                            imageOptimizationMode === 'runtime' 
-                                ? "border-primary bg-primary/5 ring-1 ring-primary text-white" 
-                                : "border-border hover:border-primary/30 hover:bg-secondary/50"
-                        )}
-                    >
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-                                <AlertTriangle size={16} className="text-rose-500" />
-                            </div>
-                            <div className="font-semibold text-foreground text-sm">Runtime (Vercel)</div>
-                        </div>
-                        <div className="text-xs text-muted-foreground leading-relaxed mb-4">
-                            Standard Next.js Image optimization enabled everywhere on every request. Increases Vercel usage and costs.
-                        </div>
-                        {imageOptimizationMode === 'runtime' && (
-                            <div className="absolute top-4 right-4 w-3 h-3 rounded-full bg-primary" />
-                        )}
-                    </button>
-                </div>
-            </div>
-
-            {/* Dynamic Alert Banner */}
-            {(imageOptimizationMode === 'runtime' || imageOptimizationMode === 'hybrid') && (
-                <div className="flex gap-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 animate-fade-in text-amber-500">
-                    <AlertTriangle className="shrink-0 mt-0.5 animate-bounce-slow" size={20} />
-                    <div className="text-sm">
-                        <span className="font-semibold block mb-0.5">⚠️ Runtime Transformation Cost Warning</span>
-                        {imageOptimizationMode === 'runtime' 
-                          ? "Every requested image will be processed dynamically on Vercel. This will rapidly increase monthly Vercel Image Transformation counts and may lead to additional hosting costs."
-                          : "Hero & above-fold banners will be processed dynamically at runtime. This balances load times for critical sections but will use some monthly Vercel Image Optimization quotas."}
-                    </div>
-                </div>
-            )}
         </div>
       </div>
     </div>

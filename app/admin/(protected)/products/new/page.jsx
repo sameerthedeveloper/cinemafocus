@@ -226,7 +226,7 @@ export default function AddProductPage() {
                   onChange={(e) => handleSpecChange(index, 'value', e.target.value)} 
                   className="w-full flex-1 p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" 
                 />
-                <button type="button" onClick={() => removeSpec(index)} className="p-3 text-red-500 hover:bg-red-50 rounded-lg self-end md:self-auto">
+                <button type="button" onClick={() => removeSpec(index)} className="p-3 text-red-500 hover:bg-red-500/10 rounded-lg self-end md:self-auto">
                   <X size={20} />
                 </button>
               </div>
