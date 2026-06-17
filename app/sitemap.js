@@ -29,13 +29,14 @@ export default async function sitemap() {
     '/about',
     '/contact',
     '/gallery',
+    '/location',
     '/press',
     '/products'
   ].map((route) => ({
     url: `${BASE_URL}${route}`,
     lastModified: new Date(),
-    changeFrequency: 'daily',
-    priority: route === '' ? 1.0 : 0.8,
+    changeFrequency: route === '/location' ? 'monthly' : 'daily',
+    priority: route === '' ? 1.0 : route === '/location' ? 0.9 : 0.8,
   }));
 
   // 2. Fetch Dynamic Routes Concurrently to Optimize Server Response Time

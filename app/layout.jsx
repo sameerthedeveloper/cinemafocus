@@ -5,6 +5,7 @@ import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
 import { getImageSettings } from "@/lib/getImageSettings";
 
 import { getSeo } from "@/lib/cms";
+import { getLocalBusinessSchema, getServiceAreaSchema } from "@/lib/structuredData";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -87,7 +88,11 @@ export async function generateMetadata() {
       "preconnect": [
         "https://xdvzchxtbwfdmlxhnzpo.supabase.co",
         "https://images.unsplash.com"
-      ]
+      ],
+      "geo.position": "13.0415;80.2720",
+      "ICBM": "13.0415, 80.2720",
+      "geo.placename": "Mylapore, Chennai, Tamil Nadu, India",
+      "geo.region": "IN-TN"
     }
   };
 }
@@ -102,6 +107,20 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en" className="h-full">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(getLocalBusinessSchema())
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(getServiceAreaSchema())
+          }}
+        />
+      </head>
       <body className={`${inter.variable} flex flex-col min-h-screen bg-background text-foreground antialiased selection:bg-black/10`}>
         <SiteSettingsProvider initialImageOptimizationMode={imageSettings?.imageOptimizationMode || 'upload'}>
           {children}

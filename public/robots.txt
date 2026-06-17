@@ -2,5 +2,15 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /private
+Disallow: /api
+Disallow: /_*
 
 Sitemap: https://cinemafocus.in/sitemap.xml
+
+User-agent: Googlebot
+Allow: /
+Allow: /location
+
+User-agent: Bingbot
+Allow: /
+Allow: /location
