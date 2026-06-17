@@ -4,7 +4,43 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Button from './Button';
 import clsx from 'clsx';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import gsap from 'gsap';
+
+// Waveform Visualizer Component
+const WaveformVisualizer = ({ className = '' }) => {
+  const bars = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    delay: i * 0.08,
+    randomHeight: 40 + Math.random() * 60
+  }));
+
+  return (
+    <svg
+      viewBox="0 0 240 80"
+      className={clsx('w-24 h-12', className)}
+      aria-label="Audio waveform"
+    >
+      {bars.map((bar) => (
+        <rect
+          key={bar.id}
+          x={bar.id * 18 + 6}
+          y="20"
+          width="12"
+          height="40"
+          fill="currentColor"
+          opacity="0.7"
+          rx="2"
+          className="animate-waveform-bar"
+          style={{
+            animationDelay: `${bar.delay}s`,
+            transformOrigin: `${bar.id * 18 + 12}px 50px`
+          }}
+        />
+      ))}
+    </svg>
+  );
+};
 
 const Hero = ({ 
   // New unified slides array (each slide contains all visual configurations)
@@ -57,7 +93,11 @@ const Hero = ({
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const autoPlayRef = useRef(null);
+  const titleRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const scrollIndicatorRef = useRef(null);
 
   // Navigation handlers
   const handlePrev = () => {
@@ -71,6 +111,40 @@ const Hero = ({
   const handleDotClick = (index) => {
     setCurrentIndex(index);
   };
+
+  // GSAP entrance animation on slide change
+  useEffect(() => {
+    if (!titleRef.current || !subtitleRef.current) return;
+
+    gsap.fromTo(
+      titleRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 }
+    );
+
+    gsap.fromTo(
+      subtitleRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 }
+    );
+  }, [currentIndex]);
+
+  // Scroll indicator fade on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 100;
+      if (scrollIndicatorRef.current) {
+        gsap.to(scrollIndicatorRef.current, {
+          opacity: scrolled ? 0 : 0.6,
+          duration: 0.3
+        });
+      }
+      setScrollProgress(Math.min(window.scrollY / window.innerHeight, 1));
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Keyboard navigation support
   useEffect(() => {
@@ -137,23 +211,24 @@ const Hero = ({
     return '#000000';
   };
 
-  // Build CTA button dynamic classes per slide
+  // Build CTA button dynamic classes per slide (enhanced with glow hover)
   const getButtonClasses = (slide) => {
     const shape = slide.ctaShape === 'rounded-none' ? 'rounded-none' : slide.ctaShape === 'rounded-lg' ? 'rounded-lg' : 'rounded-full';
     const sizeClass = slide.ctaSize === 'sm' ? 'px-6 py-2 text-xs' : slide.ctaSize === 'lg' ? 'px-10 py-4 text-base' : 'px-8 py-3 text-sm';
-    
+    const hoverBase = "hover:scale-105 hover:-translate-y-1 transition-all duration-200 ease-out";
+
     if (slide.ctaVariant === 'secondary') {
-      return clsx(shape, sizeClass, "bg-zinc-900 text-white hover:bg-zinc-800 border border-zinc-800 font-bold transition-all shadow-md");
+      return clsx(shape, sizeClass, hoverBase, "bg-zinc-900 text-white hover:bg-zinc-800 border border-zinc-800 font-bold shadow-md hover:shadow-lg hover:shadow-zinc-700/50");
     } else if (slide.ctaVariant === 'outline') {
-      return clsx(shape, sizeClass, "bg-transparent text-white border border-white hover:bg-white hover:text-black font-bold transition-all");
+      return clsx(shape, sizeClass, hoverBase, "bg-transparent text-white border border-white hover:bg-white hover:text-black font-bold hover:shadow-lg hover:shadow-white/30");
     } else if (slide.ctaVariant === 'gradient') {
-      return clsx(shape, sizeClass, "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:opacity-90 font-bold border-none transition-all shadow-lg");
+      return clsx(shape, sizeClass, hoverBase, "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:opacity-90 font-bold border-none shadow-lg hover:shadow-indigo-500/40");
     } else if (slide.ctaVariant === 'link') {
-      return clsx(shape, sizeClass, "bg-transparent text-white hover:underline font-medium border-none p-0");
+      return clsx(shape, sizeClass, hoverBase, "bg-transparent text-white hover:underline font-medium border-none p-0");
     }
-    
+
     // Default / Primary: White Button
-    return clsx(shape, sizeClass, "bg-white text-black hover:bg-zinc-200 border-none font-bold transition-all shadow-lg");
+    return clsx(shape, sizeClass, hoverBase, "bg-white text-black hover:bg-zinc-200 border-none font-bold shadow-lg hover:shadow-white/40");
   };
 
   const getButtonStyle = (slide) => {
@@ -211,10 +286,10 @@ const Hero = ({
               )}>
                 {isActive && (
                   <div className={clsx("w-full max-w-xl space-y-8 animate-fade-in-up flex flex-col", flexAlignItems)}>
-                     <h1 className={clsx("text-4xl md:text-5xl lg:text-7xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-md", slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getTitleStyle(slide)}>
+                     <h1 ref={titleRef} className={clsx("text-4xl md:text-5xl lg:text-7xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-md", slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p className={clsx("text-lg md:text-xl text-zinc-300 font-light leading-relaxed drop-shadow-sm", pAlignClass, slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("text-lg md:text-xl text-zinc-300 font-light leading-relaxed drop-shadow-sm", pAlignClass, slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
                      <div className="pt-4">
@@ -284,10 +359,10 @@ const Hero = ({
                 <div className={`flex flex-col ${alignClass}`}>
                   {isActive && (
                     <div className={`max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                      <h1 className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
+                      <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
                         {slide.title}
                       </h1>
-                      <p className={clsx("text-xl md:text-2xl text-zinc-300 font-light max-w-2xl leading-relaxed drop-shadow-md", pAlignClass)} style={getSubtitleStyle(slide)}>
+                      <p ref={subtitleRef} className={clsx("text-xl md:text-2xl text-zinc-300 font-light max-w-2xl leading-relaxed drop-shadow-md", pAlignClass)} style={getSubtitleStyle(slide)}>
                         {slide.subtitle}
                       </p>
                       <div className="pt-8">
@@ -356,10 +431,10 @@ const Hero = ({
                <div className={`flex flex-col ${alignClass}`}>
                  {isActive && (
                    <div className={`max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                     <h1 className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
+                     <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p className={clsx("text-xl md:text-2xl text-zinc-300 font-light max-w-2xl leading-relaxed drop-shadow-md", pAlignClass)} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("text-xl md:text-2xl text-zinc-300 font-light max-w-2xl leading-relaxed drop-shadow-md", pAlignClass)} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
                      <div className="pt-8">
@@ -403,7 +478,7 @@ const Hero = ({
       {slideItems.length > 1 && (
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex gap-2.5">
           {slideItems.map((_, idx) => (
-            <button 
+            <button
               key={`dot-${idx}`}
               onClick={() => handleDotClick(idx)}
               className={clsx(
@@ -415,6 +490,59 @@ const Hero = ({
           ))}
         </div>
       )}
+
+      {/* 4. SCROLL INDICATOR with Chevron Pulse */}
+      <div
+        ref={scrollIndicatorRef}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 opacity-60 transition-opacity"
+      >
+        <span className="text-xs font-light text-zinc-400 uppercase tracking-wider">Scroll to explore</span>
+        <div className="animate-chevron-pulse text-white">
+          <ChevronDown size={20} strokeWidth={1.5} />
+        </div>
+      </div>
+
+      {/* CSS Keyframes */}
+      <style jsx>{`
+        @keyframes waveform-bar {
+          0%, 100% {
+            height: 40px;
+            opacity: 0.7;
+          }
+          50% {
+            height: 60px;
+            opacity: 1;
+          }
+        }
+
+        @keyframes chevron-pulse {
+          0%, 100% {
+            opacity: 0.6;
+            transform: translateY(0);
+          }
+          50% {
+            opacity: 1;
+            transform: translateY(4px);
+          }
+        }
+
+        @keyframes button-glow {
+          0% {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+          }
+          100% {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+          }
+        }
+
+        .animate-waveform-bar {
+          animation: waveform-bar 1.25s ease-in-out infinite;
+        }
+
+        .animate-chevron-pulse {
+          animation: chevron-pulse 1.5s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };
