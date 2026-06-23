@@ -492,7 +492,7 @@ const Hero = ({
       )}
 
       {/* 4. SCROLL INDICATOR with Chevron Pulse */}
-      <div
+      {/* <div
         ref={scrollIndicatorRef}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 opacity-60 transition-opacity"
       >
@@ -500,7 +500,7 @@ const Hero = ({
         <div className="animate-chevron-pulse text-white">
           <ChevronDown size={20} strokeWidth={1.5} />
         </div>
-      </div>
+      </div> */}
 
       {/* CSS Keyframes */}
       <style jsx>{`
