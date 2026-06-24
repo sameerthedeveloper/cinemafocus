@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import ContentBlockBuilder from '@/components/admin/ContentBlockBuilder';
+import { revalidatePressCache } from '@/app/actions/press';
 
 export default function EditPressReleasePage() {
   const { id } = useParams();
@@ -114,6 +115,7 @@ export default function EditPressReleasePage() {
 
       if (error) throw error;
 
+      await revalidatePressCache();
       router.push('/admin/press-releases');
       router.refresh();
     } catch (error) {
