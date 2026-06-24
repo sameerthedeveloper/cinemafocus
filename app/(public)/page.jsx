@@ -1,12 +1,8 @@
 import React, { Suspense } from 'react';
 import Link from 'next/link';
-import { 
-  getHero, 
-  getNewLaunches 
-} from '@/lib/cms';
+import { getHero } from '@/lib/cms';
 import { createClient } from '@/lib/supabase/server';
 import Hero from '@/components/Hero';
-import NewLaunches from '@/components/NewLaunches';
 import { 
   PressSection, 
   CollectionSection, 
@@ -71,10 +67,7 @@ export default async function Home() {
   };
 
   // ONLY fetch critical LCP data upfront to minimize server response time
-  const [heroData, newLaunchesData] = await Promise.all([
-    getHero(),
-    getNewLaunches()
-  ]);
+  const heroData = await getHero();
 
   // Normalize heroData to always contain a slides array
   const normalizedHero = heroData?.slides && Array.isArray(heroData.slides)
@@ -109,13 +102,9 @@ export default async function Home() {
       <JsonLd data={websiteSchema} />
       <JsonLd data={organizationSchema} />
       {/* Critical LCP Section - Rendered immediately without animation to minimize LCP delay */}
-      {newLaunchesData && newLaunchesData.length > 0 ? (
-        <NewLaunches products={newLaunchesData} /> 
-      ) : (
-        <Hero 
-          {...normalizedHero}
-        />
-      )}
+      <Hero
+        {...normalizedHero}
+      />
 
       {/* Deferred Sections - Animations start here to preserve visual experience below the fold */}
       <div className="animate-fade-in">
