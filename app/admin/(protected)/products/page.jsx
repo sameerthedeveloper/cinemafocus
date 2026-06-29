@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, Upload, X, Check, Loader2, AlertCircle, CheckSquare, Square, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload, X, Check, Loader2, AlertCircle, CheckSquare, Square, Search, Eye, EyeOff } from 'lucide-react';
 import { revalidateData } from '@/lib/actions';
 
 export default function AdminProductsPage() {
@@ -11,6 +11,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkToggling, setBulkToggling] = useState(false);
   
   // Bulk Import States
   const [showImportModal, setShowImportModal] = useState(false);
@@ -193,6 +194,41 @@ export default function AdminProductsPage() {
       alert('Failed to update products: ' + error.message);
     } finally {
       setBulkEditing(false);
+    }
+  };
+
+  const handleToggleActive = async (id, currentValue) => {
+    const newValue = currentValue === false ? true : false;
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ is_active: newValue })
+        .eq('id', id);
+      if (error) throw error;
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, is_active: newValue } : p));
+      try { await revalidateData('products'); } catch (e) { console.warn('Revalidation skipped:', e); }
+    } catch (error) {
+      alert('Failed to update product: ' + error.message);
+    }
+  };
+
+  const handleBulkToggleActive = async (targetValue) => {
+    if (selectedIds.size === 0) return;
+    setBulkToggling(true);
+    try {
+      const ids = Array.from(selectedIds);
+      const { error } = await supabase
+        .from('products')
+        .update({ is_active: targetValue })
+        .in('id', ids);
+      if (error) throw error;
+      setProducts(prev => prev.map(p => selectedIds.has(p.id) ? { ...p, is_active: targetValue } : p));
+      setSelectedIds(new Set());
+      try { await revalidateData('products'); } catch (e) { console.warn('Revalidation skipped:', e); }
+    } catch (error) {
+      alert('Failed to update products: ' + error.message);
+    } finally {
+      setBulkToggling(false);
     }
   };
 
@@ -429,6 +465,22 @@ export default function AdminProductsPage() {
             Deselect all
           </button>
           <button
+            onClick={() => handleBulkToggleActive(false)}
+            disabled={bulkToggling}
+            className="flex items-center gap-1.5 px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-full text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
+          >
+            {bulkToggling ? <Loader2 size={12} className="animate-spin" /> : <EyeOff size={12} className="text-amber-500" />}
+            Disable
+          </button>
+          <button
+            onClick={() => handleBulkToggleActive(true)}
+            disabled={bulkToggling}
+            className="flex items-center gap-1.5 px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-full text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
+          >
+            {bulkToggling ? <Loader2 size={12} className="animate-spin" /> : <Eye size={12} className="text-emerald-500" />}
+            Enable
+          </button>
+          <button
             onClick={() => {
               setBulkEditFields({ updateBrand: false, updateCategory: false, updatePrice: false });
               setBulkEditData({ brand: '', category: '', price: '' });
@@ -504,6 +556,7 @@ export default function AdminProductsPage() {
                   <th className="p-4 font-medium text-sm text-muted-foreground">Brand</th>
                   <th className="p-4 font-medium text-sm text-muted-foreground">Brand Category</th>
                   <th className="p-4 font-medium text-sm text-muted-foreground">Price</th>
+                  <th className="p-4 font-medium text-sm text-muted-foreground">Status</th>
                   <th className="p-4 font-medium text-sm text-muted-foreground text-right">Actions</th>
                 </tr>
               </thead>
@@ -540,6 +593,23 @@ export default function AdminProductsPage() {
                       <td className="p-4 font-medium">
                         {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.price || 0)}
                       </td>
+                      <td className="p-4">
+                        <button
+                          onClick={() => handleToggleActive(product.id, product.is_active)}
+                          title={product.is_active === false ? 'Enable product' : 'Disable product'}
+                          className="cursor-pointer"
+                        >
+                          {product.is_active === false ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                              <EyeOff size={11} /> Disabled
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                              <Eye size={11} /> Active
+                            </span>
+                          )}
+                        </button>
+                      </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link href={`/admin/products/edit/${product.id}`} className="p-2 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-colors">
@@ -558,7 +628,7 @@ export default function AdminProductsPage() {
                 })}
                 {filteredProducts.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="p-12 text-center text-muted-foreground font-light italic">
+                    <td colSpan="8" className="p-12 text-center text-muted-foreground font-light italic">
                       {searchTerm ? 'No products match your search. Try adjusting your query.' : 'No products found. Add your first one to get started.'}
                     </td>
                   </tr>
