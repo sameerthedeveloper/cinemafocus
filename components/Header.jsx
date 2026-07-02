@@ -22,9 +22,11 @@ const Header = () => {
 
   const isHome = pathname === '/';
 
-  // "Dark Header" State (White Logo/Text)
-  // During hydration, we default to the state that matches the Home Hero's background
+  // Text/icon color: follows theme or transparent-header state
   const useLightContent = theme === 'dark' || (isHome && !isScrolled);
+  // Logo swap: ONLY based on whether header is transparent over dark hero
+  // theme must NOT override — white logo on white bg = invisible
+  const useLightLogo = isHome && !isScrolled;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,11 +65,11 @@ const Header = () => {
       <div className="container px-6 mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="block hover:opacity-80 transition-opacity z-50" aria-label="Cinema Focus Home">
-          {/* Mobile Logo (Always Dark/Standard) */}
+          {/* Mobile Logo — always dark logo (mobile header always has white bg) */}
           <div className="h-10 w-48 relative md:hidden">
-            <Image 
-              src={logo} 
-              alt="Cinema Focus Logo" 
+            <Image
+              src={logo}
+              alt="Cinema Focus Logo"
               fill
               priority
               className="object-contain object-left"
@@ -78,11 +80,11 @@ const Header = () => {
           {/* Desktop Logo (Dynamic) */}
           <div className={clsx(
               "hidden md:block relative transition-all duration-500",
-              useLightContent ? "h-14 md:h-16 w-64" : "h-10 md:h-12 w-48"
+              useLightLogo ? "h-14 md:h-16 w-64" : "h-10 md:h-12 w-48"
             )}>
-            <Image 
-              src={useLightContent ? logoLight : logo} 
-              alt="Cinema Focus Logo" 
+            <Image
+              src={useLightLogo ? logoLight : logo}
+              alt="Cinema Focus Logo"
               fill
               priority
               className="object-contain object-left"
