@@ -42,3 +42,4 @@ next-env.d.ts
 # Temporary Scripts
 scripts/inspect_site_content.js
 scripts/test_connection.js
+.claude/
