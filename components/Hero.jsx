@@ -65,7 +65,9 @@ const Hero = ({
   ctaVariant = 'primary',
   ctaSize = 'lg',
   ctaShape = 'rounded-full',
-  duration = 6
+  duration = 6,
+  textColor = 'white',
+  textColorCustom = '#ffffff'
 }) => {
 
   // Normalize slides: if slides array is empty, construct it from legacy props
@@ -85,6 +87,8 @@ const Hero = ({
     overlayColor,
     overlayColorCustom,
     overlayOpacity,
+    textColor,
+    textColorCustom,
     ctaVariant,
     ctaSize,
     ctaShape,
@@ -211,6 +215,18 @@ const Hero = ({
     return '#000000';
   };
 
+  const getTextColor = (slide) => {
+    if (slide.textColor === 'black') return '#000000';
+    if (slide.textColor === 'custom') return slide.textColorCustom || '#ffffff';
+    return '#ffffff';
+  };
+
+  const getSubtitleColor = (slide) => {
+    if (slide.textColor === 'black') return '#3f3f46'; // zinc-700
+    if (slide.textColor === 'custom') return slide.textColorCustom || '#ffffff'; // maybe with some opacity, but full color is safer
+    return '#d4d4d8'; // zinc-300
+  };
+
   // Build CTA button dynamic classes per slide (enhanced with glow hover)
   const getButtonClasses = (slide) => {
     const shape = slide.ctaShape === 'rounded-none' ? 'rounded-none' : slide.ctaShape === 'rounded-lg' ? 'rounded-lg' : 'rounded-full';
@@ -239,19 +255,21 @@ const Hero = ({
   };
 
   const getTitleStyle = (slide) => {
-    if (!slide.titleSize) return {};
-    return {
-      fontSize: `clamp(24px, 5vw, ${slide.titleSize}px)`,
-      lineHeight: '1.15'
-    };
+    const style = { color: getTextColor(slide) };
+    if (slide.titleSize) {
+      style.fontSize = `clamp(24px, 5vw, ${slide.titleSize}px)`;
+      style.lineHeight = '1.15';
+    }
+    return style;
   };
 
   const getSubtitleStyle = (slide) => {
-    if (!slide.subtitleSize) return {};
-    return {
-      fontSize: `clamp(14px, 2.5vw, ${slide.subtitleSize}px)`,
-      lineHeight: '1.4'
-    };
+    const style = { color: getSubtitleColor(slide) };
+    if (slide.subtitleSize) {
+      style.fontSize = `clamp(14px, 2.5vw, ${slide.subtitleSize}px)`;
+      style.lineHeight = '1.4';
+    }
+    return style;
   };
 
   return (
@@ -286,10 +304,10 @@ const Hero = ({
               )}>
                 {isActive && (
                   <div className={clsx("w-full max-w-xl space-y-8 animate-fade-in-up flex flex-col", flexAlignItems)}>
-                     <h1 ref={titleRef} className={clsx("text-4xl md:text-5xl lg:text-7xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-md", slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getTitleStyle(slide)}>
+                     <h1 ref={titleRef} className={clsx("text-4xl md:text-5xl lg:text-7xl font-medium tracking-tight leading-[1.1] drop-shadow-md", slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p ref={subtitleRef} className={clsx("text-lg md:text-xl text-zinc-300 font-light leading-relaxed drop-shadow-sm", pAlignClass, slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("text-lg md:text-xl font-light leading-relaxed drop-shadow-sm whitespace-pre-line", pAlignClass, slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
                      <div className="pt-4">
@@ -359,10 +377,10 @@ const Hero = ({
                 <div className={`flex flex-col ${alignClass}`}>
                   {isActive && (
                     <div className={`max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                      <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
+                      <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
                         {slide.title}
                       </h1>
-                      <p ref={subtitleRef} className={clsx("text-xl md:text-2xl text-zinc-300 font-light max-w-2xl leading-relaxed drop-shadow-md", pAlignClass)} style={getSubtitleStyle(slide)}>
+                      <p ref={subtitleRef} className={clsx("text-xl md:text-2xl font-light max-w-2xl leading-relaxed drop-shadow-md whitespace-pre-line", pAlignClass)} style={getSubtitleStyle(slide)}>
                         {slide.subtitle}
                       </p>
                       <div className="pt-8">
@@ -431,10 +449,10 @@ const Hero = ({
                <div className={`flex flex-col ${alignClass}`}>
                  {isActive && (
                    <div className={`max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                     <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight text-white leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
+                     <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p ref={subtitleRef} className={clsx("text-xl md:text-2xl text-zinc-300 font-light max-w-2xl leading-relaxed drop-shadow-md", pAlignClass)} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("text-xl md:text-2xl font-light max-w-2xl leading-relaxed drop-shadow-md whitespace-pre-line", pAlignClass)} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
                      <div className="pt-8">

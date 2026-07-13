@@ -233,6 +233,8 @@ export default function AdminSiteControlPage() {
                 overlayColor: val.overlayColor || 'black',
                 overlayColorCustom: val.overlayColorCustom || '#000000',
                 overlayOpacity: val.overlayOpacity !== undefined ? val.overlayOpacity : 40,
+                textColor: val.textColor || 'white',
+                textColorCustom: val.textColorCustom || '#ffffff',
                 ctaVariant: val.ctaVariant || 'primary',
                 ctaSize: val.ctaSize || 'lg',
                 ctaShape: val.ctaShape || 'rounded-full',
@@ -334,6 +336,8 @@ export default function AdminSiteControlPage() {
       overlayColor: 'black',
       overlayColorCustom: '#000000',
       overlayOpacity: 40,
+      textColor: 'white',
+      textColorCustom: '#ffffff',
       ctaVariant: 'primary',
       ctaSize: 'lg',
       ctaShape: 'rounded-full',
@@ -382,6 +386,7 @@ export default function AdminSiteControlPage() {
           layout: 'full-bg', textAlignment: 'center', verticalAlignment: 'center',
           imageOpacity: 60, imageBlur: 0, imageBrightness: 100, imagePosition: 'center',
           overlayColor: 'black', overlayColorCustom: '#000000', overlayOpacity: 40,
+          textColor: 'white', textColorCustom: '#ffffff',
           ctaVariant: 'primary', ctaSize: 'lg', ctaShape: 'rounded-full'
         });
       }
@@ -565,6 +570,8 @@ export default function AdminSiteControlPage() {
             overlayColor: 'black',
             overlayColorCustom: '#000000',
             overlayOpacity: 40,
+            textColor: 'white',
+            textColorCustom: '#ffffff',
             ctaVariant: 'primary',
             ctaSize: 'lg',
             ctaShape: 'rounded-full',
@@ -704,6 +711,35 @@ export default function AdminSiteControlPage() {
                           />
                         </div>
                       </div>
+                   </div>
+
+                   {/* Text Color */}
+                   <div className="space-y-2">
+                     <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Text Color</label>
+                     <div className="flex gap-4">
+                       <select value={currentSlide.textColor || 'white'} onChange={e => updateCurrentSlide({ textColor: e.target.value })} className="w-full p-2.5 bg-secondary/30 rounded-lg border border-border outline-none focus:border-primary text-sm cursor-pointer text-foreground">
+                         <option value="white">White</option>
+                         <option value="black">Black</option>
+                         <option value="custom">Custom Color (HEX)</option>
+                       </select>
+                       {currentSlide.textColor === 'custom' && (
+                         <div className="flex gap-2 items-center w-full">
+                           <input 
+                             type="color" 
+                             value={currentSlide.textColorCustom || '#ffffff'} 
+                             onChange={e => updateCurrentSlide({ textColorCustom: e.target.value })} 
+                             className="w-10 h-10 rounded border border-border cursor-pointer bg-transparent shrink-0"
+                           />
+                           <input 
+                             type="text" 
+                             value={currentSlide.textColorCustom || ''} 
+                             onChange={e => updateCurrentSlide({ textColorCustom: e.target.value })} 
+                             className="flex-grow p-2.5 bg-background border border-border text-sm rounded uppercase font-mono" 
+                             placeholder="#ffffff" 
+                           />
+                         </div>
+                       )}
+                     </div>
                    </div>
 
                    {/* Layout Mode */}
@@ -1004,6 +1040,18 @@ export default function AdminSiteControlPage() {
                       </div>
 
                       {/* Interactive Visual Simulator Box */}
+                      {(() => {
+                        const getSimTextColor = (slide) => {
+                          if (slide.textColor === 'black') return '#000000';
+                          if (slide.textColor === 'custom') return slide.textColorCustom || '#ffffff';
+                          return '#ffffff';
+                        };
+                        const getSimSubtitleColor = (slide) => {
+                          if (slide.textColor === 'black') return '#3f3f46';
+                          if (slide.textColor === 'custom') return slide.textColorCustom || '#ffffff';
+                          return '#d4d4d8';
+                        };
+                        return (
                       <div className="relative border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-950 h-80 w-full flex flex-col justify-center shadow-xl">
                         
                         {currentSlide.layout === 'minimal' ? (
@@ -1015,10 +1063,10 @@ export default function AdminSiteControlPage() {
                             <div className={clsx("relative z-10 flex flex-col space-y-3", 
                               currentSlide.textAlignment === 'left' ? 'items-start text-left' : currentSlide.textAlignment === 'right' ? 'items-end text-right' : 'items-center text-center'
                             )}>
-                              <h3 className="text-lg md:text-xl font-bold tracking-tight text-white leading-tight" style={{ fontSize: currentSlide.titleSize ? `${Math.max(14, currentSlide.titleSize / 2.5)}px` : undefined }}>
+                              <h3 className="text-lg md:text-xl font-bold tracking-tight leading-tight" style={{ color: getSimTextColor(currentSlide), fontSize: currentSlide.titleSize ? `${Math.max(14, currentSlide.titleSize / 2.5)}px` : undefined }}>
                                 {currentSlide.title || "Sound, unbound."}
                               </h3>
-                              <p className="text-[10px] text-zinc-400 font-light max-w-xs leading-relaxed line-clamp-2" style={{ fontSize: currentSlide.subtitleSize ? `${Math.max(9, currentSlide.subtitleSize / 1.8)}px` : undefined }}>
+                              <p className="text-[10px] font-light max-w-xs leading-relaxed line-clamp-2 whitespace-pre-line" style={{ color: getSimSubtitleColor(currentSlide), fontSize: currentSlide.subtitleSize ? `${Math.max(9, currentSlide.subtitleSize / 1.8)}px` : undefined }}>
                                 {currentSlide.subtitle || "Experience music in its purest form..."}
                               </p>
                               <div className="pt-2">
@@ -1047,10 +1095,10 @@ export default function AdminSiteControlPage() {
                               <div className={clsx("flex flex-col space-y-2",
                                 currentSlide.textAlignment === 'left' ? 'items-start text-left' : currentSlide.textAlignment === 'right' ? 'items-end text-right' : 'items-center text-center'
                               )}>
-                                <h3 className="text-xs md:text-sm font-bold tracking-tight text-white leading-tight line-clamp-3" style={{ fontSize: currentSlide.titleSize ? `${Math.max(12, currentSlide.titleSize / 3)}px` : undefined }}>
+                                <h3 className="text-xs md:text-sm font-bold tracking-tight leading-tight line-clamp-3" style={{ color: getSimTextColor(currentSlide), fontSize: currentSlide.titleSize ? `${Math.max(12, currentSlide.titleSize / 3)}px` : undefined }}>
                                   {currentSlide.title || "Sound, unbound."}
                                 </h3>
-                                <p className="text-[9px] text-zinc-400 font-light leading-relaxed line-clamp-2" style={{ fontSize: currentSlide.subtitleSize ? `${Math.max(8, currentSlide.subtitleSize / 2)}px` : undefined }}>
+                                <p className="text-[9px] font-light leading-relaxed line-clamp-2 whitespace-pre-line" style={{ color: getSimSubtitleColor(currentSlide), fontSize: currentSlide.subtitleSize ? `${Math.max(8, currentSlide.subtitleSize / 2)}px` : undefined }}>
                                   {currentSlide.subtitle || "Experience music..."}
                                 </p>
                                 <div className="pt-1.5">
@@ -1130,10 +1178,10 @@ export default function AdminSiteControlPage() {
                               <div className={clsx("w-full flex flex-col space-y-3",
                                 currentSlide.textAlignment === 'left' ? 'items-start text-left' : currentSlide.textAlignment === 'right' ? 'items-end text-right' : 'items-center text-center'
                               )}>
-                                <h3 className="text-lg md:text-xl font-bold tracking-tight text-white leading-tight drop-shadow-md" style={{ fontSize: currentSlide.titleSize ? `${Math.max(14, currentSlide.titleSize / 2.5)}px` : undefined }}>
+                                <h3 className="text-lg md:text-xl font-bold tracking-tight leading-tight drop-shadow-md" style={{ color: getSimTextColor(currentSlide), fontSize: currentSlide.titleSize ? `${Math.max(14, currentSlide.titleSize / 2.5)}px` : undefined }}>
                                   {currentSlide.title || "Sound, unbound."}
                                 </h3>
-                                <p className="text-[10px] text-zinc-200 font-light max-w-xs leading-relaxed line-clamp-2 drop-shadow-sm" style={{ fontSize: currentSlide.subtitleSize ? `${Math.max(9, currentSlide.subtitleSize / 1.8)}px` : undefined }}>
+                                <p className="text-[10px] font-light max-w-xs leading-relaxed line-clamp-2 drop-shadow-sm whitespace-pre-line" style={{ color: getSimSubtitleColor(currentSlide), fontSize: currentSlide.subtitleSize ? `${Math.max(9, currentSlide.subtitleSize / 1.8)}px` : undefined }}>
                                   {currentSlide.subtitle || "Experience music in its purest form..."}
                                 </p>
                                 <div className="pt-2">
@@ -1155,6 +1203,8 @@ export default function AdminSiteControlPage() {
                           </div>
                         )}
                       </div>
+                      );
+                      })()}
 
                       <div className="p-4 bg-secondary/10 border border-border rounded-xl text-[11px] text-muted-foreground flex gap-2">
                          <Info size={14} className="text-primary flex-shrink-0 mt-0.5" />
