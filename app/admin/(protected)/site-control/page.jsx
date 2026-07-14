@@ -395,7 +395,7 @@ export default function AdminSiteControlPage() {
     });
   };
 
-  const handleHeroImageUpload = async (e) => {
+  const handleHeroImageUpload = async (e, fieldName = 'imageUrl') => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -417,9 +417,9 @@ export default function AdminSiteControlPage() {
       setHero(prev => {
         const slides = [...(prev.slides || [])];
         if (slides[activeSlideIndex]) {
-          slides[activeSlideIndex] = { ...slides[activeSlideIndex], imageUrl: publicUrl };
+          slides[activeSlideIndex] = { ...slides[activeSlideIndex], [fieldName]: publicUrl };
         } else {
-          slides[activeSlideIndex] = { imageUrl: publicUrl };
+          slides[activeSlideIndex] = { [fieldName]: publicUrl };
         }
         return { ...prev, slides };
       });
@@ -895,26 +895,76 @@ export default function AdminSiteControlPage() {
                      <div className="border-t border-border pt-4 mt-2 space-y-4">
                        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Image Filters & Position</h4>
                        
-                       <div className="space-y-2">
-                         <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Background Image</label>
-                         <div className="flex gap-4 items-center">
-                            <div className="w-20 h-12 bg-secondary rounded-lg overflow-hidden border border-border flex-shrink-0">
-                              {currentSlide.imageUrl && <img src={currentSlide.imageUrl} className="w-full h-full object-cover" />}
-                            </div>
-                            <label className="cursor-pointer bg-secondary px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-secondary/70 flex items-center gap-1.5 border border-border transition-colors">
-                              <Upload size={14} /> Change Asset
-                              <input type="file" className="hidden" accept="image/*" onChange={handleHeroImageUpload} />
-                            </label>
-                            <div className="space-y-1 flex-grow">
-                              <select value={currentSlide.imagePosition || 'center'} onChange={e => updateCurrentSlide({ imagePosition: e.target.value })} className="p-1.5 w-full bg-secondary/30 rounded border border-border text-xs text-foreground cursor-pointer">
-                                <option value="center">Center Center</option>
-                                <option value="top">Top Align</option>
-                                <option value="bottom">Bottom Align</option>
-                                <option value="left">Left Align</option>
-                                <option value="right">Right Align</option>
-                              </select>
-                            </div>
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         {/* Desktop (Default) Image */}
+                         <div className="space-y-2 p-3 border border-border rounded-lg bg-secondary/10">
+                           <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex justify-between">
+                             <span>Desktop Image (Default)</span>
+                             <span className="text-primary">* Required</span>
+                           </label>
+                           <div className="flex gap-3 items-center">
+                              <div className="w-16 h-10 bg-secondary rounded overflow-hidden border border-border shrink-0">
+                                {currentSlide.imageUrl && <img src={currentSlide.imageUrl} className="w-full h-full object-cover" />}
+                              </div>
+                              <label className="cursor-pointer bg-secondary px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-secondary/70 border border-border transition-colors">
+                                <Upload size={14} className="inline mr-1" /> Upload
+                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleHeroImageUpload(e, 'imageUrl')} />
+                              </label>
+                           </div>
                          </div>
+
+                         {/* Mobile Image */}
+                         <div className="space-y-2 p-3 border border-border rounded-lg bg-secondary/10">
+                           <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Mobile Image (Optional)</label>
+                           <div className="flex gap-3 items-center">
+                              <div className="w-16 h-10 bg-secondary rounded overflow-hidden border border-border shrink-0">
+                                {currentSlide.imageUrlMobile && <img src={currentSlide.imageUrlMobile} className="w-full h-full object-cover" />}
+                              </div>
+                              <label className="cursor-pointer bg-secondary px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-secondary/70 border border-border transition-colors">
+                                <Upload size={14} className="inline mr-1" /> Upload
+                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleHeroImageUpload(e, 'imageUrlMobile')} />
+                              </label>
+                           </div>
+                         </div>
+
+                         {/* Tablet Image */}
+                         <div className="space-y-2 p-3 border border-border rounded-lg bg-secondary/10">
+                           <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Tablet Image (Optional)</label>
+                           <div className="flex gap-3 items-center">
+                              <div className="w-16 h-10 bg-secondary rounded overflow-hidden border border-border shrink-0">
+                                {currentSlide.imageUrlTablet && <img src={currentSlide.imageUrlTablet} className="w-full h-full object-cover" />}
+                              </div>
+                              <label className="cursor-pointer bg-secondary px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-secondary/70 border border-border transition-colors">
+                                <Upload size={14} className="inline mr-1" /> Upload
+                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleHeroImageUpload(e, 'imageUrlTablet')} />
+                              </label>
+                           </div>
+                         </div>
+
+                         {/* Ultrawide Image */}
+                         <div className="space-y-2 p-3 border border-border rounded-lg bg-secondary/10">
+                           <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Ultrawide Image (Optional)</label>
+                           <div className="flex gap-3 items-center">
+                              <div className="w-16 h-10 bg-secondary rounded overflow-hidden border border-border shrink-0">
+                                {currentSlide.imageUrlUltrawide && <img src={currentSlide.imageUrlUltrawide} className="w-full h-full object-cover" />}
+                              </div>
+                              <label className="cursor-pointer bg-secondary px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-secondary/70 border border-border transition-colors">
+                                <Upload size={14} className="inline mr-1" /> Upload
+                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleHeroImageUpload(e, 'imageUrlUltrawide')} />
+                              </label>
+                           </div>
+                         </div>
+                       </div>
+                       
+                       <div className="space-y-2">
+                         <label className="text-[11px] font-medium text-muted-foreground">Image Alignment (Object Position)</label>
+                         <select value={currentSlide.imagePosition || 'center'} onChange={e => updateCurrentSlide({ imagePosition: e.target.value })} className="p-2.5 w-full bg-secondary/30 rounded-lg border border-border text-sm text-foreground cursor-pointer">
+                           <option value="center">Center Center</option>
+                           <option value="top">Top Align</option>
+                           <option value="bottom">Bottom Align</option>
+                           <option value="left">Left Align</option>
+                           <option value="right">Right Align</option>
+                         </select>
                        </div>
 
                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

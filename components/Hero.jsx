@@ -52,6 +52,9 @@ const Hero = ({
   ctaText, 
   ctaLink, 
   imageUrl,
+  imageUrlMobile,
+  imageUrlTablet,
+  imageUrlUltrawide,
   layout = 'full-bg',
   textAlignment = 'center',
   verticalAlignment = 'center',
@@ -77,6 +80,9 @@ const Hero = ({
     ctaText,
     ctaLink,
     imageUrl,
+    imageUrlMobile,
+    imageUrlTablet,
+    imageUrlUltrawide,
     layout,
     textAlignment,
     verticalAlignment,
@@ -98,6 +104,7 @@ const Hero = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isLightBackground, setIsLightBackground] = useState(false);
   const autoPlayRef = useRef(null);
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
@@ -180,6 +187,67 @@ const Hero = ({
     };
   }, [currentIndex, slideItems, isPaused]);
 
+  // SMART LOGO SWITCHING: Analyze current slide's background image brightness
+  useEffect(() => {
+    if (!slideItems || slideItems.length === 0) return;
+    
+    const currentSlide = slideItems[currentIndex];
+    
+    // If layout doesn't have a background image, assume dark background (white logo)
+    if (currentSlide.layout === 'minimal' || !currentSlide.imageUrl) {
+      setIsLightBackground(false);
+      window.dispatchEvent(new CustomEvent('hero-brightness', { detail: { isLight: false } }));
+      return;
+    }
+
+    const checkImageBrightness = async () => {
+      try {
+        const img = new window.Image();
+        img.crossOrigin = "Anonymous";
+        img.src = currentSlide.imageUrl;
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        // Analyze top 20% (where header sits)
+        const sampleHeight = Math.max(1, Math.floor(canvas.height * 0.2));
+        const imageData = ctx.getImageData(0, 0, canvas.width, sampleHeight);
+        const data = imageData.data;
+        let colorSum = 0;
+        
+        for (let x = 0, len = data.length; x < len; x += 4) {
+          const r = data[x];
+          const g = data[x + 1];
+          const b = data[x + 2];
+          // relative luminance
+          const avg = Math.floor(0.299 * r + 0.587 * g + 0.114 * b);
+          colorSum += avg;
+        }
+        
+        const brightness = Math.floor(colorSum / (canvas.width * sampleHeight));
+        // If brightness is high (e.g. > 160 out of 255), it's a light background
+        const isLight = brightness > 160;
+        
+        setIsLightBackground(isLight);
+        window.dispatchEvent(new CustomEvent('hero-brightness', { detail: { isLight } }));
+      } catch (e) {
+        // Fallback to dark background (white logo) on CORS or load errors
+        setIsLightBackground(false);
+        window.dispatchEvent(new CustomEvent('hero-brightness', { detail: { isLight: false } }));
+      }
+    };
+
+    checkImageBrightness();
+  }, [currentIndex, slideItems]);
+
   // Alignments mapping
   const horizontalAlignClasses = {
     left: 'text-left items-start justify-start',
@@ -216,12 +284,14 @@ const Hero = ({
   };
 
   const getTextColor = (slide) => {
+    if (isLightBackground) return '#000000'; // Override for bright backgrounds
     if (slide.textColor === 'black') return '#000000';
     if (slide.textColor === 'custom') return slide.textColorCustom || '#ffffff';
     return '#ffffff';
   };
 
   const getSubtitleColor = (slide) => {
+    if (isLightBackground) return '#3f3f46'; // dark text (zinc-700) on bright bg
     if (slide.textColor === 'black') return '#3f3f46'; // zinc-700
     if (slide.textColor === 'custom') return slide.textColorCustom || '#ffffff'; // maybe with some opacity, but full color is safer
     return '#d4d4d8'; // zinc-300
@@ -233,21 +303,33 @@ const Hero = ({
     const sizeClass = slide.ctaSize === 'sm' ? 'px-6 py-2 text-xs' : slide.ctaSize === 'lg' ? 'px-10 py-4 text-base' : 'px-8 py-3 text-sm';
     const hoverBase = "hover:scale-105 hover:-translate-y-1 transition-all duration-200 ease-out";
 
+    // SMART OVERRIDE: If light background and using primary variant (default white), flip it to dark button
+    if (isLightBackground && (slide.ctaVariant === 'primary' || !slide.ctaVariant)) {
+      return clsx(shape, sizeClass, hoverBase, "bg-black text-white hover:bg-zinc-800 border-none font-bold shadow-lg hover:shadow-black/40");
+    }
+
     if (slide.ctaVariant === 'secondary') {
       return clsx(shape, sizeClass, hoverBase, "bg-zinc-900 text-white hover:bg-zinc-800 border border-zinc-800 font-bold shadow-md hover:shadow-lg hover:shadow-zinc-700/50");
     } else if (slide.ctaVariant === 'outline') {
+      // Smart override for outline button on bright bg
+      if (isLightBackground) {
+        return clsx(shape, sizeClass, hoverBase, "bg-transparent text-black border border-black hover:bg-black hover:text-white font-bold hover:shadow-lg hover:shadow-black/30");
+      }
       return clsx(shape, sizeClass, hoverBase, "bg-transparent text-white border border-white hover:bg-white hover:text-black font-bold hover:shadow-lg hover:shadow-white/30");
     } else if (slide.ctaVariant === 'gradient') {
       return clsx(shape, sizeClass, hoverBase, "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:opacity-90 font-bold border-none shadow-lg hover:shadow-indigo-500/40");
     } else if (slide.ctaVariant === 'link') {
-      return clsx(shape, sizeClass, hoverBase, "bg-transparent text-white hover:underline font-medium border-none p-0");
+      return clsx(shape, sizeClass, hoverBase, "bg-transparent text-white hover:underline font-medium border-none p-0", isLightBackground && "text-black");
     }
 
-    // Default / Primary: White Button
+    // Default / Primary: White Button (for dark background)
     return clsx(shape, sizeClass, hoverBase, "bg-white text-black hover:bg-zinc-200 border-none font-bold shadow-lg hover:shadow-white/40");
   };
 
   const getButtonStyle = (slide) => {
+    // If we flipped primary to black because of light bg, we don't need color override
+    if (isLightBackground && (slide.ctaVariant === 'primary' || !slide.ctaVariant)) return {};
+    
     if (slide.ctaVariant === 'primary' || !slide.ctaVariant) {
       return { color: 'black' }; // Force black text on primary white background
     }
@@ -272,9 +354,58 @@ const Hero = ({
     return style;
   };
 
+  const renderResponsiveImages = (slide, idx, isActive, isSplit = false) => {
+    if (!slide.imageUrl && !slide.imageUrlMobile && !slide.imageUrlTablet && !slide.imageUrlUltrawide) {
+      return (
+        <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-600">
+          No Image Provided
+        </div>
+      );
+    }
+
+    const desktopImg = slide.imageUrl;
+    const mobileImg = slide.imageUrlMobile || desktopImg;
+    const tabletImg = slide.imageUrlTablet || desktopImg;
+    const ultrawideImg = slide.imageUrlUltrawide || desktopImg;
+
+    const commonProps = {
+      alt: slide.title || "Cinema Focus Hero",
+      fill: true,
+      priority: idx === 0,
+      fetchPriority: idx === 0 ? "high" : "auto",
+      loading: idx === 0 ? "eager" : "lazy",
+      style: { 
+        objectPosition: slide.imagePosition || 'center',
+        filter: `brightness(${slide.imageBrightness !== undefined ? slide.imageBrightness : 100}%) blur(${slide.imageBlur !== undefined ? slide.imageBlur : 0}px)`,
+        opacity: (slide.imageOpacity !== undefined ? slide.imageOpacity : 100) / 100
+      }
+    };
+
+    const getImgClass = (breakpointClass) => clsx(
+      breakpointClass,
+      "object-cover transition-all ease-out",
+      isActive ? "scale-105 duration-[8000ms]" : "scale-100 duration-500"
+    );
+
+    const sizes = isSplit ? "(max-width: 768px) 100vw, 50vw" : "100vw";
+
+    return (
+      <>
+        {/* Mobile: 0 - 768px */}
+        <Image src={mobileImg} {...commonProps} className={getImgClass("block md:hidden")} sizes={sizes} />
+        {/* Tablet: 768px - 1024px */}
+        <Image src={tabletImg} {...commonProps} className={getImgClass("hidden md:block lg:hidden")} sizes={sizes} />
+        {/* Laptop/Desktop: 1024px - 2560px */}
+        <Image src={desktopImg} {...commonProps} className={getImgClass("hidden lg:block 3xl:hidden")} sizes={sizes} />
+        {/* Ultrawide: 2560px+ */}
+        <Image src={ultrawideImg} {...commonProps} className={getImgClass("hidden 3xl:block")} sizes={sizes} />
+      </>
+    );
+  };
+
   return (
     <div 
-      className="relative w-full h-screen bg-zinc-950 overflow-hidden group/hero"
+      className="relative w-full 3xl:max-w-[2560px] mx-auto h-[100dvh] bg-zinc-950 overflow-hidden group/hero"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -328,28 +459,7 @@ const Hero = ({
                 "relative h-[50vh] md:h-full w-full bg-zinc-900 z-0",
                 isRightSplit ? "md:order-1" : "md:order-2"
               )}>
-                 {slide.imageUrl ? (
-                   <Image 
-                     src={slide.imageUrl} 
-                     alt={slide.title || "Hero Image"} 
-                     fill
-                     priority={idx === 0}
-                     className={clsx(
-                       "object-cover transition-all ease-out",
-                       isActive ? "scale-105 duration-[8000ms]" : "scale-100 duration-500"
-                     )}
-                     style={{ 
-                       objectPosition: slide.imagePosition || 'center',
-                       filter: `brightness(${slide.imageBrightness !== undefined ? slide.imageBrightness : 100}%) blur(${slide.imageBlur !== undefined ? slide.imageBlur : 0}px)`,
-                       opacity: (slide.imageOpacity !== undefined ? slide.imageOpacity : 100) / 100
-                     }}
-                     sizes="(max-width: 768px) 100vw, 50vw"
-                   />
-                 ) : (
-                   <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-600">
-                     No Image Provided
-                   </div>
-                 )}
+                 {renderResponsiveImages(slide, idx, isActive, true)}
                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent md:bg-gradient-to-r md:from-zinc-950/20 md:to-transparent pointer-events-none" />
               </div>
             </div>
@@ -412,26 +522,7 @@ const Hero = ({
           >
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
-              {slide.imageUrl ? (
-                <Image 
-                  src={slide.imageUrl} 
-                  alt={slide.title || "Cinema Focus Hero"} 
-                  fill
-                  priority={idx === 0}
-                  className={clsx(
-                    "object-cover transition-all ease-out",
-                    isActive ? "scale-105 duration-[8000ms]" : "scale-100 duration-500"
-                  )}
-                  style={{ 
-                    objectPosition: slide.imagePosition || 'center',
-                    filter: `brightness(${slide.imageBrightness !== undefined ? slide.imageBrightness : 100}%) blur(${slide.imageBlur !== undefined ? slide.imageBlur : 0}px)`,
-                    opacity: (slide.imageOpacity !== undefined ? slide.imageOpacity : 60) / 100
-                  }}
-                  sizes="100vw"
-                />
-              ) : (
-                <div className="w-full h-full bg-zinc-900" />
-              )}
+              {renderResponsiveImages(slide, idx, isActive, false)}
               
               {/* Overlay */}
               <div 

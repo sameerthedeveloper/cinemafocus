@@ -15,18 +15,26 @@ const Header = () => {
   const pathname = usePathname();
   const { theme, showDesktopMenu } = useSiteSettings();
   const [mounted, setMounted] = useState(false);
+  const [isHeroLight, setIsHeroLight] = useState(false);
   
   useEffect(() => {
     setMounted(true);
+    
+    // Listen for smart brightness detection from Hero
+    const handleBrightness = (e) => {
+      setIsHeroLight(e.detail.isLight);
+    };
+    window.addEventListener('hero-brightness', handleBrightness);
+    return () => window.removeEventListener('hero-brightness', handleBrightness);
   }, []);
 
   const isHome = pathname === '/';
 
   // Text/icon color: follows theme or transparent-header state
-  const useLightContent = theme === 'dark' || (isHome && !isScrolled);
+  const useLightContent = theme === 'dark' || (isHome && !isScrolled && !isHeroLight);
   // Logo swap: ONLY based on whether header is transparent over dark hero
   // theme must NOT override — white logo on white bg = invisible
-  const useLightLogo = isHome && !isScrolled;
+  const useLightLogo = isHome && !isScrolled && !isHeroLight;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -82,12 +90,28 @@ const Header = () => {
               "hidden md:block relative transition-all duration-500",
               useLightLogo ? "h-14 md:h-16 w-64" : "h-10 md:h-12 w-48"
             )}>
+            {/* Light Logo (used on home hero) */}
             <Image
-              src={useLightLogo ? logoLight : logo}
-              alt="Cinema Focus Logo"
+              src={logoLight}
+              alt="Cinema Focus Logo Light"
               fill
               priority
-              className="object-contain object-left"
+              className={clsx(
+                "object-contain object-left transition-opacity duration-500",
+                useLightLogo ? "opacity-100" : "opacity-0"
+              )}
+              sizes="300px"
+            />
+            {/* Dark Logo (used when scrolled or on other pages) */}
+            <Image
+              src={logo}
+              alt="Cinema Focus Logo Dark"
+              fill
+              priority
+              className={clsx(
+                "object-contain object-left transition-opacity duration-500",
+                useLightLogo ? "opacity-0" : "opacity-100"
+              )}
               sizes="300px"
             />
           </div>

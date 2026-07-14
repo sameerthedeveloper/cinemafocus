@@ -68,6 +68,18 @@
     color: var(--color-foreground);
     @apply font-sans antialiased selection:bg-black/10;
     font-feature-settings: "cv11", "ss01";
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+  html::-webkit-scrollbar {
+    display: none;
+  }
+  html {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply tracking-tight font-medium;
