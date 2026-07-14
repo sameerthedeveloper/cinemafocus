@@ -92,7 +92,9 @@ export default async function Home() {
           ctaVariant: heroData?.ctaVariant || 'primary',
           ctaSize: heroData?.ctaSize || 'lg',
           ctaShape: heroData?.ctaShape || 'rounded-full',
-          duration: heroData?.duration !== undefined ? heroData.duration : 6
+          duration: heroData?.duration !== undefined ? heroData.duration : 6,
+          mobileTextAlignment: heroData?.mobileTextAlignment || 'center',
+          mobileVerticalAlignment: heroData?.mobileVerticalAlignment || 'center'
         }]
       };
 

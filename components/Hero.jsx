@@ -523,10 +523,10 @@ const Hero = ({
 
               {/* Content */}
               <div className="container px-6 relative z-10 mx-auto">
-                <div className={`flex flex-col ${alignClass}`}>
+                <div className={`w-full flex flex-col ${alignClass}`}>
                   {isActive && (
-                    <div className={`max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                      <h1 ref={titleRef} className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl" style={getTitleStyle(slide)}>
+                    <div className={`w-full max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
+                      <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl", alignClass)} style={getTitleStyle(slide)}>
                         {slide.title}
                       </h1>
                       <p ref={subtitleRef} className={clsx("text-base sm:text-lg md:text-2xl font-medium max-w-2xl leading-relaxed drop-shadow-xl", pAlignClass)} style={getSubtitleStyle(slide)}>
@@ -576,10 +576,10 @@ const Hero = ({
 
             {/* Content */}
             <div className="container px-6 relative z-10 mx-auto">
-               <div className={`flex flex-col ${alignClass}`}>
+               <div className={`w-full flex flex-col ${alignClass}`}>
                  {isActive && (
-                   <div className={`max-w-4xl space-y-6 md:space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                     <h1 ref={titleRef} className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl" style={getTitleStyle(slide)}>
+                   <div className={`w-full max-w-4xl space-y-6 md:space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
+                     <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl", alignClass)} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
                      <p ref={subtitleRef} className={clsx("text-base sm:text-lg md:text-2xl font-medium max-w-2xl leading-relaxed drop-shadow-xl", pAlignClass)} style={getSubtitleStyle(slide)}>
