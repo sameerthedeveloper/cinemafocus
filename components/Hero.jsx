@@ -435,10 +435,10 @@ const Hero = ({
               )}>
                 {isActive && (
                   <div className={clsx("w-full max-w-xl space-y-8 animate-fade-in-up flex flex-col", flexAlignItems)}>
-                     <h1 ref={titleRef} className={clsx("text-4xl md:text-5xl lg:text-7xl font-medium tracking-tight leading-[1.1] drop-shadow-md", slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getTitleStyle(slide)}>
+                     <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] drop-shadow-xl", slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p ref={subtitleRef} className={clsx("text-lg md:text-xl font-light leading-relaxed drop-shadow-sm whitespace-pre-line", pAlignClass, slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("text-base sm:text-lg md:text-xl font-medium leading-relaxed drop-shadow-lg", pAlignClass, slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
                      <div className="pt-4">
@@ -487,10 +487,10 @@ const Hero = ({
                 <div className={`flex flex-col ${alignClass}`}>
                   {isActive && (
                     <div className={`max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                      <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
+                      <h1 ref={titleRef} className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl" style={getTitleStyle(slide)}>
                         {slide.title}
                       </h1>
-                      <p ref={subtitleRef} className={clsx("text-xl md:text-2xl font-light max-w-2xl leading-relaxed drop-shadow-md whitespace-pre-line", pAlignClass)} style={getSubtitleStyle(slide)}>
+                      <p ref={subtitleRef} className={clsx("text-base sm:text-lg md:text-2xl font-medium max-w-2xl leading-relaxed drop-shadow-xl", pAlignClass)} style={getSubtitleStyle(slide)}>
                         {slide.subtitle}
                       </p>
                       <div className="pt-8">
@@ -539,14 +539,14 @@ const Hero = ({
             <div className="container px-6 relative z-10 mx-auto">
                <div className={`flex flex-col ${alignClass}`}>
                  {isActive && (
-                   <div className={`max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                     <h1 ref={titleRef} className="text-4xl md:text-6xl lg:text-8xl font-medium tracking-tight leading-[1.1] drop-shadow-lg" style={getTitleStyle(slide)}>
+                   <div className={`max-w-4xl space-y-6 md:space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
+                     <h1 ref={titleRef} className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl" style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p ref={subtitleRef} className={clsx("text-xl md:text-2xl font-light max-w-2xl leading-relaxed drop-shadow-md whitespace-pre-line", pAlignClass)} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("text-base sm:text-lg md:text-2xl font-medium max-w-2xl leading-relaxed drop-shadow-xl", pAlignClass)} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
-                     <div className="pt-8">
+                     <div className="pt-4 md:pt-8">
                        <Button 
                          to={slide.ctaLink || '/products'} 
                          className={getButtonClasses(slide)}

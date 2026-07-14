@@ -63,11 +63,11 @@ const Header = () => {
       className={clsx(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out',
         // Mobile: Always visible background
-        'bg-background/80 backdrop-blur-xl py-3 border-b border-border',
+        'bg-background backdrop-blur-xl m-3 rounded-3xl py-3 border-b border-border',
         // Desktop: Dynamic based on scroll
         isScrolled 
-          ? 'md:bg-background/80 md:backdrop-blur-2xl md:shadow-sm md:py-3' 
-          : 'md:bg-transparent md:py-5 md:border-none md:backdrop-blur-none'
+          ? 'md:bg-background md:backdrop-blur-2xl md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:py-3' 
+          : 'md:bg-transparent/80 md:py-5 md:border-none md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:backdrop-blur-none'
       )}
     >
       <div className="container px-6 mx-auto flex items-center justify-between">
@@ -88,7 +88,7 @@ const Header = () => {
           {/* Desktop Logo (Dynamic) */}
           <div className={clsx(
               "hidden md:block relative transition-all duration-500",
-              useLightLogo ? "h-14 md:h-16 w-64" : "h-10 md:h-12 w-48"
+              useLightLogo ? "h-14 md:h-16 w-64 " : "h-10 md:h-12 w-48"
             )}>
             {/* Light Logo (used on home hero) */}
             <Image
@@ -119,7 +119,7 @@ const Header = () => {
 
         {/* Desktop Nav */}
         {showDesktopMenu && (
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className=" md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
@@ -140,7 +140,7 @@ const Header = () => {
         {/* Mobile Menu Toggle - Hidden on Desktop */}
         <button 
           className={clsx(
-            "md:hidden z-50 p-2 -mr-2 transition-colors",
+            "min-md:hidden z-50 p-2 -mr-2 transition-colors",
             useLightContent ? "text-black" : "text-foreground"
           )}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -152,11 +152,11 @@ const Header = () => {
         {/* Fullscreen Menu - Hidden on Desktop */}
         <div 
           className={clsx(
-            "fixed inset-0 mt-64 bg-background backdrop-blur-2xl z-40 flex flex-col items-center justify-center transition-all duration-500 ease-in-out md:hidden",
-            isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            "fixed inset-0 mt-65 bg-background backdrop-blur-2xl z-40 flex flex-col items-center justify-center transition-all duration-500 ease-in-out md:hidden",
+            isMenuOpen ? "rounded-xl opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           )}
         >
-          <nav className="flex  flex-col items-start p-7 bg-background w-full gap-8">
+          <nav className="flex  flex-col items-start p-7 rounded-4xl bg-background w-full gap-8">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
