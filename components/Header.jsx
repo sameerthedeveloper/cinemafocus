@@ -1,17 +1,19 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import { Menu, X } from 'lucide-react';
 import { useSiteSettings } from '../context/SiteSettingsContext';
+import gsap from 'gsap';
 const logo = '/images/logo.png';
 const logoLight = '/images/logo-light.webp';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
   const pathname = usePathname();
   const { theme, showDesktopMenu } = useSiteSettings();
   const [mounted, setMounted] = useState(false);
@@ -49,6 +51,29 @@ const Header = () => {
     setIsMenuOpen(false);
   }, [pathname]);
 
+  // GSAP Animation for Mobile Menu
+  useEffect(() => {
+    if (menuRef.current) {
+      if (isMenuOpen) {
+        gsap.to(menuRef.current, {
+          y: 0,
+          opacity: 1,
+          duration: 0.5,
+          ease: "power3.out",
+          pointerEvents: "auto",
+        });
+      } else {
+        gsap.to(menuRef.current, {
+          y: -50,
+          opacity: 0,
+          duration: 0.4,
+          ease: "power3.in",
+          pointerEvents: "none",
+        });
+      }
+    }
+  }, [isMenuOpen]);
+
   const navLinks = [
     { name: 'New Launches', path: '/products?category=new-arrivals' },
     { name: 'Products', path: '/products' },
@@ -66,8 +91,8 @@ const Header = () => {
         'bg-background backdrop-blur-xl m-3 rounded-3xl py-3 border-b border-border',
         // Desktop: Dynamic based on scroll
         isScrolled 
-          ? 'md:bg-background/80 md:backdrop-blur-2xl md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:py-3' 
-          : 'md:bg-transparent/80 md:py-5 md:border-none md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:backdrop-blur-none'
+          ? 'md:bg-background md:backdrop-blur-2xl md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:py-3' 
+          : 'md:bg-transparent md:py-5 md:border-none md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:backdrop-blur-none'
       )}
     >
       <div className="container px-6 mx-auto flex items-center justify-between">
@@ -119,7 +144,7 @@ const Header = () => {
 
         {/* Desktop Nav */}
         {showDesktopMenu && (
-          <nav className=" md:flex items-center gap-8">
+          <nav className="hidden md:flex justify-between items-center gap-8">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
@@ -140,7 +165,7 @@ const Header = () => {
         {/* Mobile Menu Toggle - Hidden on Desktop */}
         <button 
           className={clsx(
-            "min-md:hidden z-50 p-2 -mr-2 transition-colors",
+            "md:hidden z-50 p-2 -mr-2 transition-colors",
             useLightContent ? "text-black" : "text-foreground"
           )}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -151,10 +176,9 @@ const Header = () => {
 
         {/* Fullscreen Menu - Hidden on Desktop */}
         <div 
-          className={clsx(
-            "fixed inset-0 mt-65 bg-background backdrop-blur-2xl z-40 flex flex-col items-center justify-center transition-all duration-500 ease-in-out md:hidden",
-            isMenuOpen ? "rounded-xl opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-          )}
+          ref={menuRef}
+          className="fixed inset-0 mt-65 bg-background backdrop-blur-2xl z-40 flex flex-col items-center justify-center md:hidden rounded-xl m-1 opacity-0 pointer-events-none"
+          style={{ transform: 'translateY(-50px)' }}
         >
           <nav className="flex  flex-col items-start p-7 rounded-4xl bg-background w-full gap-8">
             {navLinks.map((link) => (
