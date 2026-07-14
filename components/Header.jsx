@@ -66,7 +66,7 @@ const Header = () => {
         'bg-background backdrop-blur-xl m-3 rounded-3xl py-3 border-b border-border',
         // Desktop: Dynamic based on scroll
         isScrolled 
-          ? 'md:bg-background md:backdrop-blur-2xl md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:py-3' 
+          ? 'md:bg-background/80 md:backdrop-blur-2xl md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:py-3' 
           : 'md:bg-transparent/80 md:py-5 md:border-none md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:backdrop-blur-none'
       )}
     >
