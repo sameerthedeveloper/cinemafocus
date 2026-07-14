@@ -141,7 +141,7 @@ function ProductListContent() {
       <div
         ref={filtersRef}
         className={clsx(
-          'sticky top-[64px] md:top-[72px] z-40 transition-all duration-300',
+          'sticky top-[75px] md:top-[80px] z-40 transition-all duration-300',
           filtersSticky
             ? 'bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-[0_1px_0_rgba(0,0,0,0.05)] py-2'
             : 'bg-transparent py-4'

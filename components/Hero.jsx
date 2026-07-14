@@ -250,24 +250,48 @@ const Hero = ({
 
   // Alignments mapping
   const horizontalAlignClasses = {
+    left: 'md:text-left md:items-start md:justify-start',
+    center: 'md:text-center md:items-center md:justify-center',
+    right: 'md:text-right md:items-end md:justify-end',
+  };
+  
+  const mobileHorizontalAlignClasses = {
     left: 'text-left items-start justify-start',
     center: 'text-center items-center justify-center',
     right: 'text-right items-end justify-end',
   };
 
   const verticalAlignClasses = {
-    top: 'items-start pt-24 md:pt-36',
+    top: 'md:items-start md:pt-36',
+    center: 'md:items-center',
+    bottom: 'md:items-end md:pb-36',
+  };
+  
+  const mobileVerticalAlignClasses = {
+    top: 'items-start pt-24',
     center: 'items-center',
-    bottom: 'items-end pb-24 md:pb-36',
+    bottom: 'items-end pb-24',
   };
 
   const horizontalAlignItems = {
+    left: 'md:items-start',
+    center: 'md:items-center',
+    right: 'md:items-end',
+  };
+  
+  const mobileHorizontalAlignItems = {
     left: 'items-start',
     center: 'items-center',
     right: 'items-end',
   };
 
   const paragraphAlignClasses = {
+    left: 'md:mr-auto md:ml-0',
+    center: 'md:mx-auto',
+    right: 'md:ml-auto md:mr-0',
+  };
+  
+  const mobileParagraphAlignClasses = {
     left: 'mr-auto ml-0',
     center: 'mx-auto',
     right: 'ml-auto mr-0',
@@ -412,10 +436,25 @@ const Hero = ({
       {/* 1. SLIDES LOOP */}
       {slideItems.map((slide, idx) => {
         const isActive = idx === currentIndex;
-        const alignClass = horizontalAlignClasses[slide.textAlignment] || horizontalAlignClasses.center;
-        const verticalClass = verticalAlignClasses[slide.verticalAlignment] || verticalAlignClasses.center;
-        const pAlignClass = paragraphAlignClasses[slide.textAlignment] || paragraphAlignClasses.center;
-        const flexAlignItems = horizontalAlignItems[slide.textAlignment] || horizontalAlignItems.center;
+        const mobileAlign = slide.mobileTextAlignment || slide.textAlignment;
+        const mobileVertical = slide.mobileVerticalAlignment || slide.verticalAlignment;
+        
+        const alignClass = clsx(
+          mobileHorizontalAlignClasses[mobileAlign] || mobileHorizontalAlignClasses.center,
+          horizontalAlignClasses[slide.textAlignment] || horizontalAlignClasses.center
+        );
+        const verticalClass = clsx(
+          mobileVerticalAlignClasses[mobileVertical] || mobileVerticalAlignClasses.center,
+          verticalAlignClasses[slide.verticalAlignment] || verticalAlignClasses.center
+        );
+        const pAlignClass = clsx(
+          mobileParagraphAlignClasses[mobileAlign] || mobileParagraphAlignClasses.center,
+          paragraphAlignClasses[slide.textAlignment] || paragraphAlignClasses.center
+        );
+        const flexAlignItems = clsx(
+          mobileHorizontalAlignItems[mobileAlign] || mobileHorizontalAlignItems.center,
+          horizontalAlignItems[slide.textAlignment] || horizontalAlignItems.center
+        );
 
         // Render Split Layout
         if (slide.layout === 'split-left' || slide.layout === 'split-right') {
@@ -435,10 +474,10 @@ const Hero = ({
               )}>
                 {isActive && (
                   <div className={clsx("w-full max-w-xl space-y-8 animate-fade-in-up flex flex-col", flexAlignItems)}>
-                     <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] drop-shadow-xl", slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getTitleStyle(slide)}>
+                     <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] drop-shadow-xl", alignClass)} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p ref={subtitleRef} className={clsx("text-base sm:text-lg md:text-xl font-medium leading-relaxed drop-shadow-lg", pAlignClass, slide.textAlignment === 'right' ? 'text-right' : slide.textAlignment === 'left' ? 'text-left' : 'text-center')} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("text-base sm:text-lg md:text-xl font-medium leading-relaxed drop-shadow-lg", pAlignClass)} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
                      <div className="pt-4">

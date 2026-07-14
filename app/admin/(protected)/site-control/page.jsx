@@ -238,7 +238,9 @@ export default function AdminSiteControlPage() {
                 ctaVariant: val.ctaVariant || 'primary',
                 ctaSize: val.ctaSize || 'lg',
                 ctaShape: val.ctaShape || 'rounded-full',
-                duration: val.duration !== undefined ? val.duration : 6
+                duration: val.duration !== undefined ? val.duration : 6,
+                mobileTextAlignment: val.mobileTextAlignment || 'center',
+                mobileVerticalAlignment: val.mobileVerticalAlignment || 'center'
               }]
             });
           }
@@ -341,7 +343,9 @@ export default function AdminSiteControlPage() {
       ctaVariant: 'primary',
       ctaSize: 'lg',
       ctaShape: 'rounded-full',
-      duration: 6
+      duration: 6,
+      mobileTextAlignment: 'center',
+      mobileVerticalAlignment: 'center'
     };
     setHero(prev => {
       const slides = [...(prev.slides || [])];
@@ -387,7 +391,8 @@ export default function AdminSiteControlPage() {
           imageOpacity: 60, imageBlur: 0, imageBrightness: 100, imagePosition: 'center',
           overlayColor: 'black', overlayColorCustom: '#000000', overlayOpacity: 40,
           textColor: 'white', textColorCustom: '#ffffff',
-          ctaVariant: 'primary', ctaSize: 'lg', ctaShape: 'rounded-full'
+          ctaVariant: 'primary', ctaSize: 'lg', ctaShape: 'rounded-full',
+          mobileTextAlignment: 'center', mobileVerticalAlignment: 'center'
         });
       }
       slides[activeSlideIndex] = { ...slides[activeSlideIndex], ...updatedFields };
@@ -575,7 +580,9 @@ export default function AdminSiteControlPage() {
             ctaVariant: 'primary',
             ctaSize: 'lg',
             ctaShape: 'rounded-full',
-            duration: 6
+            duration: 6,
+            mobileTextAlignment: 'center',
+            mobileVerticalAlignment: 'center'
           };
 
           return (
@@ -789,12 +796,10 @@ export default function AdminSiteControlPage() {
                        onChange={e => updateCurrentSlide({ duration: parseInt(e.target.value) })} 
                        className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary" 
                      />
-                   </div>
-
-                   {/* Alignment Options */}
+                     {/* Alignment Options - Desktop */}
                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                      <div className="space-y-2">
-                       <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Text Horizontal Align</label>
+                       <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Desktop Horizontal Align</label>
                        <div className="flex gap-1 bg-secondary/20 p-1 rounded-lg border border-border w-fit">
                          {[
                            { id: 'left', icon: AlignLeft },
@@ -820,7 +825,7 @@ export default function AdminSiteControlPage() {
 
                      {currentSlide.layout === 'full-bg' && (
                        <div className="space-y-2">
-                         <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Text Vertical Align</label>
+                         <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Desktop Vertical Align</label>
                          <div className="flex gap-1 bg-secondary/20 p-1 rounded-lg border border-border w-fit text-xs font-semibold">
                            {[
                              { id: 'top', label: 'Top' },
@@ -834,7 +839,7 @@ export default function AdminSiteControlPage() {
                                className={clsx(
                                  "px-3 py-1.5 rounded-md transition-all cursor-pointer",
                                  currentSlide.verticalAlignment === vAlign.id
-                                   ? "bg-primary text-primary-foreground shadow-sm"
+                                   ? "bg-black text-white shadow-sm"
                                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                                )}
                              >
@@ -845,6 +850,61 @@ export default function AdminSiteControlPage() {
                        </div>
                      )}
                    </div>
+
+                   {/* Alignment Options - Mobile */}
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-border pt-4">
+                     <div className="space-y-2">
+                       <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mobile Horizontal Align</label>
+                       <div className="flex gap-1 bg-secondary/20 p-1 rounded-lg border border-border w-fit">
+                         {[
+                           { id: 'left', icon: AlignLeft },
+                           { id: 'center', icon: AlignCenter },
+                           { id: 'right', icon: AlignRight }
+                         ].map(align => (
+                           <button
+                             key={`mob-${align.id}`}
+                             type="button"
+                             onClick={() => updateCurrentSlide({ mobileTextAlignment: align.id })}
+                             className={clsx(
+                               "p-2 rounded-md transition-all cursor-pointer",
+                               (currentSlide.mobileTextAlignment || currentSlide.textAlignment || 'center') === align.id
+                                 ? "bg-primary text-primary-foreground shadow-sm"
+                                 : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                             )}
+                           >
+                             <align.icon size={16} />
+                           </button>
+                         ))}
+                       </div>
+                     </div>
+
+                     {currentSlide.layout === 'full-bg' && (
+                       <div className="space-y-2">
+                         <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mobile Vertical Align</label>
+                         <div className="flex gap-1 bg-secondary/20 p-1 rounded-lg border border-border w-fit text-xs font-semibold">
+                           {[
+                             { id: 'top', label: 'Top' },
+                             { id: 'center', label: 'Center' },
+                             { id: 'bottom', label: 'Bottom' }
+                           ].map(vAlign => (
+                             <button
+                               key={`mob-v-${vAlign.id}`}
+                               type="button"
+                               onClick={() => updateCurrentSlide({ mobileVerticalAlignment: vAlign.id })}
+                               className={clsx(
+                                 "px-3 py-1.5 rounded-md transition-all cursor-pointer",
+                                 (currentSlide.mobileVerticalAlignment || currentSlide.verticalAlignment || 'center') === vAlign.id
+                                   ? "bg-black text-white shadow-sm"
+                                   : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                               )}
+                             >
+                               {vAlign.label}
+                             </button>
+                           ))}
+                         </div>
+                       </div>
+                     )}
+                   </div>    </div>
 
                    {/* CTA Customization */}
                    <div className="border-t border-border pt-4 mt-2">

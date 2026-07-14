@@ -86,13 +86,13 @@ const Header = () => {
   return (
     <header
       className={clsx(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out',
+        'fixed top-0 left-0 right-0 z-99 transition-all duration-500 ease-in-out',
         // Mobile: Always visible background
-        'bg-background backdrop-blur-xl m-3 rounded-3xl py-3 border-b border-border',
+        'bg-background backdrop-blur-xl m-3 rounded-3xl py-3 border shadow-md border-gray-300',
         // Desktop: Dynamic based on scroll
         isScrolled 
           ? 'md:bg-background md:backdrop-blur-2xl md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:py-3' 
-          : 'md:bg-transparent md:py-5 md:border-none md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:backdrop-blur-none'
+          : 'md:bg-transparent md:py-5 md:border-none md:m-3 md:rounded-4xl md:border md:border-gray-200  md:shadow-lg md:backdrop-blur-none'
       )}
     >
       <div className="container px-6 mx-auto flex items-center justify-between">
@@ -177,10 +177,10 @@ const Header = () => {
         {/* Fullscreen Menu - Hidden on Desktop */}
         <div 
           ref={menuRef}
-          className="fixed inset-0 mt-65 bg-background backdrop-blur-2xl z-40 flex flex-col items-center justify-center md:hidden rounded-xl m-1 opacity-0 pointer-events-none"
+          className="fixed inset-0 mt-65 bg-background backdrop-blur-2xl z-10 flex flex-col items-center justify-center md:hidden  rounded-xl  opacity-0 pointer-events-none"
           style={{ transform: 'translateY(-50px)' }}
         >
-          <nav className="flex  flex-col items-start p-7 rounded-4xl bg-background w-full gap-8">
+          <nav className="flex  flex-col items-start p-7 rounded-4xl bg-background w-full gap-8 border border-gray-300 shadow mt-2">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
