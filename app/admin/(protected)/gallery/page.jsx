@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Plus, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, Loader2, Edit2 } from 'lucide-react';
 
 export default function AdminGalleryPage() {
   const [projects, setProjects] = useState([]);
@@ -10,6 +10,7 @@ export default function AdminGalleryPage() {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newProject, setNewProject] = useState({ title: '', image: null });
+  const [editingProject, setEditingProject] = useState(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -46,6 +47,27 @@ export default function AdminGalleryPage() {
         console.error("Error deleting project:", error);
         alert("Failed to delete item: " + error.message);
       }
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ title: editingProject.title })
+        .eq('id', editingProject.id);
+
+      if (error) throw error;
+      
+      setProjects(projects.map(p => p.id === editingProject.id ? { ...p, title: editingProject.title } : p));
+      setEditingProject(null);
+    } catch (error) {
+      console.error("Error updating project:", error);
+      alert("Failed to update item: " + error.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -123,12 +145,22 @@ export default function AdminGalleryPage() {
              <div key={project.id} className="group relative bg-background rounded-2xl border border-border overflow-hidden flex flex-col hover:border-primary/50 transition-colors">
                <div className="aspect-video bg-secondary/20 relative overflow-hidden">
                  <img src={project.image_url} alt={project.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                 <button 
-                    onClick={() => handleDelete(project.id)}
-                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-sm"
-                 >
-                   <Trash2 size={16} />
-                 </button>
+                 <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                   <button 
+                      onClick={() => setEditingProject(project)}
+                      className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-sm transition-colors"
+                      title="Edit Caption"
+                   >
+                     <Edit2 size={16} />
+                   </button>
+                   <button 
+                      onClick={() => handleDelete(project.id)}
+                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow-sm transition-colors"
+                      title="Delete Image"
+                   >
+                     <Trash2 size={16} />
+                   </button>
+                 </div>
                </div>
                <div className="p-4 flex-1">
                   <h3 className="font-medium truncate">{project.title}</h3>
@@ -154,7 +186,7 @@ export default function AdminGalleryPage() {
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
                  <div className="space-y-2">
-                   <label className="text-sm font-medium">Title</label>
+                   <label className="text-sm font-medium">Caption</label>
                    <input 
                      type="text" 
                      required 
@@ -185,6 +217,38 @@ export default function AdminGalleryPage() {
                     <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 font-medium disabled:opacity-50">
                       {saving ? <Loader2 className="animate-spin" size={18} /> : null}
                       {saving ? 'Creating...' : 'Add Item'}
+                    </button>
+                 </div>
+              </form>
+           </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+           <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6">
+              <div className="flex justify-between items-center">
+                 <h2 className="text-xl font-medium">Edit Image Caption</h2>
+                 <button onClick={() => setEditingProject(null)} className="text-muted-foreground hover:text-foreground">X</button>
+              </div>
+              <form onSubmit={handleEditSubmit} className="space-y-4">
+                 <div className="space-y-2">
+                   <label className="text-sm font-medium">Caption</label>
+                   <input 
+                     type="text" 
+                     required 
+                     value={editingProject.title} 
+                     onChange={e => setEditingProject({...editingProject, title: e.target.value})}
+                     className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" 
+                     placeholder="e.g. Modern Home Theater"
+                   />
+                 </div>
+                 <div className="flex justify-end gap-3 pt-2">
+                    <button type="button" onClick={() => setEditingProject(null)} className="px-5 py-2 text-muted-foreground hover:bg-secondary rounded-lg font-medium transition-colors">Cancel</button>
+                    <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 font-medium disabled:opacity-50">
+                      {saving ? <Loader2 className="animate-spin" size={18} /> : null}
+                      {saving ? 'Saving...' : 'Save Changes'}
                     </button>
                  </div>
               </form>
