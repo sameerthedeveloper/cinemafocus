@@ -86,16 +86,16 @@ const Header = () => {
   return (
     <header
       className={clsx(
-        'fixed top-0 left-0 right-0 z-99 transition-all duration-500 ease-in-out ',
+        'fixed top-0 left-0 right-0 z-99 transition-all duration-500 ease-in-out',
         // Mobile: Always visible background
-        'bg-background backdrop-blur-xl m-3 rounded-3xl py-3 border shadow-md border-gray-300 gap-8 border',
+        'bg-background m-3 rounded-3xl py-3 shadow gap-8 border border-gray-300',
         // Desktop: Dynamic based on scroll
         isScrolled 
-          ? 'md:bg-background md:backdrop-blur-2xl md:m-3 md:rounded-4xl md:border md:borer-gray-200  md:shadow-lg md:py-3' 
-          : 'md:bg-transparent md:py-5 md:border-none md:m-3 md:rounded-4xl md:border md:border-gray-200  md:shadow-lg md:backdrop-blur-none'
+          ? 'md:bg-background md:backdrop-blur-2xl md:m-3 md:rounded-4xl md:border md:border-gray-300 md:shadow-lg md:py-3' 
+          : 'md:bg-transparent md:py-5 md:border-transparent md:m-3 md:rounded-4xl md:shadow-none md:backdrop-blur-none'
       )}
     >
-      <div className="container px-6 mx-auto flex items-center justify-between  ">
+      <div className="container px-6 mx-auto flex items-center justify-between ">
         {/* Logo */}
         <Link href="/" className="block hover:opacity-80 transition-opacity z-50" aria-label="Cinema Focus Home">
           {/* Mobile Logo — always dark logo (mobile header always has white bg) */}
@@ -177,7 +177,7 @@ const Header = () => {
         {/* Fullscreen Menu - Hidden on Desktop */}
         <div 
           ref={menuRef}
-          className="fixed inset-0 mt-65 bg-background backdrop-blur-2xl z-40 flex flex-col items-center justify-center md:hidden  rounded-xl  opacity-0 pointer-events-none "
+          className="fixed inset-0 mt-65 bg-background backdrop-blur-2xl z-40 flex flex-col items-center justify-center md:hidden  rounded-xl  opacity-0 pointer-events-none border-2 "
           style={{ transform: 'translateY(-50px)' }}
         >
           <nav className="flex  flex-col items-start p-7 rounded-4xl bg-background w-full gap-8 border border-gray-300 shadow mt-2">
