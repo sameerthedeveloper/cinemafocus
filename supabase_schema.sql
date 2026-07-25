@@ -162,6 +162,7 @@ CREATE TABLE public.projects (
   title TEXT NOT NULL,
   category TEXT NOT NULL,
   image_url TEXT NOT NULL,
+  featured BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

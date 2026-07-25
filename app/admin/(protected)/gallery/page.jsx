@@ -2,14 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Plus, Trash2, Image as ImageIcon, Loader2, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, Loader2, Edit2, Star } from 'lucide-react';
+import { revalidateData } from '@/lib/actions';
 
 export default function AdminGalleryPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [newProject, setNewProject] = useState({ title: '', image: null });
+  const [newProject, setNewProject] = useState({ title: '', image: null, featured: true });
   const [editingProject, setEditingProject] = useState(null);
   const supabase = createClient();
 
@@ -22,6 +23,7 @@ export default function AdminGalleryPage() {
       const { data, error } = await supabase
         .from('projects')
         .select('*')
+        .order('featured', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -30,6 +32,27 @@ export default function AdminGalleryPage() {
       console.error("Error fetching projects:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleFeatured = async (project) => {
+    const newFeaturedState = !project.featured;
+    // Optimistic update
+    setProjects(projects.map(p => p.id === project.id ? { ...p, featured: newFeaturedState } : p));
+
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ featured: newFeaturedState })
+        .eq('id', project.id);
+
+      if (error) throw error;
+      await revalidateData('projects');
+    } catch (error) {
+      console.error("Error updating featured status:", error);
+      // Revert optimistic update
+      setProjects(projects.map(p => p.id === project.id ? { ...p, featured: project.featured } : p));
+      alert("Failed to update featured status: " + error.message);
     }
   };
 
@@ -43,6 +66,7 @@ export default function AdminGalleryPage() {
         
         if (error) throw error;
         setProjects(projects.filter(p => p.id !== id));
+        await revalidateData('projects');
       } catch (error) {
         console.error("Error deleting project:", error);
         alert("Failed to delete item: " + error.message);
@@ -56,13 +80,17 @@ export default function AdminGalleryPage() {
     try {
       const { error } = await supabase
         .from('projects')
-        .update({ title: editingProject.title })
+        .update({ 
+          title: editingProject.title,
+          featured: editingProject.featured || false
+        })
         .eq('id', editingProject.id);
 
       if (error) throw error;
       
-      setProjects(projects.map(p => p.id === editingProject.id ? { ...p, title: editingProject.title } : p));
+      setProjects(projects.map(p => p.id === editingProject.id ? { ...p, title: editingProject.title, featured: editingProject.featured } : p));
       setEditingProject(null);
+      await revalidateData('projects');
     } catch (error) {
       console.error("Error updating project:", error);
       alert("Failed to update item: " + error.message);
@@ -105,13 +133,15 @@ export default function AdminGalleryPage() {
           title: newProject.title,
           category: 'Residential', // Default category
           image_url: publicUrl,
+          featured: newProject.featured
         });
       
       if (dbError) throw dbError;
 
+      await revalidateData('projects');
       fetchProjects();
       setShowModal(false);
-      setNewProject({ title: '', image: null });
+      setNewProject({ title: '', image: null, featured: true });
     } catch (error) {
       console.error("Error adding project:", error);
       alert("Failed to add project: " + error.message);
@@ -125,7 +155,7 @@ export default function AdminGalleryPage() {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-8 md:mb-10">
         <div>
            <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Gallery</h1>
-           <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage showcase items and portfolio images.</p>
+           <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage showcase items and set featured photos for the home page.</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
@@ -142,10 +172,27 @@ export default function AdminGalleryPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-             <div key={project.id} className="group relative bg-background rounded-2xl border border-border overflow-hidden flex flex-col hover:border-primary/50 transition-colors">
+             <div key={project.id} className={`group relative bg-background rounded-2xl border ${project.featured ? 'border-amber-500/50 shadow-sm' : 'border-border'} overflow-hidden flex flex-col hover:border-primary/50 transition-colors`}>
                <div className="aspect-video bg-secondary/20 relative overflow-hidden">
                  <img src={project.image_url} alt={project.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                 <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                 
+                 {/* Featured Badge */}
+                 {project.featured && (
+                   <div className="absolute top-2 left-2 z-10">
+                     <span className="px-2.5 py-1 text-xs font-semibold bg-amber-500 text-black rounded-full shadow flex items-center gap-1 backdrop-blur-md">
+                       <Star size={12} fill="currentColor" /> Featured on Home
+                     </span>
+                   </div>
+                 )}
+
+                 <div className="absolute top-2 right-2 flex gap-2 opacity-90 md:opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                   <button 
+                      onClick={() => toggleFeatured(project)}
+                      className={`p-2 rounded-lg shadow-sm transition-colors ${project.featured ? 'bg-amber-500 text-black hover:bg-amber-600' : 'bg-black/60 text-white hover:bg-black/80'}`}
+                      title={project.featured ? "Unfeature from Home" : "Feature on Home Page"}
+                   >
+                     <Star size={16} fill={project.featured ? "currentColor" : "none"} />
+                   </button>
                    <button 
                       onClick={() => setEditingProject(project)}
                       className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-sm transition-colors"
@@ -162,9 +209,14 @@ export default function AdminGalleryPage() {
                    </button>
                  </div>
                </div>
-               <div className="p-4 flex-1">
-                  <h3 className="font-medium truncate">{project.title}</h3>
-                  <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{project.category}</p>
+               <div className="p-4 flex-1 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium truncate">{project.title}</h3>
+                    <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{project.category}</p>
+                  </div>
+                  {project.featured && (
+                    <span className="text-amber-500 text-xs font-medium shrink-0 ml-2" title="Featured on Homepage">Home Featured</span>
+                  )}
                </div>
              </div>
           ))}
@@ -212,6 +264,23 @@ export default function AdminGalleryPage() {
                       )}
                    </div>
                  </div>
+
+                 {/* Featured Checkbox */}
+                 <div className="pt-1">
+                   <label className="flex items-center gap-3 cursor-pointer">
+                     <input 
+                       type="checkbox" 
+                       checked={newProject.featured} 
+                       onChange={e => setNewProject({...newProject, featured: e.target.checked})}
+                       className="w-4 h-4 rounded text-primary focus:ring-primary border-border" 
+                     />
+                     <span className="text-sm font-medium flex items-center gap-1.5">
+                       <Star size={15} className={newProject.featured ? "text-amber-500 fill-amber-500" : "text-muted-foreground"} />
+                       Set as Featured on Home Page
+                     </span>
+                   </label>
+                 </div>
+
                  <div className="flex justify-end gap-3 pt-2">
                     <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2 text-muted-foreground hover:bg-secondary rounded-lg font-medium transition-colors">Cancel</button>
                     <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 font-medium disabled:opacity-50">
@@ -229,7 +298,7 @@ export default function AdminGalleryPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
            <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6">
               <div className="flex justify-between items-center">
-                 <h2 className="text-xl font-medium">Edit Image Caption</h2>
+                 <h2 className="text-xl font-medium">Edit Image Details</h2>
                  <button onClick={() => setEditingProject(null)} className="text-muted-foreground hover:text-foreground">X</button>
               </div>
               <form onSubmit={handleEditSubmit} className="space-y-4">
@@ -244,6 +313,23 @@ export default function AdminGalleryPage() {
                      placeholder="e.g. Modern Home Theater"
                    />
                  </div>
+
+                 {/* Featured Checkbox */}
+                 <div className="pt-1">
+                   <label className="flex items-center gap-3 cursor-pointer">
+                     <input 
+                       type="checkbox" 
+                       checked={editingProject.featured || false} 
+                       onChange={e => setEditingProject({...editingProject, featured: e.target.checked})}
+                       className="w-4 h-4 rounded text-primary focus:ring-primary border-border" 
+                     />
+                     <span className="text-sm font-medium flex items-center gap-1.5">
+                       <Star size={15} className={editingProject.featured ? "text-amber-500 fill-amber-500" : "text-muted-foreground"} />
+                       Set as Featured on Home Page
+                     </span>
+                   </label>
+                 </div>
+
                  <div className="flex justify-end gap-3 pt-2">
                     <button type="button" onClick={() => setEditingProject(null)} className="px-5 py-2 text-muted-foreground hover:bg-secondary rounded-lg font-medium transition-colors">Cancel</button>
                     <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 font-medium disabled:opacity-50">
@@ -258,3 +344,4 @@ export default function AdminGalleryPage() {
     </div>
   );
 }
+

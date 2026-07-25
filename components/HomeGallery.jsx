@@ -19,7 +19,10 @@ export default function HomeGallery({ projects }) {
   const openLightbox = (index) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
   
-  const displayedProjects = projects.slice(0, 3);
+  const featuredProjects = Array.isArray(projects) ? projects.filter(p => p.featured) : [];
+  const displayedProjects = featuredProjects.length > 0 
+    ? featuredProjects.slice(0, 6) 
+    : (Array.isArray(projects) ? projects.slice(0, 3) : []);
 
   const nextImage = (e) => {
     if (e) e.stopPropagation();
