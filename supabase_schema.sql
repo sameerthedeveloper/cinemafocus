@@ -163,8 +163,15 @@ CREATE TABLE public.projects (
   category TEXT NOT NULL,
   image_url TEXT NOT NULL,
   featured BOOLEAN DEFAULT false,
+  image_position TEXT DEFAULT 'center',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migration helper for existing projects table
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT false;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS image_position TEXT DEFAULT 'center';
+UPDATE public.projects SET featured = false WHERE featured IS NULL;
+UPDATE public.projects SET image_position = 'center' WHERE image_position IS NULL;
 
 -- RLS
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;

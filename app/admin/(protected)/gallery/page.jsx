@@ -2,15 +2,125 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Plus, Trash2, Image as ImageIcon, Loader2, Edit2, Star } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, Loader2, Edit2, Star, Move } from 'lucide-react';
 import { revalidateData } from '@/lib/actions';
+
+function ImagePositionAdjuster({ value, onChange }) {
+  const parsePos = (val) => {
+    if (!val || val === 'center') return { x: 50, y: 50 };
+    if (val === 'top') return { x: 50, y: 0 };
+    if (val === 'bottom') return { x: 50, y: 100 };
+    if (val === 'left') return { x: 0, y: 50 };
+    if (val === 'right') return { x: 100, y: 50 };
+    if (val === 'top left') return { x: 0, y: 0 };
+    if (val === 'top right') return { x: 100, y: 0 };
+    if (val === 'bottom left') return { x: 0, y: 100 };
+    if (val === 'bottom right') return { x: 100, y: 100 };
+
+    const parts = String(val).split(' ');
+    if (parts.length === 2) {
+      const x = parseInt(parts[0], 10);
+      const y = parseInt(parts[1], 10);
+      if (!isNaN(x) && !isNaN(y)) return { x, y };
+    }
+    return { x: 50, y: 50 };
+  };
+
+  const { x, y } = parsePos(value);
+
+  const setPos = (newX, newY) => {
+    onChange(`${newX}% ${newY}%`);
+  };
+
+  const presets = [
+    { label: 'Top Left', x: 0, y: 0 },
+    { label: 'Top', x: 50, y: 0 },
+    { label: 'Top Right', x: 100, y: 0 },
+    { label: 'Left', x: 0, y: 50 },
+    { label: 'Center', x: 50, y: 50 },
+    { label: 'Right', x: 100, y: 50 },
+    { label: 'Bottom Left', x: 0, y: 100 },
+    { label: 'Bottom', x: 50, y: 100 },
+    { label: 'Bottom Right', x: 100, y: 100 },
+  ];
+
+  return (
+    <div className="space-y-3 bg-secondary/20 p-3.5 rounded-xl border border-border">
+      <div className="flex items-center justify-between text-xs font-medium">
+        <span className="flex items-center gap-1.5 text-foreground">
+          <Move size={14} className="text-primary" /> Manual Focal Position
+        </span>
+        <span className="font-mono text-primary bg-primary/10 px-2 py-0.5 rounded text-[11px]">
+          {x}% {y}%
+        </span>
+      </div>
+
+      {/* Sliders */}
+      <div className="space-y-2.5 text-xs">
+        <div>
+          <div className="flex justify-between mb-1 text-muted-foreground text-[11px]">
+            <span>Horizontal Position (Left ↔ Right)</span>
+            <span className="font-mono">{x}%</span>
+          </div>
+          <input 
+            type="range" 
+            min="0" 
+            max="100" 
+            value={x} 
+            onChange={(e) => setPos(parseInt(e.target.value, 10), y)}
+            className="w-full accent-primary h-1.5 bg-secondary rounded-lg cursor-pointer"
+          />
+        </div>
+
+        <div>
+          <div className="flex justify-between mb-1 text-muted-foreground text-[11px]">
+            <span>Vertical Position (Top ↕ Bottom)</span>
+            <span className="font-mono">{y}%</span>
+          </div>
+          <input 
+            type="range" 
+            min="0" 
+            max="100" 
+            value={y} 
+            onChange={(e) => setPos(x, parseInt(e.target.value, 10))}
+            className="w-full accent-primary h-1.5 bg-secondary rounded-lg cursor-pointer"
+          />
+        </div>
+      </div>
+
+      {/* Presets Grid */}
+      <div className="pt-1">
+        <span className="text-[11px] text-muted-foreground block mb-1.5 font-medium">Quick Presets</span>
+        <div className="grid grid-cols-3 gap-1">
+          {presets.map((p) => {
+            const isSelected = x === p.x && y === p.y;
+            return (
+              <button
+                key={p.label}
+                type="button"
+                onClick={() => setPos(p.x, p.y)}
+                className={`py-1 px-1.5 text-[10px] font-medium rounded transition-colors truncate ${
+                  isSelected 
+                    ? 'bg-primary text-primary-foreground shadow-sm' 
+                    : 'bg-background hover:bg-secondary text-muted-foreground hover:text-foreground border border-border/40'
+                }`}
+              >
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminGalleryPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [newProject, setNewProject] = useState({ title: '', image: null, featured: true });
+  const [newProject, setNewProject] = useState({ title: '', image: null, featured: true, image_position: '50% 50%' });
   const [editingProject, setEditingProject] = useState(null);
   const supabase = createClient();
 
@@ -74,21 +184,57 @@ export default function AdminGalleryPage() {
     }
   };
 
+  const handleEditImageChange = (e) => {
+    if (e.target.files[0]) {
+      setEditingProject({ ...editingProject, newImageFile: e.target.files[0] });
+    }
+  };
+
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
+      let imageUrl = editingProject.image_url;
+
+      if (editingProject.newImageFile) {
+        const fileExt = editingProject.newImageFile.name.split('.').pop();
+        const fileName = `projects/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('images')
+          .upload(fileName, editingProject.newImageFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('images')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicUrl;
+      }
+
+      const imgPos = editingProject.image_position || editingProject.imagePosition || '50% 50%';
+
       const { error } = await supabase
         .from('projects')
         .update({ 
           title: editingProject.title,
-          featured: editingProject.featured || false
+          featured: editingProject.featured || false,
+          image_url: imageUrl,
+          image_position: imgPos
         })
         .eq('id', editingProject.id);
 
       if (error) throw error;
       
-      setProjects(projects.map(p => p.id === editingProject.id ? { ...p, title: editingProject.title, featured: editingProject.featured } : p));
+      setProjects(projects.map(p => p.id === editingProject.id ? { 
+        ...p, 
+        title: editingProject.title, 
+        featured: editingProject.featured,
+        image_url: imageUrl,
+        image_position: imgPos,
+        imagePosition: imgPos
+      } : p));
       setEditingProject(null);
       await revalidateData('projects');
     } catch (error) {
@@ -133,7 +279,8 @@ export default function AdminGalleryPage() {
           title: newProject.title,
           category: 'Residential', // Default category
           image_url: publicUrl,
-          featured: newProject.featured
+          featured: newProject.featured,
+          image_position: newProject.image_position || '50% 50%'
         });
       
       if (dbError) throw dbError;
@@ -141,7 +288,7 @@ export default function AdminGalleryPage() {
       await revalidateData('projects');
       fetchProjects();
       setShowModal(false);
-      setNewProject({ title: '', image: null, featured: true });
+      setNewProject({ title: '', image: null, featured: true, image_position: '50% 50%' });
     } catch (error) {
       console.error("Error adding project:", error);
       alert("Failed to add project: " + error.message);
@@ -155,7 +302,7 @@ export default function AdminGalleryPage() {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-8 md:mb-10">
         <div>
            <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Gallery</h1>
-           <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage showcase items and set featured photos for the home page.</p>
+           <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage showcase items, adjust manual focal crop coordinates, and set featured photos for the home page.</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
@@ -174,7 +321,12 @@ export default function AdminGalleryPage() {
           {projects.map((project) => (
              <div key={project.id} className={`group relative bg-background rounded-2xl border ${project.featured ? 'border-amber-500/50 shadow-sm' : 'border-border'} overflow-hidden flex flex-col hover:border-primary/50 transition-colors`}>
                <div className="aspect-video bg-secondary/20 relative overflow-hidden">
-                 <img src={project.image_url} alt={project.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                 <img 
+                   src={project.image_url} 
+                   alt={project.title} 
+                   style={{ objectPosition: project.image_position || project.imagePosition || '50% 50%' }}
+                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                 />
                  
                  {/* Featured Badge */}
                  {project.featured && (
@@ -194,9 +346,9 @@ export default function AdminGalleryPage() {
                      <Star size={16} fill={project.featured ? "currentColor" : "none"} />
                    </button>
                    <button 
-                      onClick={() => setEditingProject(project)}
+                      onClick={() => setEditingProject({ ...project, image_position: project.image_position || project.imagePosition || '50% 50%' })}
                       className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-sm transition-colors"
-                      title="Edit Caption"
+                      title="Edit Details / Change Image"
                    >
                      <Edit2 size={16} />
                    </button>
@@ -212,7 +364,14 @@ export default function AdminGalleryPage() {
                <div className="p-4 flex-1 flex items-center justify-between">
                   <div>
                     <h3 className="font-medium truncate">{project.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{project.category}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider">{project.category}</span>
+                      {(project.image_position || project.imagePosition) && (project.image_position || project.imagePosition) !== 'center' && (project.image_position || project.imagePosition) !== '50% 50%' && (
+                        <span className="text-[10px] bg-secondary px-2 py-0.5 rounded text-muted-foreground font-mono">
+                          Crop: {project.image_position || project.imagePosition}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   {project.featured && (
                     <span className="text-amber-500 text-xs font-medium shrink-0 ml-2" title="Featured on Homepage">Home Featured</span>
@@ -228,13 +387,13 @@ export default function AdminGalleryPage() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Add Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-           <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6">
+           <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center">
                  <h2 className="text-xl font-medium">Add New Image</h2>
-                 <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground">X</button>
+                 <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground font-medium">X</button>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
                  <div className="space-y-2">
@@ -250,20 +409,36 @@ export default function AdminGalleryPage() {
                  </div>
                  <div className="space-y-2">
                    <label className="text-sm font-medium">Image File</label>
-                   <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-secondary/20 transition-colors relative cursor-pointer group">
+                   <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:bg-secondary/20 transition-colors relative cursor-pointer group">
                       <input type="file" required accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
                       {newProject.image ? (
-                        <div className="text-primary font-medium flex items-center justify-center gap-2">
-                          <ImageIcon size={18} /> {newProject.image.name}
+                        <div className="space-y-2">
+                          <div className="w-full aspect-video rounded-lg overflow-hidden bg-secondary/40 relative border border-border">
+                            <img 
+                              src={URL.createObjectURL(newProject.image)} 
+                              alt="Preview" 
+                              style={{ objectPosition: newProject.image_position || '50% 50%' }}
+                              className="w-full h-full object-cover transition-all duration-150" 
+                            />
+                          </div>
+                          <div className="text-primary font-medium text-xs flex items-center justify-center gap-1.5 truncate">
+                            <ImageIcon size={14} /> {newProject.image.name}
+                          </div>
                         </div>
                       ) : (
-                        <div className="text-muted-foreground group-hover:text-primary transition-colors">
+                        <div className="text-muted-foreground group-hover:text-primary transition-colors py-4">
                           <ImageIcon className="mx-auto mb-2 opacity-50" />
                           <span>Click or drag image to upload</span>
                         </div>
                       )}
                    </div>
                  </div>
+
+                 {/* Manual Focal Position Adjuster */}
+                 <ImagePositionAdjuster 
+                   value={newProject.image_position || '50% 50%'}
+                   onChange={(val) => setNewProject({ ...newProject, image_position: val })}
+                 />
 
                  {/* Featured Checkbox */}
                  <div className="pt-1">
@@ -296,12 +471,52 @@ export default function AdminGalleryPage() {
       {/* Edit Modal */}
       {editingProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-           <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6">
+           <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center">
                  <h2 className="text-xl font-medium">Edit Image Details</h2>
-                 <button onClick={() => setEditingProject(null)} className="text-muted-foreground hover:text-foreground">X</button>
+                 <button onClick={() => setEditingProject(null)} className="text-muted-foreground hover:text-foreground font-medium">X</button>
               </div>
               <form onSubmit={handleEditSubmit} className="space-y-4">
+                 {/* Image Preview & Change Input */}
+                 <div className="space-y-2">
+                   <label className="text-sm font-medium">Image File</label>
+                   <div className="relative border-2 border-dashed border-border rounded-lg p-3 text-center hover:bg-secondary/20 transition-colors cursor-pointer group flex flex-col items-center gap-2">
+                      <div className="w-full aspect-video rounded-lg overflow-hidden bg-secondary/40 relative border border-border">
+                        <img 
+                          src={editingProject.newImageFile ? URL.createObjectURL(editingProject.newImageFile) : editingProject.image_url} 
+                          alt={editingProject.title} 
+                          style={{ objectPosition: editingProject.image_position || editingProject.imagePosition || '50% 50%' }}
+                          className="w-full h-full object-cover transition-all duration-150"
+                        />
+                      </div>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleEditImageChange} 
+                        className="absolute inset-0 opacity-0 cursor-pointer z-10" 
+                      />
+                      {editingProject.newImageFile ? (
+                        <div className="text-primary text-xs font-medium flex items-center justify-center gap-1.5">
+                          <ImageIcon size={14} /> New file selected: {editingProject.newImageFile.name}
+                        </div>
+                      ) : (
+                        <div className="text-xs text-muted-foreground group-hover:text-primary transition-colors flex items-center gap-1.5">
+                          <ImageIcon size={14} /> Click or drag to replace image (Optional)
+                        </div>
+                      )}
+                   </div>
+                 </div>
+
+                 {/* Manual Focal Position Adjuster */}
+                 <ImagePositionAdjuster 
+                   value={editingProject.image_position || editingProject.imagePosition || '50% 50%'}
+                   onChange={(val) => setEditingProject({ 
+                     ...editingProject, 
+                     image_position: val,
+                     imagePosition: val 
+                   })}
+                 />
+
                  <div className="space-y-2">
                    <label className="text-sm font-medium">Caption</label>
                    <input 
@@ -344,4 +559,6 @@ export default function AdminGalleryPage() {
     </div>
   );
 }
+
+
 

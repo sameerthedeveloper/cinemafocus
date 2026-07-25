@@ -85,6 +85,7 @@ export default function HomeGallery({ projects }) {
               aspectRatio="aspect-video"
               containerClassName="rounded-2xl"
               className="transition-transform duration-1000 group-hover:scale-110" 
+              style={{ objectPosition: project.imagePosition || project.image_position || 'center' }}
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
                 <span className="text-white font-medium text-lg tracking-wide border border-white/30 px-6 py-2 rounded-full backdrop-blur-sm">View Photo</span>
