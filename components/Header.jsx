@@ -17,26 +17,17 @@ const Header = () => {
   const pathname = usePathname();
   const { theme, showDesktopMenu } = useSiteSettings();
   const [mounted, setMounted] = useState(false);
-  const [isHeroLight, setIsHeroLight] = useState(false);
-  
   useEffect(() => {
     setMounted(true);
-    
-    // Listen for smart brightness detection from Hero
-    const handleBrightness = (e) => {
-      setIsHeroLight(e.detail.isLight);
-    };
-    window.addEventListener('hero-brightness', handleBrightness);
-    return () => window.removeEventListener('hero-brightness', handleBrightness);
   }, []);
 
   const isHome = pathname === '/';
 
   // Text/icon color: follows theme or transparent-header state
-  const useLightContent = theme === 'dark' || (isHome && !isScrolled && !isHeroLight);
+  const useLightContent = theme === 'dark' || (isHome && !isScrolled);
   // Logo swap: ONLY based on whether header is transparent over dark hero
   // theme must NOT override — white logo on white bg = invisible
-  const useLightLogo = isHome && !isScrolled && !isHeroLight;
+  const useLightLogo = isHome && !isScrolled;
 
   useEffect(() => {
     const handleScroll = () => {
