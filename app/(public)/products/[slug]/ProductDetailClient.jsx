@@ -10,7 +10,18 @@ import LazyImage from '@/components/LazyImage';
 
 export default function ProductDetailClient({ product }) {
   const { formatPrice, showPrice } = useCurrency();
-  const [activeIndex, setActiveIndex] = useState(0);
+  // Default to the most recently added image (last in the array) so a
+  // newly uploaded image shows as the primary photo without requiring
+  // the old one to be removed first.
+  const [activeIndex, setActiveIndex] = useState(() =>
+    product?.images?.length ? product.images.length - 1 : 0
+  );
+
+  // Reset to the newest image whenever we're showing a different product
+  // (e.g. client-side navigation between product pages).
+  useEffect(() => {
+    setActiveIndex(product?.images?.length ? product.images.length - 1 : 0);
+  }, [product?.id, product?.slug]);
 
   // Preload all gallery images in background
   useEffect(() => {
