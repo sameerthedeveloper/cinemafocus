@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { revalidateData } from '@/lib/actions';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Save, X, Upload, ArrowLeft, Trash2, Plus } from 'lucide-react';
@@ -166,7 +167,9 @@ export default function EditProductPage() {
         .eq('id', id);
       
       if (error) throw error;
-      
+
+      await revalidateData('products');
+
       router.push('/admin/products');
       router.refresh();
     } catch (error) {
