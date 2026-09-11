@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import ContentBlockBuilder from '@/components/admin/ContentBlockBuilder';
 import { revalidatePressCache } from '@/app/actions/press';
+import Reveal from '@/components/Reveal';
 
 export default function AddPressReleasePage() {
   const router = useRouter();
@@ -71,7 +72,7 @@ export default function AddPressReleasePage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto pb-20 md:pb-8 animate-fade-in">
+    <Reveal className="p-4 md:p-8 max-w-4xl mx-auto pb-20 md:pb-8 animate-fade-in">
       <Link href="/admin/press-releases" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors font-medium">
         <ArrowLeft size={18} className="mr-2" />
         Back to Press Releases
@@ -202,6 +203,6 @@ export default function AddPressReleasePage() {
           </button>
         </div>
       </form>
-    </div>
+    </Reveal>
   );
 }

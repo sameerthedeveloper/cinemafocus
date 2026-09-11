@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Trash2, Mail, CheckCircle, Loader2, Reply } from 'lucide-react';
 import clsx from 'clsx';
+import Reveal from '@/components/Reveal';
 
 export default function AdminMessagesPage() {
   const [messages, setMessages] = useState([]);
@@ -63,7 +64,7 @@ export default function AdminMessagesPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in pb-20 md:pb-8">
+    <Reveal className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in pb-20 md:pb-8">
       <header className="mb-8 md:mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
          <div>
            <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Messages</h1>
@@ -143,6 +144,6 @@ export default function AdminMessagesPage() {
           </div>
         )}
       </div>
-    </div>
+    </Reveal>
   );
 }

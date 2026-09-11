@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Loader2, Plus, Trash2, Tag, X, Edit, Check } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import { revalidateData } from '@/lib/actions';
+import Reveal from '@/components/Reveal';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState([]);
@@ -168,7 +169,7 @@ export default function AdminCategoriesPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in relative pb-20 md:pb-8">
+    <Reveal className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in relative pb-20 md:pb-8">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-8 md:mb-10">
         <div>
            <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Brands</h1>
@@ -232,7 +233,7 @@ export default function AdminCategoriesPage() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
           <div className="bg-background rounded-2xl w-full max-w-lg shadow-xl border border-border overflow-hidden">
             <div className="p-6 border-b border-border flex justify-between items-center bg-secondary/30">
                <h2 className="text-xl font-medium">{editingCategory ? 'Edit Brand' : 'New Brand'}</h2>
@@ -298,8 +299,8 @@ export default function AdminCategoriesPage() {
               </div>
             </form>
           </div>
-        </div>
+        </Reveal>
       )}
-    </div>
+    </Reveal>
   );
 }

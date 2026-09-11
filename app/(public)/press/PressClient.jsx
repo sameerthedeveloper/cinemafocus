@@ -3,6 +3,7 @@
 import React from 'react';
 import Section from '@/components/Section';
 import PressReleaseCard from '@/components/PressReleaseCard';
+import Reveal from '@/components/Reveal';
 
 export default function PressClient({ initialReleases = [] }) {
   if (!initialReleases || initialReleases.length === 0) {
@@ -25,7 +26,7 @@ export default function PressClient({ initialReleases = [] }) {
   const otherReleases = initialReleases.slice(1);
 
   return (
-    <div className="animate-fade-in pt-24 pb-20">
+    <Reveal className="animate-fade-in pt-24 pb-20">
       <Section>
         <div className="mb-16 text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-medium tracking-tight">Press Room.</h1>
@@ -50,6 +51,6 @@ export default function PressClient({ initialReleases = [] }) {
           </div>
         )}
       </Section>
-    </div>
+    </Reveal>
   );
 }

@@ -5,6 +5,7 @@ import Section from '@/components/Section';
 import Button from '@/components/Button';
 import { Mail, Phone, MapPin, Clock, Loader2, CheckCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import Reveal from '@/components/Reveal';
 
 export default function ContactClient({ initialInfo }) {
   const [contactInfo] = useState(initialInfo);
@@ -58,7 +59,7 @@ export default function ContactClient({ initialInfo }) {
   };
 
   return (
-    <div className="animate-fade-in pt-10">
+    <Reveal className="animate-fade-in pt-10">
        <Section className="py-20 text-center">
         <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-4">Get in Touch</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -215,6 +216,6 @@ export default function ContactClient({ initialInfo }) {
           </div>
         </div>
       </Section>
-    </div>
+    </Reveal>
   );
 }

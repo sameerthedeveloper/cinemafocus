@@ -7,6 +7,7 @@ import Button from '@/components/Button';
 import { useCurrency } from '@/hooks/useCurrency';
 import { ChevronRight, ChevronLeft, FileText } from 'lucide-react';
 import LazyImage from '@/components/LazyImage';
+import Reveal from '@/components/Reveal';
 
 export default function ProductDetailClient({ product }) {
   const { formatPrice, showPrice } = useCurrency();
@@ -47,7 +48,7 @@ export default function ProductDetailClient({ product }) {
   if (!product) return null;
 
   return (
-    <div className="animate-fade-in pt-6">
+    <Reveal className="animate-fade-in pt-6">
       {/* Breadcrumb */}
       <div className="max-w-[1400px] px-4 md:px-8 mx-auto py-4 flex mt-15 items-center text-sm text-muted-foreground">
         <Link href={`/brand/${product.category}`} className="hover:text-primary transition-colors capitalize">
@@ -174,6 +175,6 @@ export default function ProductDetailClient({ product }) {
            </div>
          </div>
       </Section>
-    </div>
+    </Reveal>
   );
 }

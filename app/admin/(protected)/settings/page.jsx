@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { Monitor, Moon, Sun, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
+import Reveal from '@/components/Reveal';
 
 export default function AdminSettingsPage() {
   const { theme, updateSettings, loading } = useSiteSettings();
@@ -21,7 +22,7 @@ export default function AdminSettingsPage() {
   if (loading) return <div className="p-8 text-muted-foreground flex items-center"><Loader2 className="animate-spin mr-2"/> Loading settings...</div>;
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto p-4 md:p-8 animate-fade-in pb-20 md:pb-8">
+    <Reveal className="space-y-8 max-w-4xl mx-auto p-4 md:p-8 animate-fade-in pb-20 md:pb-8">
       <div>
         <h1 className="text-2xl md:text-3xl font-medium tracking-tight mb-2">Site Settings</h1>
         <p className="text-muted-foreground text-sm md:text-base">Manage global configuration and appearance.</p>
@@ -93,6 +94,6 @@ export default function AdminSettingsPage() {
             </div>
         </div>
       </div>
-    </div>
+    </Reveal>
   );
 }

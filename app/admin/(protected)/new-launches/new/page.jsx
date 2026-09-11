@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, Sparkles, Search, Loader2 } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
+import Reveal from '@/components/Reveal';
 
 export default function AddNewLaunchPage() {
   const router = useRouter();
@@ -110,7 +111,7 @@ export default function AddNewLaunchPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20">
+    <Reveal className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20">
        <Link href="/admin/site-control" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
         <ArrowLeft size={18} className="mr-2" />
         Back to Site Control
@@ -187,7 +188,7 @@ export default function AddNewLaunchPage() {
         </div>
 
         {selectedProductId && (
-            <div className="space-y-6 animate-fade-in-up">
+            <Reveal className="space-y-6 animate-fade-in-up">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                     <label className="block text-sm font-medium mb-2">Display Name Override</label>
@@ -266,9 +267,9 @@ export default function AddNewLaunchPage() {
                         {loading ? 'Processing...' : 'Feature Launch'}
                     </button>
                 </div>
-            </div>
+            </Reveal>
         )}
       </form>
-    </div>
+    </Reveal>
   );
 }

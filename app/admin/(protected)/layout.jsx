@@ -7,6 +7,7 @@ import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, Tag, Users, Mess
 import { createClient } from '@/lib/supabase/client';
 import clsx from 'clsx';
 import logoPng from '@/assets/images/logo.png';
+import Reveal from '@/components/Reveal';
 
 
 export default function AdminLayout({ children }) {
@@ -121,7 +122,7 @@ export default function AdminLayout({ children }) {
       </div>
 
       {isMobileMenuOpen && (
-        <div 
+        <Reveal
           className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm animate-fade-in"
           onClick={() => setIsMobileMenuOpen(false)}
         />

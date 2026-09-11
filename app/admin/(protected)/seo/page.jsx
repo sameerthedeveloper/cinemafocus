@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import Reveal from '@/components/Reveal';
 import { 
   Loader2, Save, Globe, Search, Share2, 
   ArrowLeft, ArrowRight, Edit3, CheckCircle2, 
@@ -194,7 +195,7 @@ export default function AdminSEOPage() {
   });
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in pb-20 md:pb-8">
+    <Reveal className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in pb-20 md:pb-8">
       <header className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
          <div>
             <h1 className="text-2xl md:text-3xl font-medium tracking-tight">SEO Settings</h1>
@@ -515,7 +516,7 @@ export default function AdminSEOPage() {
 
           {/* RIGHT: Live Google Preview & SEO Editor Panel (2/5 cols) */}
           {selectedProduct && (
-            <div className="lg:col-span-2 space-y-6 animate-fade-in-up">
+            <Reveal className="lg:col-span-2 space-y-6 animate-fade-in-up">
               
               {/* Sticky container for editor */}
               <div className="bg-background border border-border rounded-2xl p-4 md:p-6 space-y-6 sticky top-6 shadow-xl border-t-2 border-t-primary">
@@ -666,7 +667,7 @@ export default function AdminSEOPage() {
                 </div>
 
               </div>
-            </div>
+            </Reveal>
           )}
 
         </div>
@@ -674,11 +675,11 @@ export default function AdminSEOPage() {
 
       {/* Success Toast Notice */}
       {message && (
-        <div className="fixed bottom-8 right-8 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg animate-fade-in-up flex items-center gap-2 z-50 select-none">
+        <Reveal className="fixed bottom-8 right-8 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg animate-fade-in-up flex items-center gap-2 z-50 select-none">
           <CheckCircle2 size={18} />
           {message}
-        </div>
+        </Reveal>
       )}
-    </div>
+    </Reveal>
   );
 }

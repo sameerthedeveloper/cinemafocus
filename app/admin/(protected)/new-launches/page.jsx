@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { Plus, Edit, Trash2, Sparkles, Loader2 } from 'lucide-react';
+import Reveal from '@/components/Reveal';
 
 export default function AdminNewLaunchesPage() {
   const [launches, setLaunches] = useState([]);
@@ -48,7 +49,7 @@ export default function AdminNewLaunchesPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in pb-20 md:pb-8">
+    <Reveal className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in pb-20 md:pb-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-8 md:mb-10">
         <div>
            <h1 className="text-2xl md:text-3xl font-medium tracking-tight flex items-center gap-2">
@@ -121,6 +122,6 @@ export default function AdminNewLaunchesPage() {
         </table>
         </div>
       </div>
-    </div>
+    </Reveal>
   );
 }

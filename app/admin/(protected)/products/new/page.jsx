@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Plus, X, Upload, ArrowLeft } from 'lucide-react';
+import Reveal from '@/components/Reveal';
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -135,7 +136,7 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20 md:pb-8">
+    <Reveal className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20 md:pb-8">
       <header className="flex items-center gap-4 mb-8">
         <Link href="/admin/products" className="p-2 hover:bg-secondary rounded-full transition-colors flex-shrink-0">
           <ArrowLeft size={20} />
@@ -250,6 +251,6 @@ export default function AddProductPage() {
         </div>
 
       </form>
-    </div>
+    </Reveal>
   );
 }

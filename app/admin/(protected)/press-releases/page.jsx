@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import Reveal from '@/components/Reveal';
 
 export default function AdminPressReleasesPage() {
   const [releases, setReleases] = useState([]);
@@ -51,7 +52,7 @@ export default function AdminPressReleasesPage() {
   if (loading) return <div className="p-4 md:p-8">Loading...</div>;
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in pb-20 md:pb-8">
+    <Reveal className="p-4 md:p-8 max-w-6xl mx-auto animate-fade-in pb-20 md:pb-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-8 md:mb-10">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">Press Releases</h1>
@@ -97,6 +98,6 @@ export default function AdminPressReleasesPage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </Reveal>
   );
 }

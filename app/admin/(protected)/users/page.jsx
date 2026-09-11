@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Shield, User, UserCheck, Users2, Plus, Trash2, AlertCircle } from 'lucide-react';
+import Reveal from '@/components/Reveal';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -96,7 +97,7 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto animate-fade-in pb-20 md:pb-8">
+    <Reveal className="p-4 md:p-8 max-w-5xl mx-auto animate-fade-in pb-20 md:pb-8">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-8 md:mb-10">
         <div>
            <h1 className="text-2xl md:text-3xl font-medium tracking-tight flex items-center gap-3">
@@ -181,7 +182,7 @@ export default function AdminUsersPage() {
 
       {/* Add Modal */}
       {showModal && (
-         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+         <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
            <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6">
               <div className="flex justify-between items-center">
                  <h2 className="text-xl font-medium tracking-tight">Assign User Role</h2>
@@ -241,8 +242,8 @@ export default function AdminUsersPage() {
                  </div>
               </form>
            </div>
-         </div>
+         </Reveal>
       )}
-    </div>
+    </Reveal>
   );
 }

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Section from '@/components/Section';
 import { X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
+import Reveal from '@/components/Reveal';
 
 export default function GalleryClient({ projects }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
@@ -56,7 +57,7 @@ export default function GalleryClient({ projects }) {
   }, [lightboxIndex, projects.length]);
 
   return (
-    <div className="animate-fade-in min-h-screen bg-background">
+    <Reveal className="animate-fade-in min-h-screen bg-background">
       <Section className="text-center pt-32 pb-16">
         <div className="max-w-3xl mx-auto space-y-6">
           <span className="text-secondary-foreground/60 uppercase tracking-[0.2em] text-sm font-medium">Gallery</span>
@@ -155,6 +156,6 @@ export default function GalleryClient({ projects }) {
         </div>,
         document.body
       )}
-    </div>
+    </Reveal>
   );
 }

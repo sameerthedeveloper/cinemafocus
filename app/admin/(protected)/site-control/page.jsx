@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import Reveal from '@/components/Reveal';
 import { 
   Loader2, 
   Save, 
@@ -530,7 +531,7 @@ export default function AdminSiteControlPage() {
   ];
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in pb-20 md:pb-8">
+    <Reveal className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in pb-20 md:pb-8">
       <header className="mb-8 md:mb-10">
          <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Site Control</h1>
          <p className="text-muted-foreground mt-1 text-sm md:text-base">Customize global website content.</p>
@@ -1785,7 +1786,7 @@ export default function AdminSiteControlPage() {
 
         {/* IMAGES TAB */}
         {activeTab === 'images' && (
-          <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6 animate-fade-in">
+          <Reveal className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6 animate-fade-in">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-lg">
                 <ImageIcon size={24} />
@@ -1903,7 +1904,7 @@ export default function AdminSiteControlPage() {
 
               {/* Dynamic Alert Banner */}
               {(themeContext.imageOptimizationMode === 'runtime' || themeContext.imageOptimizationMode === 'hybrid') && (
-                <div className="flex gap-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 animate-fade-in text-amber-500">
+                <Reveal className="flex gap-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 animate-fade-in text-amber-500">
                   <AlertTriangle className="shrink-0 mt-0.5 animate-bounce-slow" size={20} />
                   <div className="text-sm">
                     <span className="font-semibold block mb-0.5">⚠️ Runtime Transformation Cost Warning</span>
@@ -1911,15 +1912,15 @@ export default function AdminSiteControlPage() {
                       ? "Every requested image will be processed dynamically on Vercel. This will rapidly increase monthly Vercel Image Transformation counts and may lead to additional hosting costs."
                       : "Hero & above-fold banners will be processed dynamically at runtime. This balances load times for critical sections but will use some monthly Vercel Image Optimization quotas."}
                   </div>
-                </div>
+                </Reveal>
               )}
             </div>
-          </div>
+          </Reveal>
         )}
 
         {/* MAINTENANCE TAB */}
         {activeTab === 'maintenance' && (
-          <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6 animate-fade-in">
+          <Reveal className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6 animate-fade-in">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 rounded-lg">
                 <Hammer size={24} />
@@ -2012,15 +2013,15 @@ export default function AdminSiteControlPage() {
                 {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Maintenance Settings
               </button>
             </div>
-          </div>
+          </Reveal>
         )}
 
         {message && (
-          <div className="fixed bottom-8 right-8 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg animate-fade-in-up flex items-center gap-2 z-50">
+          <Reveal className="fixed bottom-8 right-8 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg animate-fade-in-up flex items-center gap-2 z-50">
             {message}
-          </div>
+          </Reveal>
         )}
       </div>
-    </div>
+    </Reveal>
   );
 }

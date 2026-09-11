@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Package, MessageSquare, Users, LayoutGrid, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import Reveal from '@/components/Reveal';
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -44,7 +45,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in pb-20 md:pb-8">
+    <Reveal className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in pb-20 md:pb-8">
       <header className="mb-8 md:mb-10">
           <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Dashboard Overview</h1>
           <p className="text-muted-foreground mt-1 text-sm md:text-base">Quick metrics from your Supabase backend.</p>
@@ -94,6 +95,6 @@ export default function DashboardPage() {
             </div>
          </div>
       </div>
-    </div>
+    </Reveal>
   );
 }

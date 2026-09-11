@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { revalidateData } from '@/lib/actions';
+import Reveal from '@/components/Reveal';
 import {
   Loader2, Save, Timer, ExternalLink, ToggleLeft, ToggleRight,
   Plus, Trash2, AlertCircle, CheckCircle2, Clock, Info, Globe,
@@ -119,7 +120,7 @@ export default function CustomRoutesPage() {
   const slugs = Object.keys(config);
 
   return (
-    <div className="max-w-3xl mx-auto pb-20 md:pb-8 animate-fade-in">
+    <Reveal className="max-w-3xl mx-auto pb-20 md:pb-8 animate-fade-in">
       {/* header */}
       <div className="flex items-start justify-between mb-8 gap-4">
         <div>
@@ -320,7 +321,7 @@ export default function CustomRoutesPage() {
           </button>
         )}
       </div>
-    </div>
+    </Reveal>
   );
 }
 

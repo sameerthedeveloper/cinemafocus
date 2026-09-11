@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { Plus, Edit, Trash2, Upload, X, Check, Loader2, AlertCircle, CheckSquare, Square, Search, Eye, EyeOff } from 'lucide-react';
 import { revalidateData } from '@/lib/actions';
+import Reveal from '@/components/Reveal';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState([]);
@@ -424,7 +425,7 @@ export default function AdminProductsPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in pb-20 md:pb-8">
+    <Reveal className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in pb-20 md:pb-8">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-8 md:mb-10">
         <div>
            <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Products</h1>
@@ -453,7 +454,7 @@ export default function AdminProductsPage() {
 
       {/* Bulk Action Toolbar */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 px-6 py-3 bg-background border border-border rounded-2xl shadow-2xl animate-fade-in">
+        <Reveal className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 px-6 py-3 bg-background border border-border rounded-2xl shadow-2xl animate-fade-in">
           <span className="text-sm font-medium text-foreground">
             <span className="text-primary font-semibold">{selectedIds.size}</span> product{selectedIds.size > 1 ? 's' : ''} selected
           </span>
@@ -503,7 +504,7 @@ export default function AdminProductsPage() {
             )}
             {bulkDeleting ? 'Deleting…' : `Delete ${selectedIds.size}`}
           </button>
-        </div>
+        </Reveal>
       )}
 
       <div className="mb-6 max-w-md relative">
@@ -641,7 +642,7 @@ export default function AdminProductsPage() {
 
       {/* Bulk Import Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-background rounded-2xl w-full max-w-2xl shadow-2xl border border-border overflow-hidden flex flex-col max-h-[85vh]">
             <div className="p-6 border-b border-border flex justify-between items-center bg-secondary/30">
                <div>
@@ -727,7 +728,7 @@ export default function AdminProductsPage() {
 
               {/* Success Panel */}
               {importSuccess && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-6 rounded-2xl flex flex-col items-center gap-3 text-center animate-fade-in">
+                <Reveal className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-6 rounded-2xl flex flex-col items-center gap-3 text-center animate-fade-in">
                   <div className="p-3 bg-emerald-500/25 rounded-full text-emerald-400 animate-bounce">
                     <Check size={32} />
                   </div>
@@ -735,18 +736,18 @@ export default function AdminProductsPage() {
                     <h3 className="font-semibold text-lg">Import Completed Successfully!</h3>
                     <p className="text-sm text-emerald-400/80 mt-1">All {importProgress.total} products and their brands are fully synced in the database.</p>
                   </div>
-                </div>
+                </Reveal>
               )}
 
               {/* Error Alert */}
               {importError && (
-                <div className="bg-red-500/10 border border-red-500/25 text-red-400 p-4 rounded-xl flex gap-3 items-start animate-fade-in">
+                <Reveal className="bg-red-500/10 border border-red-500/25 text-red-400 p-4 rounded-xl flex gap-3 items-start animate-fade-in">
                   <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-sm">Failed to import products</h4>
                     <p className="text-xs text-red-400/90 mt-1">{importError}</p>
                   </div>
-                </div>
+                </Reveal>
               )}
             </div>
 
@@ -760,12 +761,12 @@ export default function AdminProductsPage() {
                </button>
             </div>
           </div>
-        </div>
+        </Reveal>
       )}
 
       {/* Bulk Product Edit Modal */}
       {showBulkEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <form 
             onSubmit={handleBulkEdit}
             className="bg-background rounded-2xl w-full max-w-lg shadow-2xl border border-border overflow-hidden flex flex-col max-h-[85vh] animate-scale-up"
@@ -859,7 +860,7 @@ export default function AdminProductsPage() {
                   </span>
                 </label>
                 {bulkEditFields.updatePrice && (
-                  <div className="relative animate-fade-in">
+                  <Reveal className="relative animate-fade-in">
                     <span className="absolute left-3.5 top-2.5 text-xs text-muted-foreground font-mono">INR</span>
                     <input 
                       type="number" 
@@ -869,7 +870,7 @@ export default function AdminProductsPage() {
                       className="w-full pl-14 pr-4 p-2.5 bg-background border border-border rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 shadow-sm" 
                       placeholder="e.g. 1250" 
                     />
-                  </div>
+                  </Reveal>
                 )}
               </div>
 
@@ -895,9 +896,9 @@ export default function AdminProductsPage() {
                </button>
             </div>
           </form>
-        </div>
+        </Reveal>
       )}
-    </div>
+    </Reveal>
   );
 }
 

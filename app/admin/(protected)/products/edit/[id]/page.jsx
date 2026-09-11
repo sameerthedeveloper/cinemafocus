@@ -6,6 +6,7 @@ import { revalidateData } from '@/lib/actions';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2, Save, X, Upload, ArrowLeft, Trash2, Plus } from 'lucide-react';
+import Reveal from '@/components/Reveal';
 
 export default function EditProductPage() {
   const { id } = useParams();
@@ -189,7 +190,7 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto animate-fade-in pb-20">
+    <Reveal className="p-8 max-w-4xl mx-auto animate-fade-in pb-20">
       <header className="flex items-center gap-4 mb-8">
         <Link href="/admin/products" className="p-2 hover:bg-secondary rounded-full transition-colors">
           <ArrowLeft size={20} />
@@ -323,6 +324,6 @@ export default function EditProductPage() {
         </div>
 
       </form>
-    </div>
+    </Reveal>
   );
 }

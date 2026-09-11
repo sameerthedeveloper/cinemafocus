@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getHero } from '@/lib/cms';
 import { createClient } from '@/lib/supabase/server';
 import Hero from '@/components/Hero';
+import Reveal from '@/components/Reveal';
 import { 
   PressSection, 
   CollectionSection, 
@@ -109,7 +110,7 @@ export default async function Home() {
       />
 
       {/* Deferred Sections - Animations start here to preserve visual experience below the fold */}
-      <div className="animate-fade-in">
+      <Reveal className="animate-fade-in">
         <Suspense fallback={
           <div className="py-24 container mx-auto px-6">
             <div className="flex justify-between items-end mb-12">
@@ -241,7 +242,7 @@ export default async function Home() {
         }>
           <ContactSection />
         </Suspense>
-      </div>
+      </Reveal>
     </div>
   );
 }

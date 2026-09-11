@@ -9,6 +9,7 @@ import { getPressRelease } from '@/lib/db';
 import { createClient } from '@/lib/supabase/client';
 import { formatDate } from '@/lib/utils';
 import { useParams } from 'next/navigation';
+import Reveal from '@/components/Reveal';
 
 export default function PressReleaseDetailPage() {
   const params = useParams();
@@ -44,7 +45,7 @@ export default function PressReleaseDetailPage() {
   }
 
   return (
-    <div className="animate-fade-in pt-24 pb-20">
+    <Reveal className="animate-fade-in pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-6">
         <Link href="/press" className="group inline-flex items-center text-muted hover:text-foreground mb-12 transition-colors">
           <ArrowLeft size={20} className="mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -167,6 +168,6 @@ export default function PressReleaseDetailPage() {
            </div>
         </div>
       </div>
-    </div>
+    </Reveal>
   );
 }

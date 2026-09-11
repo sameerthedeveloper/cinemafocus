@@ -6,6 +6,7 @@ import Button from './Button';
 import clsx from 'clsx';
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import gsap from 'gsap';
+import Reveal from '@/components/Reveal';
 
 // Waveform Visualizer Component
 const WaveformVisualizer = ({ className = '' }) => {
@@ -473,7 +474,7 @@ const Hero = ({
                 isRightSplit ? "md:order-2 md:border-l" : "md:order-1 md:border-r"
               )}>
                 {isActive && (
-                  <div className={clsx("w-full max-w-xl space-y-8 animate-fade-in-up flex flex-col", flexAlignItems)}>
+                  <Reveal className={clsx("w-full max-w-xl space-y-8 animate-fade-in-up flex flex-col", flexAlignItems)}>
                      <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] drop-shadow-xl", alignClass)} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
@@ -489,7 +490,7 @@ const Hero = ({
                          {slide.ctaText || "Discover Products"}
                        </Button>
                      </div>
-                  </div>
+                  </Reveal>
                 )}
               </div>
 
@@ -525,7 +526,7 @@ const Hero = ({
               <div className="container px-6 relative z-10 mx-auto">
                 <div className={`w-full flex flex-col ${alignClass}`}>
                   {isActive && (
-                    <div className={`w-full max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
+                    <Reveal className={`w-full max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
                       <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl", alignClass)} style={getTitleStyle(slide)}>
                         {slide.title}
                       </h1>
@@ -541,7 +542,7 @@ const Hero = ({
                           {slide.ctaText || "Discover Products"}
                         </Button>
                       </div>
-                    </div>
+                    </Reveal>
                   )}
                 </div>
               </div>
@@ -578,7 +579,7 @@ const Hero = ({
             <div className="container px-6 relative z-10 mx-auto">
                <div className={`w-full flex flex-col ${alignClass}`}>
                  {isActive && (
-                   <div className={`w-full max-w-4xl space-y-6 md:space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
+                   <Reveal className={`w-full max-w-4xl space-y-6 md:space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
                      <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl", alignClass)} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
@@ -594,7 +595,7 @@ const Hero = ({
                          {slide.ctaText || "Discover Products"}
                        </Button>
                      </div>
-                   </div>
+                   </Reveal>
                  )}
                </div>
             </div>

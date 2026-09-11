@@ -3,6 +3,7 @@ import Section from '@/components/Section';
 import LazyImage from '@/components/LazyImage';
 import { createClient } from '@/lib/supabase/server';
 import { getPhilosophy } from '@/lib/db';
+import Reveal from '@/components/Reveal';
 
 export const metadata = {
   title: "About",
@@ -33,7 +34,7 @@ export default async function AboutPage() {
   ];
 
   return (
-    <div className="animate-fade-in pt-10">
+    <Reveal className="animate-fade-in pt-10">
       <Section className="py-20 text-center">
         <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-6">{title}</h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -96,7 +97,7 @@ export default async function AboutPage() {
            </div>
         </div>
       </Section>
-    </div>
+    </Reveal>
   );
 }
 

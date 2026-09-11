@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, Sparkles, Loader2 } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
+import Reveal from '@/components/Reveal';
 
 export default function EditLaunchPage() {
   const router = useRouter();
@@ -118,7 +119,7 @@ export default function EditLaunchPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20">
+    <Reveal className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in pb-20">
       <Link href="/admin/new-launches" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
         <ArrowLeft size={18} className="mr-2" />
         Back to New Arrivals
@@ -221,6 +222,6 @@ export default function EditLaunchPage() {
           </div>
         </div>
       </form>
-    </div>
+    </Reveal>
   );
 }

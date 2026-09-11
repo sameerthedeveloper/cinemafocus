@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import Reveal from '@/components/Reveal';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -60,7 +61,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-secondary/30">
-      <div className="bg-background p-8 rounded-2xl border border-border w-full max-w-md space-y-8 animate-fade-in-up">
+      <Reveal className="bg-background p-8 rounded-2xl border border-border w-full max-w-md space-y-8 animate-fade-in-up">
         <div className="text-center space-y-4">
            {/* Using a placeholder text if image path is changed or omitted */}
            <div className="mx-auto w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
@@ -104,7 +105,7 @@ export default function LoginPage() {
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
-      </div>
+      </Reveal>
     </div>
   );
 }

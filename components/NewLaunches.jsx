@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import Button from './Button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useCurrency } from '../hooks/useCurrency';
+import Reveal from '@/components/Reveal';
 
 const NewLaunches = ({ products }) => {
   const { formatPrice, showPrice } = useCurrency();
@@ -105,9 +106,9 @@ const NewLaunches = ({ products }) => {
               )}
             >
               {/* Eyebrow / Label */}
-              <span className="mb-4 inline-block px-3 py-1 rounded-full border border-white/20 bg-white/5 text-xs font-semibold tracking-wider uppercase backdrop-blur-md animate-fade-in-up">
+              <Reveal as="span" className="mb-4 inline-block px-3 py-1 rounded-full border border-white/20 bg-white/5 text-xs font-semibold tracking-wider uppercase backdrop-blur-md animate-fade-in-up">
                  NEWLY LAUNCH
-              </span>
+              </Reveal>
 
               <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-semibold tracking-tighter leading-[0.95] whitespace-pre-line mb-6 md:mb-8 drop-shadow-sm bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-zinc-500">
                 {currentProduct.name}
@@ -134,22 +135,22 @@ const NewLaunches = ({ products }) => {
 
          {/* Right Side: Product Image */}
          <div className="w-full md:w-1/2 h-auto md:h-full flex items-center justify-center relative z-10 pointer-events-none pt-24 md:pt-0">
-            <div 
+            <Reveal
                className={clsx(
-                 "transition-all duration-1000 cubic-bezier(0.16, 1, 0.3, 1) transform w-full flex justify-center relative aspect-square max-h-[35vh] md:max-h-[85vh]",
+                 "transition-all duration-1000 cubic-bezier(0.16, 1, 0.3, 1) transform w-full flex justify-center relative aspect-square max-h-[35vh] md:max-h-[85vh] animate-float",
                  isTransitioning ? "opacity-0 scale-90 translate-x-12 blur-sm" : "opacity-100 scale-100 translate-x-0 blur-0"
                )}
             >
-               <OptimizedImage 
-                 src={currentProduct.images?.[0] || '/images/products/speaker-transparent.png'} 
+               <OptimizedImage
+                 src={currentProduct.images?.[0] || '/images/products/speaker-transparent.png'}
                  alt={currentProduct.name}
                  fill
                  priority={currentIndex === 0}
-                 className="object-contain drop-shadow-2xl animate-float mt-0 md:mt-0"
+                 className="object-contain drop-shadow-2xl mt-0 md:mt-0"
                  style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }}
                  sizes="(max-width: 768px) 90vw, 40vw"
                />
-            </div>
+            </Reveal>
          </div>
       </div>
 

@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import ContentBlockBuilder from '@/components/admin/ContentBlockBuilder';
 import { revalidatePressCache } from '@/app/actions/press';
+import Reveal from '@/components/Reveal';
 
 export default function EditPressReleasePage() {
   const { id } = useParams();
@@ -129,7 +130,7 @@ export default function EditPressReleasePage() {
   if (loading) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading press release...</div>;
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto pb-20 md:pb-8 animate-fade-in text-sm md:text-base">
+    <Reveal className="p-4 md:p-8 max-w-4xl mx-auto pb-20 md:pb-8 animate-fade-in text-sm md:text-base">
       <Link href="/admin/press-releases" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors font-medium">
         <ArrowLeft size={18} className="mr-2" />
         Back to Press Releases
@@ -247,6 +248,6 @@ export default function EditPressReleasePage() {
           </button>
         </div>
       </form>
-    </div>
+    </Reveal>
   );
 }
