@@ -79,6 +79,10 @@ const Header = () => {
 
   return (
     <header
+      data-debug-pathname={pathname}
+      data-debug-resolved={resolvedPathname}
+      data-debug-ishome={String(isHome)}
+      data-debug-scrolled={String(isScrolled)}
       className={clsx(
         'fixed top-0 left-0 right-0 z-99 transition-all duration-300 ease-in-out',
         // Mobile: Always visible background
