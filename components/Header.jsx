@@ -16,12 +16,15 @@ const Header = () => {
   const menuRef = useRef(null);
   const pathname = usePathname();
   const { theme, showDesktopMenu } = useSiteSettings();
-  const [mounted, setMounted] = useState(false);
+  // usePathname() can read the SSR pathname during hydration (mismatch risk from
+  // the proxy.js request interception — see next/docs use-pathname.md), so resolve
+  // the real path from the browser once mounted instead of trusting it outright.
+  const [resolvedPathname, setResolvedPathname] = useState(pathname);
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setResolvedPathname(window.location.pathname);
+  }, [pathname]);
 
-  const isHome = pathname === '/';
+  const isHome = resolvedPathname === '/';
 
   // Text/icon color: follows theme or transparent-header state
   const useLightContent = theme === 'dark' || (isHome && !isScrolled);
