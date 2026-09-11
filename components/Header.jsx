@@ -77,7 +77,7 @@ const Header = () => {
   return (
     <header
       className={clsx(
-        'fixed top-0 left-0 right-0 z-99 transition-all duration-500 ease-in-out',
+        'fixed top-0 left-0 right-0 z-99 transition-all duration-300 ease-in-out',
         // Mobile: Always visible background
         'bg-background m-3 rounded-3xl py-3 shadow gap-8 border border-gray-300',
         // Desktop: Dynamic based on scroll
