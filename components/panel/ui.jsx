@@ -62,7 +62,17 @@ export function Badge({ tone = 'neutral', children }) {
 }
 
 export function Skeleton({ className }) {
-  return <div className={clsx("bg-black/[0.06] rounded-xl animate-pulse", className)} />;
+  return <div className={clsx("shimmer rounded-xl", className)} />;
+}
+
+/** Small "Loading…" cue with spinner, shown above skeletons. */
+export function LoadingCue({ label = 'Loading' }) {
+  return (
+    <div className="flex items-center gap-2 text-xs text-[var(--admin-muted)] mb-4" role="status" aria-live="polite">
+      <span className="w-3.5 h-3.5 rounded-full border-2 border-[var(--admin-accent)] border-t-transparent animate-spin" />
+      {label}…
+    </div>
+  );
 }
 
 export function Card({ title, subtitle, action, children, className, flush }) {
