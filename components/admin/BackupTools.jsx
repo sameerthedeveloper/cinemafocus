@@ -4,56 +4,79 @@ import React, { useState, useRef } from 'react';
 import { createClient } from '@/lib/aws/queryClient';
 import { Download, Upload, Loader2, AlertTriangle, CheckCircle, FileJson } from 'lucide-react';
 
+const SETTING_IDS = [
+    'general', 'hero_main', 'philosophy', 'footer', 'trust_badges',
+    'maintenance', 'seo', 'product_seo', 'custom_routes',
+];
+
+const TABLES = ['products', 'categories', 'new_launches', 'press_releases', 'projects', 'messages', 'users'];
+const BACKUP_VERSION = '3.0-aws';
+const CHUNK = 5; // parallel writes per batch, keeps API Gateway / Lambda / Dynamo from throttling
+
+const chunked = async (items, fn) => {
+    for (let i = 0; i < items.length; i += CHUNK) {
+        await Promise.all(items.slice(i, i + CHUNK).map(fn));
+    }
+};
+
 export default function BackupTools() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [status, setStatus] = useState(null); // 'success', 'error'
     const fileInputRef = useRef(null);
-    const supabase = createClient();
-
-    const collectionsToBackup = [
-        'products', 
-        'categories', 
-        'new_launches', 
-        'press_releases', 
-        'projects', 
-        'messages', 
-        'users', 
-        'site_settings'
-    ];
+    const db = createClient();
 
     const handleBackup = async () => {
         setLoading(true);
         setStatus(null);
-        setMessage('Generating Supabase backup...');
+        setMessage('Generating AWS backup...');
 
         try {
             const backupData = {};
+            const counts = {};
 
-            for (const table of collectionsToBackup) {
-                const { data, error } = await supabase.from(table).select('*');
-                if (error) throw error;
-                backupData[table] = data;
+            for (const table of TABLES) {
+                setMessage(`Reading ${table}...`);
+                const { data, error } = await db.from(table).select('*');
+                if (error) throw new Error(`${table}: ${error.message}`);
+                backupData[table] = data || [];
+                counts[table] = backupData[table].length;
             }
 
-            backupData['_meta'] = {
+            // site_settings has no list endpoint: read each known setting by id.
+            setMessage('Reading site_settings...');
+            const settings = [];
+            for (const id of SETTING_IDS) {
+                const { data, error } = await db.from('site_settings').select('*').eq('id', id).single();
+                if (error) {
+                    if (error.status === 404) continue; // setting never saved
+                    throw new Error(`site_settings/${id}: ${error.message}`);
+                }
+                if (data) settings.push(data);
+            }
+            backupData.site_settings = settings;
+            counts.site_settings = settings.length;
+
+            backupData._meta = {
                 timestamp: new Date().toISOString(),
-                version: '2.0-supabase',
-                source: 'Supabase Postgres'
+                version: BACKUP_VERSION,
+                source: 'AWS DynamoDB',
+                counts,
             };
 
             const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `cinemafocus-supabase-backup-${new Date().toISOString().slice(0, 10)}.json`;
+            a.download = `cinemafocus-aws-backup-${new Date().toISOString().slice(0, 10)}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
+            const total = Object.values(counts).reduce((a, b) => a + b, 0);
             setStatus('success');
-            setMessage('Backup downloaded successfully.');
+            setMessage(`Backup downloaded (${total} records).`);
         } catch (error) {
             console.error(error);
             setStatus('error');
@@ -64,7 +87,7 @@ export default function BackupTools() {
     };
 
     const handleRestoreTrigger = () => {
-        if (window.confirm("Confirm Restore: This will merge the backup data into your Supabase database. Existing records with same IDs will be overwritten. Continue?")) {
+        if (window.confirm("Confirm Restore: this writes the backup into your AWS database. Records with the same IDs will be overwritten. Continue?")) {
             fileInputRef.current?.click();
         }
     };
@@ -78,49 +101,48 @@ export default function BackupTools() {
         setMessage('Reading backup file...');
 
         try {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const rawContent = e.target.result;
-                    let data = JSON.parse(rawContent);
-                    
-                    let opCount = 0;
-                    
-                    setMessage('Restoring tables...');
-                    
-                    for (const table of collectionsToBackup) {
-                        if (data[table] && Array.isArray(data[table])) {
-                            // Postgres upsert (on conflict do update)
-                            const { error } = await supabase
-                                .from(table)
-                                .upsert(data[table]);
-                                
-                            if (error) {
-                                console.error(`Error restoring ${table}:`, error);
-                                throw new Error(`Failed to restore ${table}: ${error.message}`);
-                            }
-                            opCount += data[table].length;
-                        }
-                    }
+            const data = JSON.parse(await file.text());
+            if (!data || typeof data !== 'object' || !data._meta) throw new Error('Not a valid backup file');
 
-                    if (opCount > 0) {
-                         setStatus('success');
-                         setMessage(`Database restored successfully (${opCount} records processed).`);
-                         setTimeout(() => window.location.reload(), 2000);
-                    } else {
-                        setStatus('success');
-                        setMessage('No valid data found in backup.');
-                    }
+            let done = 0;
+            const skipped = [];
+            const failed = [];
 
-                } catch (err) {
-                    console.error(err);
-                    setStatus('error');
-                    setMessage('Restore Failed: ' + err.message);
+            for (const table of [...TABLES, 'site_settings']) {
+                const rows = data[table];
+                if (!Array.isArray(rows) || rows.length === 0) continue;
+                setMessage(`Restoring ${table} (${rows.length})...`);
+
+                let toWrite = rows;
+                if (table === 'messages') {
+                    // The messages API can only update status on an existing message
+                    // (a PUT on a missing id would create a broken partial row), so
+                    // only restore messages that still exist.
+                    const { data: existing } = await db.from('messages').select('*');
+                    const ids = new Set((existing || []).map((m) => m.id));
+                    toWrite = rows.filter((m) => ids.has(m.id));
+                    if (toWrite.length < rows.length) skipped.push(`${rows.length - toWrite.length} deleted messages`);
                 }
-            };
-            reader.readAsText(file);
 
+                await chunked(toWrite, async (row) => {
+                    if (row.id === undefined) { failed.push(`${table}: row without id`); return; }
+                    const { error } = await db.from(table).upsert(row);
+                    if (error) failed.push(`${table}/${row.id}: ${error.message}`);
+                    else done++;
+                });
+            }
+
+            if (failed.length) {
+                console.error('Restore failures:', failed);
+                setStatus('error');
+                setMessage(`Restored ${done}, failed ${failed.length}. First: ${failed[0]}`);
+            } else {
+                setStatus('success');
+                setMessage(`Restored ${done} records${skipped.length ? ` (skipped ${skipped.join(', ')})` : ''}.`);
+                setTimeout(() => window.location.reload(), 2000);
+            }
         } catch (error) {
+            console.error(error);
             setStatus('error');
             setMessage('Restore failed: ' + error.message);
         } finally {
@@ -133,11 +155,11 @@ export default function BackupTools() {
         <div className="bg-background border border-border rounded-xl p-6 space-y-4 shadow-sm">
             <h3 className="font-medium flex items-center gap-2">
                 <FileJson size={18} className="text-primary" /> 
-                Supabase Backup & Restore
+                AWS Backup & Restore
             </h3>
             
             <p className="text-xs text-muted-foreground">
-                Export or import your entire PostgreSQL data as a JSON file.
+                Export or import your DynamoDB content (products, categories, launches, press, projects, messages, users, site settings) as a JSON file.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">

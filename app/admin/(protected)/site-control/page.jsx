@@ -1669,9 +1669,9 @@ export default function AdminSiteControlPage() {
         {activeTab === 'database' && (
           <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
              <div className="space-y-4">
-               <h3 className="font-medium text-lg">Supabase Data Management</h3>
+               <h3 className="font-medium text-lg">Database Management</h3>
                <p className="text-sm text-muted-foreground">
-                 Manage your site data. Resetting will use the new Supabase-compatible seeder.
+                 Back up and restore your site data.
                </p>
                
                <BackupTools />
