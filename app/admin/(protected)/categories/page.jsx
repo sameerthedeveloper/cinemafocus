@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/aws/queryClient';
 import { Loader2, Plus, Trash2, Tag, X, Edit, Check } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import { revalidateData } from '@/lib/actions';

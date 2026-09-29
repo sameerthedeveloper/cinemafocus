@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/aws/queryClient';
 import Link from 'next/link';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { formatDate } from '@/lib/utils';

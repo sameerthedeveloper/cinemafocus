@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/aws/queryClient';
 import { Shield, User, UserCheck, Users2, Plus, Trash2, AlertCircle } from 'lucide-react';
 import Reveal from '@/components/Reveal';
 

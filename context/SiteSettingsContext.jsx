@@ -4,9 +4,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getSettingData } from '@/lib/aws/adapter';
 import { revalidateData } from '@/lib/actions';
 
-// Admin-only writes still go to Supabase. Load the client lazily so public pages
-// never download or initialise it.
-const getSupabase = async () => (await import('@/lib/supabase/client')).createClient();
+// Admin-only writes go to AWS through the supabase-js-compatible query shim.
+// Loaded lazily so public pages never download it.
+const getSupabase = async () => (await import('@/lib/aws/queryClient')).createClient();
 
 const SiteSettingsContext = createContext();
 

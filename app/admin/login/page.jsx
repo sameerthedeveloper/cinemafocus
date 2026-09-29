@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import Reveal from '@/components/Reveal';
 
 export default function LoginPage() {
@@ -11,49 +10,30 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) {
-        // Sandbox Backdoor: If cloud Supabase fails/offline, allow default credentials
-        if (email === 'admin@cinemafocus.com' && (password === 'adminpassword' || password === 'admin')) {
-          localStorage.setItem('sb-bypass-session', JSON.stringify({
-            user: { email: 'admin@cinemafocus.com', id: 'sandbox-admin-id' },
-            expires_at: Math.floor(Date.now() / 1000) + 3600 * 24
-          }));
-          router.refresh();
-          router.push('/admin/dashboard');
-        } else {
-          setError("Invalid login credentials.");
-        }
-      } else {
-        // Refresh the router so the proxy can reflect the updated session
-        router.refresh();
-        router.push('/admin/dashboard');
+      if (!res.ok) {
+        setError("Invalid login credentials.");
+        return;
       }
+
+      // Refresh the router so the proxy can reflect the updated session
+      router.refresh();
+      router.push('/admin/dashboard');
     } catch (err) {
-      // Sandbox Backdoor: If network/fetch fails, allow default credentials
-      if (email === 'admin@cinemafocus.com' && (password === 'adminpassword' || password === 'admin')) {
-        localStorage.setItem('sb-bypass-session', JSON.stringify({
-          user: { email: 'admin@cinemafocus.com', id: 'sandbox-admin-id' },
-          expires_at: Math.floor(Date.now() / 1000) + 3600 * 24
-        }));
-        router.refresh();
-        router.push('/admin/dashboard');
-      } else {
-        console.error(err);
-        setError("An unexpected error occurred.");
-      }
+      console.error(err);
+      setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -71,14 +51,14 @@ export default function LoginPage() {
              Admin Portal
            </h1>
         </div>
-        
+
         {error && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center">{error}</div>}
 
         <form onSubmit={handleAuth} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Email</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               className="w-full p-3 rounded-lg border border-input bg-transparent focus:ring-1 focus:ring-primary outline-none transition-all"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -88,8 +68,8 @@ export default function LoginPage() {
           </div>
           <div className="space-y-2">
              <label className="text-sm font-medium text-muted-foreground">Password</label>
-             <input 
-               type="password" 
+             <input
+               type="password"
                className="w-full p-3 rounded-lg border border-input bg-transparent focus:ring-1 focus:ring-primary outline-none transition-all"
                value={password}
                onChange={(e) => setPassword(e.target.value)}
@@ -97,8 +77,8 @@ export default function LoginPage() {
                required
              />
           </div>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
             className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
           >

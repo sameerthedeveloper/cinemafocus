@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, Tag, Users, MessageSquare, Image, Search, Newspaper, Sparkles, Menu, X, Route } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { LogOut, LayoutDashboard, Package, ArrowLeft, Settings, Tag, Users, MessageSquare, Image, Search, Newspaper, Sparkles, Menu, X, Route, KeyRound } from 'lucide-react';
+import { createClient } from '@/lib/aws/queryClient';
 import clsx from 'clsx';
 import logoPng from '@/assets/images/logo.png';
 import Reveal from '@/components/Reveal';
@@ -16,27 +16,10 @@ export default function AdminLayout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     const checkSession = async () => {
-      // Sandbox Backdoor: Check for offline bypass session first
-      if (typeof window !== 'undefined') {
-        const bypassSessionRaw = localStorage.getItem('sb-bypass-session');
-        if (bypassSessionRaw) {
-          try {
-            const bypassSession = JSON.parse(bypassSessionRaw);
-            if (bypassSession.expires_at > Math.floor(Date.now() / 1000)) {
-              setSession(bypassSession);
-              setLoading(false);
-              return;
-            }
-          } catch (e) {
-            console.error(e);
-          }
-        }
-      }
-
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
@@ -45,30 +28,19 @@ export default function AdminLayout({ children }) {
           setSession(session);
         }
       } catch (err) {
-        console.error("Supabase getSession failed:", err);
+        console.error("getSession failed:", err);
         router.push('/admin/login');
       } finally {
         setLoading(false);
       }
     };
-    
+
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         setSession(session);
       } else {
-        // If there's a local storage session, keep it
-        const bypassSessionRaw = localStorage.getItem('sb-bypass-session');
-        if (bypassSessionRaw) {
-          try {
-            const bypassSession = JSON.parse(bypassSessionRaw);
-            if (bypassSession.expires_at > Math.floor(Date.now() / 1000)) {
-              setSession(bypassSession);
-              return;
-            }
-          } catch (e) {}
-        }
         setSession(null);
         router.push('/admin/login');
       }
@@ -78,9 +50,6 @@ export default function AdminLayout({ children }) {
   }, [router, supabase]);
 
   const handleLogout = async () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('sb-bypass-session');
-    }
     try {
       await supabase.auth.signOut();
     } catch (e) {}
@@ -169,9 +138,22 @@ export default function AdminLayout({ children }) {
         </nav>
 
         <div className="p-6 border-t border-border space-y-2 mt-auto">
-           <Link 
-             href="/" 
-             target="_blank" 
+           <Link
+             href="/admin/account"
+             onClick={() => setIsMobileMenuOpen(false)}
+             className={clsx(
+               "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+               pathname === '/admin/account'
+                 ? "bg-primary text-primary-foreground shadow-sm"
+                 : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+             )}
+           >
+              <KeyRound size={18} />
+              Account
+           </Link>
+           <Link
+             href="/"
+             target="_blank"
              rel="noopener noreferrer" 
              className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary rounded-lg transition-colors"
            >

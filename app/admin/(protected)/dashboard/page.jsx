@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Package, MessageSquare, Users, LayoutGrid, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/aws/queryClient';
 import Reveal from '@/components/Reveal';
 
 export default function DashboardPage() {

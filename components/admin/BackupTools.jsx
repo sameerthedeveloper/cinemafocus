@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/aws/queryClient';
 import { Download, Upload, Loader2, AlertTriangle, CheckCircle, FileJson } from 'lucide-react';
 
 export default function BackupTools() {
