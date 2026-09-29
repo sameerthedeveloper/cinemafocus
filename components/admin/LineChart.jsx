@@ -17,19 +17,22 @@ const niceMax = (max) => {
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * pow;
 };
 
-export default function LineChart({ data = [], color = 'var(--admin-accent)', valueLabel = 'Value' }) {
+export default function LineChart({ data = [], color = 'var(--admin-accent)', valueLabel = 'Value', secondary = null, secondaryLabel = 'Secondary' }) {
   const gradId = useId().replace(/:/g, '');
   const [hover, setHover] = useState(null);
 
   if (!data.length) return null;
 
-  const max = niceMax(Math.max(...data.map((d) => d.value), 1));
+  const max = niceMax(Math.max(...data.map((d) => d.value), ...(secondary ? secondary.map((d) => d.value) : []), 1));
   const innerW = W - PAD.left - PAD.right;
   const innerH = H - PAD.top - PAD.bottom;
   const x = (i) => PAD.left + (data.length === 1 ? innerW / 2 : (i / (data.length - 1)) * innerW);
   const y = (v) => PAD.top + innerH - (v / max) * innerH;
 
   const line = data.map((d, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(d.value).toFixed(1)}`).join(' ');
+  const line2 = secondary
+    ? secondary.map((d, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(d.value).toFixed(1)}`).join(' ')
+    : null;
   const area = `${line} L${x(data.length - 1).toFixed(1)},${PAD.top + innerH} L${x(0).toFixed(1)},${PAD.top + innerH} Z`;
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => Math.round(max * t));
   const labelEvery = Math.ceil(data.length / 6);
@@ -68,6 +71,7 @@ export default function LineChart({ data = [], color = 'var(--admin-accent)', va
         ))}
 
         <path d={area} fill={`url(#${gradId})`} />
+        {line2 && <path d={line2} fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeDasharray="4 4" strokeLinejoin="round" strokeLinecap="round" />}
         <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
 
         {data.map((d, i) => (i % labelEvery === 0 || i === data.length - 1) && (
@@ -88,6 +92,7 @@ export default function LineChart({ data = [], color = 'var(--admin-accent)', va
           style={{ left: `${(x(hover) / W) * 100}%`, top: `${(y(h.value) / H) * 100}%`, marginTop: -10 }}
         >
           <div className="font-medium text-[#111827] tabular">{h.value} {valueLabel.toLowerCase()}</div>
+          {secondary && <div className="text-[#6b7280] tabular">{secondary[hover]?.value ?? 0} {secondaryLabel.toLowerCase()}</div>}
           <div className="text-[#6b7280]">{h.label}</div>
         </div>
       )}

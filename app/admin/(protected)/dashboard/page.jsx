@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Package, MessageSquare, Tag, Inbox, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
+import { Package, MessageSquare, Tag, Inbox } from 'lucide-react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { createClient } from '@/lib/aws/queryClient';
 import Reveal from '@/components/Reveal';
 import LineChart from '@/components/admin/LineChart';
+import { StatCard, Delta, Badge, Skeleton } from '@/components/panel/ui';
 
 const DAY = 24 * 60 * 60 * 1000;
 const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -15,55 +16,6 @@ const msgDate = (m) => {
   const d = raw ? new Date(raw) : null;
   return d && !Number.isNaN(d.getTime()) ? d : null;
 };
-
-function StatCard({ label, value, sub, icon: Icon, href, delta }) {
-  const body = (
-    <>
-      <div className="flex items-center justify-between">
-        <span className="text-[13px] font-medium text-[var(--admin-muted)]">{label}</span>
-        <span className="w-8 h-8 rounded-lg bg-[#f3f4f6] text-[var(--admin-muted)] flex items-center justify-center">
-          <Icon size={16} strokeWidth={1.75} />
-        </span>
-      </div>
-      <div className="mt-3 flex items-baseline gap-2">
-        <span className="text-[28px] leading-none font-semibold tracking-tight tabular">{value}</span>
-        {delta}
-      </div>
-      <div className="mt-2 text-xs text-[var(--admin-muted)]">{sub}</div>
-    </>
-  );
-  const cls = "block bg-white border border-[var(--admin-border)] rounded-xl p-5 md:p-6 shadow-sm";
-  return href
-    ? <Link href={href} className={clsx(cls, "hover:border-[#d1d5db] transition-colors")}>{body}</Link>
-    : <div className={cls}>{body}</div>;
-}
-
-function Delta({ pct }) {
-  if (pct === null) return <span className="text-xs font-medium text-[var(--admin-info)] bg-blue-50 rounded-full px-2 py-0.5">New</span>;
-  const up = pct > 0;
-  const flat = pct === 0;
-  const Icon = flat ? Minus : up ? ArrowUpRight : ArrowDownRight;
-  return (
-    <span className={clsx("inline-flex items-center gap-0.5 text-xs font-medium rounded-full px-2 py-0.5 tabular",
-      flat ? "text-[var(--admin-muted)] bg-[#f3f4f6]" : up ? "text-[var(--admin-success)] bg-green-50" : "text-[var(--admin-danger)] bg-red-50")}>
-      <Icon size={12} />{Math.abs(pct).toFixed(0)}%
-    </span>
-  );
-}
-
-function StatusBadge({ unread }) {
-  return (
-    <span className={clsx("inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-2 py-0.5",
-      unread ? "text-[var(--admin-warning)] bg-amber-50" : "text-[var(--admin-success)] bg-green-50")}>
-      <span className={clsx("w-1.5 h-1.5 rounded-full", unread ? "bg-[var(--admin-warning)]" : "bg-[var(--admin-success)]")} />
-      {unread ? 'Unread' : 'Read'}
-    </span>
-  );
-}
-
-function Skeleton({ className }) {
-  return <div className={clsx("bg-[#eef0f3] rounded-xl animate-pulse", className)} />;
-}
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -240,7 +192,7 @@ export default function DashboardPage() {
                           <td className="px-3 py-3 text-[var(--admin-muted)] whitespace-nowrap tabular">
                             {d ? d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
                           </td>
-                          <td className="px-5 md:px-6 py-3"><StatusBadge unread={msg.status !== 'read'} /></td>
+                          <td className="px-5 md:px-6 py-3"><Badge tone={msg.status !== 'read' ? 'warning' : 'success'}>{msg.status !== 'read' ? 'Unread' : 'Read'}</Badge></td>
                         </tr>
                       );
                     })}
