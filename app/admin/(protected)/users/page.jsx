@@ -245,7 +245,7 @@ export default function AdminUsersPage() {
                      onChange={e => setFormData({...formData, role: e.target.value})}
                      className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none transition-all"
                    >
-                     <option value="owner">Owner (read-only portal at /portal)</option>
+                     <option value="owner">Owner (portal login only, read-only)</option>
                      <option value="dealer">Dealer</option>
                      <option value="admin">Admin (full admin console)</option>
                    </select>

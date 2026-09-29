@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "@/lib/aws/cognito";
+import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, verifyAccessToken } from "@/lib/aws/cognito";
 
 export async function POST(request) {
   if (!process.env.API_GATEWAY_URL) {
@@ -17,6 +17,12 @@ export async function POST(request) {
 
   if (!res.ok) {
     return NextResponse.json({ error: data.error || "Login failed" }, { status: res.status });
+  }
+
+  // Only admin accounts may hold an admin session (owner/portal accounts are rejected before a cookie is set).
+  const claims = await verifyAccessToken(data.IdToken);
+  if (!claims || claims["custom:role"] !== "admin") {
+    return NextResponse.json({ error: "No admin access" }, { status: 403 });
   }
 
   const response = NextResponse.json({ success: true });

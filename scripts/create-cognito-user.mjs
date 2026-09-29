@@ -4,8 +4,8 @@
  *
  *   node scripts/create-cognito-user.mjs --email owner@example.com --role owner
  *
- * Roles:  owner  read-only owner portal (/portal)
- *         admin  full admin console (/admin), can also open /portal
+ * Roles:  owner  read-only owner portal (/portal) — cannot sign in to /admin
+ *         admin  full admin console (/admin) — cannot sign in to /portal
  *
  * The password is typed at a hidden prompt (never passed as an argument, never printed or logged).
  * Uses your local AWS CLI credentials and COGNITO_POOL_ID / AWS_REGION from .env.local.
@@ -67,7 +67,7 @@ try {
     console.log(`User ${email} already exists; role set to ${role}`);
   }
   await client.send(new sdk.AdminSetUserPasswordCommand({ UserPoolId: poolId, Username: email, Password: password, Permanent: true }));
-  console.log('Password set. Sign in at /portal/login' + (role === 'admin' ? ' or /admin/login' : '') + '.');
+  console.log('Password set. Sign in at ' + (role === 'admin' ? '/admin/login' : '/portal/login') + '.');
 } catch (e) {
   console.error(`Failed: ${e.name}: ${e.message}`);
   process.exit(1);
