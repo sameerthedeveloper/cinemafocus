@@ -207,8 +207,8 @@ test('fetch failures throw AwsFetchError (cms.js falls back to Supabase)', async
   await assert.rejects(a.getProducts(), a.AwsFetchError);
   stubFetch({ '/products': { status: 500 } });
   await assert.rejects(a.getProducts(), (e) => e instanceof a.AwsFetchError && e.status === 500);
-  stubFetch({});
-  await assert.rejects(a.getHero(), (e) => e instanceof a.AwsFetchError && e.status === 404);
+  stubFetch({ '/site-settings/hero_main': { status: 500 } });
+  await assert.rejects(a.getHero(), (e) => e instanceof a.AwsFetchError && e.status === 500);
   stubFetch({ '/categories': [{ slug: 'x' }], '/products': { status: 503 } });
   await assert.rejects(a.getCategories(), a.AwsFetchError);
   stubFetch({ '/products': { status: 200, body: { not: 'an array' } } });
@@ -238,6 +238,18 @@ test('retries throttling/5xx/network errors, then succeeds; 404 is not retried',
 
   calls = 0;
   globalThis.fetch = async () => (calls++, new Response('{}', { status: 404 }));
-  await assert.rejects(a.getHero(), (e) => e.status === 404);
+  await assert.rejects(a.getPressRelease('nope'), (e) => e.status === 404);
   assert.equal(calls, 1);
+});
+
+test('missing setting (404) -> same defaults as lib/db.js, not an error', async () => {
+  stubFetch({});
+  assert.deepEqual(await a.getHero(), seed.hero);
+  assert.equal(await a.getSeo(), null);
+  assert.deepEqual(await a.getProductSeo(), {});
+  assert.deepEqual(await a.getTrustBadges(), seed.trustBadges);
+  assert.equal(await a.getPhilosophy(), null);
+  assert.equal(await a.getSettingData('general'), null);
+  assert.equal(await a.getCustomRoutes(), null);
+  assert.equal((await a.getFooter()).email, 'contact@cinemafocus.com');
 });
