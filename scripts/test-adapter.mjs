@@ -11,6 +11,7 @@ import * as seed from '../lib/seed-data.js';
 import * as a from '../lib/aws/adapter.js';
 
 process.env.API_GATEWAY_URL = 'https://api.test';
+process.env.AWS_RETRY_BASE_MS = '1';
 
 // Route-table fetch stub: { '/products': [..] | {status, body} | Error }
 function stubFetch(routes) {
@@ -217,4 +218,26 @@ test('fetch failures throw AwsFetchError (cms.js falls back to Supabase)', async
   delete process.env.API_GATEWAY_URL;
   await assert.rejects(a.getProducts(), a.AwsFetchError);
   process.env.API_GATEWAY_URL = saved;
+});
+
+test('retries throttling/5xx/network errors, then succeeds; 404 is not retried', async () => {
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    if (calls === 1) throw new TypeError('fetch failed');
+    if (calls === 2) return new Response('{}', { status: 503 });
+    return new Response(JSON.stringify([{ productId: 'p1', slug: 's' }]), { status: 200 });
+  };
+  assert.equal((await a.getProducts()).length, 1);
+  assert.equal(calls, 3);
+
+  calls = 0;
+  globalThis.fetch = async () => (calls++, new Response('{}', { status: 503 }));
+  await assert.rejects(a.getProducts(), (e) => e instanceof a.AwsFetchError && e.status === 503);
+  assert.equal(calls, 4);
+
+  calls = 0;
+  globalThis.fetch = async () => (calls++, new Response('{}', { status: 404 }));
+  await assert.rejects(a.getHero(), (e) => e.status === 404);
+  assert.equal(calls, 1);
 });
