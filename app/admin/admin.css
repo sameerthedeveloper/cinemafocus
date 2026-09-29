@@ -1,0 +1,29 @@
+/* Admin shell design tokens and refinements.
+   Scoped to .admin-shell so nothing here can affect the public site. */
+.admin-shell {
+  --admin-bg: #f8fafc;
+  --admin-card: #ffffff;
+  --admin-border: #e5e7eb;
+  --admin-text: #111827;
+  --admin-muted: #6b7280;
+  --admin-accent: #b8862b;
+  --admin-accent-soft: #fbf3e2;
+  --admin-success: #16a34a;
+  --admin-warning: #d97706;
+  --admin-danger: #dc2626;
+  --admin-info: #2563eb;
+
+  background: var(--admin-bg);
+  color: var(--admin-text);
+}
+
+/* Cards: subtle radius, thin border, very restrained shadow (applies to existing admin pages too) */
+.admin-shell .rounded-2xl { border-radius: 12px; }
+.admin-shell .rounded-xl { border-radius: 10px; }
+.admin-shell .shadow-sm { box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); }
+.admin-shell .shadow-2xl { box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12); }
+
+/* Tables never blow out the page on small screens */
+.admin-shell main table { border-collapse: collapse; }
+
+.admin-shell .tabular { font-variant-numeric: tabular-nums; }
