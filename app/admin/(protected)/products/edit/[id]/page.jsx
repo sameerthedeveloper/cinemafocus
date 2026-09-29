@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/aws/queryClient';
 import { revalidateData } from '@/lib/actions';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';

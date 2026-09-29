@@ -2,6 +2,8 @@ import path from 'path';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Lets test builds use their own folder (NEXT_DIST_DIR=.next-verify) so they never touch a running `next dev`.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   turbopack: {
     root: path.resolve('.'),
   },
@@ -21,7 +23,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'placehold.co',
         pathname: '/**',
-      }
+      },
+      // AWS CloudFront image CDN — only when configured
+      ...(process.env.NEXT_PUBLIC_CDN_DOMAIN
+        ? [{ protocol: 'https', hostname: process.env.NEXT_PUBLIC_CDN_DOMAIN, pathname: '/**' }]
+        : []),
     ],
     // Deliverable 1: Move from runtime image optimization -> upload-time optimization.
     // Setting unoptimized: true disables global Vercel/Next.js runtime image transformations.

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/aws/queryClient';
 import Reveal from '@/components/Reveal';
 import { 
   Loader2, Save, Globe, Search, Share2, 

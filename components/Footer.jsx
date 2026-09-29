@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
-import { getFooter } from '@/lib/db';
-import { createClient } from '@/lib/supabase/client';
+import { getFooter } from '@/lib/aws/adapter';
 
 // Brand Social Icons as inline SVGs
 const FacebookIcon = ({ size = 20 }) => (
@@ -29,12 +28,11 @@ const Footer = () => {
     twitter: '#'
   });
 
-  const supabase = createClient();
 
   useEffect(() => {
     const fetchFooter = async () => {
       try {
-        const data = await getFooter(supabase);
+        const data = await getFooter();
         if (data) {
           // Merge with defaults to prevent missing fields issues
           setFooterData(prev => ({ ...prev, ...data }));

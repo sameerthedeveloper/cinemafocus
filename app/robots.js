@@ -17,7 +17,8 @@ export default function robots() {
       userAgent: '*',
       allow: '/',
       disallow: [
-        '/admin/', 
+        '/admin/',
+        '/portal/',
         '/api/', 
         '/*?bypass=true',
         '/*?offline=true'

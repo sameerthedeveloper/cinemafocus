@@ -1,5 +1,4 @@
-import { getFooter } from '@/lib/db';
-import { createClient } from '@/lib/supabase/server';
+import { getFooter } from '@/lib/cms';
 import ContactClient from './ContactClient';
 
 export const metadata = {
@@ -9,7 +8,6 @@ export const metadata = {
 };
 
 export default async function ContactPage() {
-  const supabase = await createClient();
-  const info = await getFooter(supabase);
+  const info = await getFooter();
   return <ContactClient initialInfo={info} />;
 }

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Section from '@/components/Section';
 import Button from '@/components/Button';
 import { Mail, Phone, MapPin, Clock, Loader2, CheckCircle } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createMessage } from '@/lib/aws/adapter';
 
 export default function HomeContact({ initialInfo }) {
   const [contactInfo] = useState(initialInfo || {
@@ -24,25 +24,17 @@ export default function HomeContact({ initialInfo }) {
     subject: 'General Enquiry',
     message: ''
   });
-  const supabase = createClient();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     
     try {
-      const { error } = await supabase
-        .from('messages')
-        .insert({
-          id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15),
-          name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          subject: formData.subject,
-          text: formData.message,
-          status: 'unread',
-        });
-
-      if (error) throw error;
+      await createMessage({
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        subject: formData.subject,
+        text: formData.message,
+      });
       
       setSubmitted(true);
       setFormData({

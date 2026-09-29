@@ -1,7 +1,6 @@
 import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { getHero } from '@/lib/cms';
-import { createClient } from '@/lib/supabase/server';
 import Hero from '@/components/Hero';
 import Reveal from '@/components/Reveal';
 import { 

@@ -17,6 +17,7 @@
 
 # Secrets & Environment
 .env*
+!.env.example
 *.pem
 firebase-service-account.json
 
@@ -43,3 +44,11 @@ next-env.d.ts
 scripts/inspect_site_content.js
 scripts/test_connection.js
 .claude/
+
+# AWS / Serverless build artifacts
+infra/node_modules
+infra/.serverless
+*.zip
+
+# Alternate build output for verification builds
+.next-*/

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Section from '@/components/Section';
 import Button from '@/components/Button';
 import { Mail, Phone, MapPin, Clock, Loader2, CheckCircle } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createMessage } from '@/lib/aws/adapter';
 import Reveal from '@/components/Reveal';
 
 export default function ContactClient({ initialInfo }) {
@@ -20,23 +20,17 @@ export default function ContactClient({ initialInfo }) {
     subject: 'General Enquiry',
     message: ''
   });
-  const supabase = createClient();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     
     try {
-      const { error } = await supabase
-        .from('messages')
-        .insert({
-          name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          message: `[Subject: ${formData.subject}]\n\n${formData.message}`,
-          read: false,
-        });
-
-      if (error) throw error;
+      await createMessage({
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        subject: formData.subject,
+        text: formData.message,
+      });
       
       setSubmitted(true);
       setFormData({

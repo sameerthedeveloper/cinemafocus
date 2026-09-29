@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Space_Mono } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { getCustomRoutes } from '@/lib/aws/adapter';
 
 const spaceMono = Space_Mono({
   subsets: ['latin'],
@@ -34,14 +34,9 @@ export default function CountdownPage({ slug = 'soon' }) {
   const [remaining, setRemaining] = useState(null);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase
-      .from('site_settings')
-      .select('data')
-      .eq('id', 'custom_routes')
-      .single()
-      .then(({ data }) => {
-        const route = data?.data?.[slug] ?? {};
+    getCustomRoutes()
+      .then((routes) => {
+        const route = routes?.[slug] ?? {};
         const launchDate =
           route.widgets?.find((w) => w.type === 'countdown')?.launch_date || ENV_LAUNCH_DATE;
         setCfg({
