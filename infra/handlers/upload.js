@@ -11,15 +11,20 @@ export async function getPresignedUrl(event) {
     await requireAdmin(event);
     const body = parseBody(event);
     const folder = body.folder || "uploads";
-    const baseName = String(body.fileName || "upload")
-      .replace(/\s+/g, "_")
-      .replace(/\.[^/.]+$/, "");
-    const key = `${folder}/${Date.now()}_${baseName}.webp`;
+    const rawName = String(body.fileName || "upload").replace(/\s+/g, "_");
+    const dotIndex = rawName.lastIndexOf(".");
+    const ext = dotIndex !== -1 ? rawName.slice(dotIndex) : "";
+    const baseName = dotIndex !== -1 ? rawName.slice(0, dotIndex) : rawName;
+    // Presigned PUT bypasses the Next.js server entirely, so there's no Sharp
+    // pass to re-encode to WebP here — the original format/bytes are stored
+    // as-is. Width variants are generated after the fact by resizeImage.js.
+    const key = `${folder}/${Date.now()}_${baseName}${ext}`;
+    const contentType = body.contentType || "application/octet-stream";
 
     const command = new PutObjectCommand({
       Bucket: BUCKET(),
       Key: key,
-      ContentType: "image/webp",
+      ContentType: contentType,
       CacheControl: "public, max-age=31536000, immutable",
     });
 

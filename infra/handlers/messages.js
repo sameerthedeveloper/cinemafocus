@@ -1,6 +1,6 @@
-import { PutCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand, UpdateCommand, DeleteCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
-import { docClient, scanAll } from "../lib/aws/dynamo.js";
+import { docClient } from "../lib/aws/dynamo.js";
 import { requireAdmin, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
 
@@ -29,7 +29,7 @@ export async function create(event) {
 export async function list(event) {
   try {
     await requireAdmin(event);
-    const Items = await scanAll({ TableName: TABLE() });
+    const { Items } = await docClient.send(new ScanCommand({ TableName: TABLE() }));
     return json(200, Items || []);
   } catch (e) {
     return errorResponse(e);

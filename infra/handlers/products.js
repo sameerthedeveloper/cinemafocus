@@ -1,5 +1,5 @@
-import { GetCommand, PutCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
-import { docClient, scanAll, queryAll } from "../lib/aws/dynamo.js";
+import { GetCommand, PutCommand, UpdateCommand, DeleteCommand, ScanCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { docClient } from "../lib/aws/dynamo.js";
 import { requireAdmin, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
 
@@ -10,15 +10,15 @@ export async function list(event) {
   try {
     const category = event.queryStringParameters?.category;
     if (category) {
-      const Items = await queryAll({
+      const { Items } = await docClient.send(new QueryCommand({
         TableName: TABLE(),
         IndexName: "category-index",
         KeyConditionExpression: "category = :c",
         ExpressionAttributeValues: { ":c": category },
-      });
+      }));
       return json(200, Items || []);
     }
-    const Items = await scanAll({ TableName: TABLE() });
+    const { Items } = await docClient.send(new ScanCommand({ TableName: TABLE() }));
     return json(200, Items || []);
   } catch (e) {
     return errorResponse(e);
@@ -67,11 +67,11 @@ export async function remove(event) {
     await docClient.send(new DeleteCommand({ TableName: TABLE(), Key: { productId } }));
 
     // Replicate ON DELETE SET NULL: null out originalProductId on any NewLaunches referencing this product
-    const Items = await scanAll({
+    const { Items } = await docClient.send(new ScanCommand({
       TableName: NEW_LAUNCHES_TABLE(),
       FilterExpression: "originalProductId = :pid",
       ExpressionAttributeValues: { ":pid": productId },
-    });
+    }));
 
     for (const item of Items || []) {
       await docClient.send(new UpdateCommand({

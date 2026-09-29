@@ -64,6 +64,7 @@ provider:
           Action:
             - cognito-idp:InitiateAuth
             - cognito-idp:RespondToAuthChallenge
+            - cognito-idp:AdminSetUserPassword
           Resource:
             - !GetAtt CognitoUserPool.Arn
 
@@ -81,6 +82,10 @@ functions:
     handler: handlers/auth.refresh
     events:
       - httpApi: 'POST /auth/refresh'
+  authChangePassword:
+    handler: handlers/auth.changePassword
+    events:
+      - httpApi: 'POST /auth/change-password'
 
   # --- Users ---
   getUsers:
@@ -241,17 +246,6 @@ functions:
     handler: handlers/upload.getPresignedUrl
     events:
       - httpApi: 'POST /upload/presign'
-
-  # --- Image resize (on-the-fly transform replacement) ---
-  resizeImage:
-    handler: handlers/resizeImage.handler
-    timeout: 60
-    memorySize: 1024
-    events:
-      - s3:
-          bucket: ${self:custom.imagesBucket}
-          event: s3:ObjectCreated:*
-          existing: true
 
 resources:
   Resources:
