@@ -1,5 +1,4 @@
-import { getProjects } from '@/lib/db';
-import { createClient } from '@/lib/supabase/server';
+import { getProjects } from '@/lib/cms';
 import GalleryClient from './GalleryClient';
 
 export const metadata = {
@@ -9,7 +8,6 @@ export const metadata = {
 };
 
 export default async function GalleryPage() {
-  const supabase = await createClient();
-  const projects = await getProjects(supabase);
+  const projects = await getProjects();
   return <GalleryClient projects={projects} />;
 }

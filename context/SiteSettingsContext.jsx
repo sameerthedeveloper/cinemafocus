@@ -1,8 +1,12 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { getSettingData } from '@/lib/aws/adapter';
 import { revalidateData } from '@/lib/actions';
+
+// Admin-only writes still go to Supabase. Load the client lazily so public pages
+// never download or initialise it.
+const getSupabase = async () => (await import('@/lib/supabase/client')).createClient();
 
 const SiteSettingsContext = createContext();
 
@@ -14,7 +18,6 @@ export const SiteSettingsProvider = ({ children, initialImageOptimizationMode = 
   const [showPrice, setShowPrice] = useState(true);
   const [imageOptimizationMode, setImageOptimizationMode] = useState(initialImageOptimizationMode);
   const [loading, setLoading] = useState(true);
-  const [supabase] = useState(() => createClient());
 
   const [seoSettings, setSeoSettings] = useState({
     siteTitle: 'Cinema Focus',
@@ -24,74 +27,34 @@ export const SiteSettingsProvider = ({ children, initialImageOptimizationMode = 
   });
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchSettings = async () => {
-      try {
-        // Fetch SEO and General settings from Supabase
-        let { data, error } = await supabase
-          .from('site_settings')
-          .select('id, data')
-          .in('id', ['general', 'seo']);
+      // Public settings come from AWS (through the same-origin /api/aws proxy).
+      const [general, seo] = await Promise.allSettled([getSettingData('general'), getSettingData('seo')]);
+      if (cancelled) return;
 
-        // Fallback to site_content if site_settings is missing
-        if (error && error.code === 'PGRST205') {
-            const fallback = await supabase
-              .from('site_content')
-              .select('id, data')
-              .in('id', ['general', 'seo']);
-            data = fallback.data;
-            error = fallback.error;
-        }
-
-        if (error) throw error;
-
-        if (data) {
-          data.forEach(row => {
-            if (row.id === 'general') {
-              if (row.data.showDesktopMenu !== undefined) setShowDesktopMenu(row.data.showDesktopMenu);
-              if (row.data.showPrice !== undefined) setShowPrice(row.data.showPrice);
-              if (row.data.imageOptimizationMode !== undefined) setImageOptimizationMode(row.data.imageOptimizationMode);
-            }
-            if (row.id === 'seo') {
-              setSeoSettings(prev => ({ ...prev, ...row.data }));
-            }
-          });
-        }
-      } catch (error) {
-        console.warn("Settings fetch failed:", error);
-      } finally {
-        setLoading(false);
+      if (general.status === 'fulfilled' && general.value) {
+        const g = general.value;
+        if (g.showDesktopMenu !== undefined) setShowDesktopMenu(g.showDesktopMenu);
+        if (g.showPrice !== undefined) setShowPrice(g.showPrice);
+        if (g.imageOptimizationMode !== undefined) setImageOptimizationMode(g.imageOptimizationMode);
+      } else if (general.status === 'rejected') {
+        console.warn("Settings fetch failed:", general.reason);
       }
+      if (seo.status === 'fulfilled' && seo.value) {
+        setSeoSettings(prev => ({ ...prev, ...seo.value }));
+      }
+      setLoading(false);
     };
 
     fetchSettings();
-
-    // Set up Realtime listener for site_settings changes
-    const channel = supabase
-      .channel('site_settings_changes')
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'site_settings' },
-        (payload) => {
-          const { id, data: newData } = payload.new;
-          if (id === 'general') {
-             if (newData.showDesktopMenu !== undefined) setShowDesktopMenu(newData.showDesktopMenu);
-             if (newData.showPrice !== undefined) setShowPrice(newData.showPrice);
-             if (newData.imageOptimizationMode !== undefined) setImageOptimizationMode(newData.imageOptimizationMode);
-          }
-          if (id === 'seo') {
-             setSeoSettings(prev => ({ ...prev, ...newData }));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [supabase]);
+    return () => { cancelled = true; };
+  }, []);
 
   const updateSettings = async (partialSettings) => {
     try {
+      const supabase = await getSupabase();
       // 1. Fetch current 'general' data to ensure a clean merge
       const { data: current, error: fetchError } = await supabase
         .from('site_settings')
@@ -125,6 +88,7 @@ export const SiteSettingsProvider = ({ children, initialImageOptimizationMode = 
 
   const updateSeoSettings = async (partialSeo) => {
     try {
+      const supabase = await getSupabase();
       const { data: current } = await supabase
         .from('site_settings')
         .select('data')

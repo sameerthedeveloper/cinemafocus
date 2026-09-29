@@ -1,5 +1,4 @@
-import { getPressReleases } from '@/lib/db';
-import { createClient } from '@/lib/supabase/server';
+import { getPressReleases } from '@/lib/cms';
 import PressClient from './PressClient';
 
 export const metadata = {
@@ -9,7 +8,6 @@ export const metadata = {
 };
 
 export default async function PressPage() {
-  const supabase = await createClient();
-  const releases = await getPressReleases(supabase);
+  const releases = await getPressReleases();
   return <PressClient initialReleases={releases} />;
 }

@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Calendar, Share2, FileText, ExternalLink } from 'lucide-react';
 import Section from '@/components/Section';
 import ContentRenderer from '@/components/ContentRenderer';
-import { getPressRelease } from '@/lib/db';
-import { createClient } from '@/lib/supabase/client';
+import { getPressRelease } from '@/lib/aws/adapter';
 import { formatDate } from '@/lib/utils';
 import { useParams } from 'next/navigation';
 import Reveal from '@/components/Reveal';
@@ -17,12 +16,11 @@ export default function PressReleaseDetailPage() {
   const [release, setRelease] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const supabase = createClient();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getPressRelease(supabase, id);
+        const data = await getPressRelease(id);
         setRelease(data);
       } catch (error) {
         console.error("Error fetching press release:", error);

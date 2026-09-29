@@ -1,8 +1,7 @@
 import React from 'react';
 import Section from '@/components/Section';
 import LazyImage from '@/components/LazyImage';
-import { createClient } from '@/lib/supabase/server';
-import { getPhilosophy } from '@/lib/db';
+import { getPhilosophy } from '@/lib/cms';
 import Reveal from '@/components/Reveal';
 
 export const metadata = {
@@ -12,8 +11,7 @@ export const metadata = {
 };
 
 export default async function AboutPage() {
-  const supabase = await createClient();
-  const data = await getPhilosophy(supabase);
+  const data = await getPhilosophy();
 
   // Fallbacks if data is missing or incomplete
   const title = data?.title || "About Cinema Focus";

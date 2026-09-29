@@ -4,8 +4,7 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
-import { getProducts, getCategories, getNewLaunches } from '@/lib/db';
-import { createClient } from '@/lib/supabase/client';
+import { getProducts, getCategories, getNewLaunches } from '@/lib/aws/adapter';
 import clsx from 'clsx';
 import { Search, X } from 'lucide-react';
 
@@ -32,7 +31,6 @@ function ProductListContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const activeCategory = searchParams.get('category') || 'all';
-  const supabase = createClient();
   const filtersRef = useRef(null);
 
   const [products, setProducts] = useState([]);
@@ -70,19 +68,19 @@ function ProductListContent() {
       setLoading(true);
       try {
         const [cats, nl] = await Promise.all([
-          getCategories(supabase),
-          getNewLaunches(supabase),
+          getCategories(),
+          getNewLaunches(),
         ]);
         setCategories(cats);
         setNewLaunches(nl);
 
         let p = [];
         if (activeCategory === 'all') {
-          p = await getProducts(supabase);
+          p = await getProducts();
         } else if (activeCategory === 'new-arrivals') {
           p = nl;
         } else {
-          p = await getProducts(supabase, { category: activeCategory });
+          p = await getProducts({ category: activeCategory });
         }
         setProducts(p);
       } catch (err) {
