@@ -43,3 +43,8 @@ next-env.d.ts
 scripts/inspect_site_content.js
 scripts/test_connection.js
 .claude/
+
+# AWS / Serverless build artifacts
+infra/node_modules
+infra/.serverless
+*.zip
