@@ -17,6 +17,7 @@
 
 # Secrets & Environment
 .env*
+!.env.example
 *.pem
 firebase-service-account.json
 
