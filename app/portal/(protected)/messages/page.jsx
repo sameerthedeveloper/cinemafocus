@@ -12,7 +12,7 @@ export default async function PortalMessages() {
   try { messages = await getMessages(session.token); } catch {}
 
   return (
-    <div className="p-4 md:p-8 max-w-[1100px] mx-auto pb-20 md:pb-10">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto pb-20 md:pb-8">
       <PageHeader title="Messages" description="Enquiries sent through the website's contact forms." />
       {messages === null
         ? <EmptyState title="Messages couldn't be loaded" hint="Refresh to try again. If this keeps happening, ask your administrator to check your access." />

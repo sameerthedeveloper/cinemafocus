@@ -12,7 +12,7 @@ export default async function PortalProducts() {
   const sorted = products && [...products].sort((a, b) => String(a.name).localeCompare(String(b.name)));
 
   return (
-    <div className="p-4 md:p-8 max-w-[1200px] mx-auto pb-20 md:pb-10">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto pb-20 md:pb-8">
       <PageHeader title="Products" description="Everything in your catalogue, as it appears on the website." />
       {sorted === null ? <EmptyState title="Products couldn't be loaded" hint="Refresh to try again." /> : <ProductsView products={sorted} brands={brands} />}
     </div>

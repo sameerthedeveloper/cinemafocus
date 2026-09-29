@@ -30,6 +30,9 @@
   letter-spacing: -0.022em;
 }
 
+/* One large-title style for every page heading in the admin and the portal */
+.admin-shell main h1 { font-size: clamp(28px, 3.2vw, 34px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+
 /* Frosted glass surfaces (sidebar, top bar, overlays) */
 .admin-shell .glass {
   background: var(--admin-glass);

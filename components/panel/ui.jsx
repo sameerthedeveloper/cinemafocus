@@ -83,11 +83,12 @@ export function Card({ title, subtitle, action, children, className, flush }) {
 }
 
 export function PageHeader({ title, description, actions }) {
+  // Same header pattern as the admin pages (the shared admin.css gives every h1 the large title style).
   return (
-    <header className="mb-6 md:mb-8 flex flex-wrap items-end justify-between gap-4">
+    <header className="mb-8 md:mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
       <div>
-        <h1 className="text-[32px] md:text-[34px] leading-[1.1] font-bold tracking-[-0.03em]">{title}</h1>
-        {description && <p className="text-[var(--admin-muted)] mt-1 text-sm">{description}</p>}
+        <h1 className="text-2xl md:text-3xl font-medium tracking-tight">{title}</h1>
+        {description && <p className="text-muted-foreground mt-1 text-sm md:text-base">{description}</p>}
       </div>
       {actions}
     </header>
@@ -95,10 +96,11 @@ export function PageHeader({ title, description, actions }) {
 }
 
 export function EmptyState({ title, hint }) {
+  // Same empty state as the admin lists.
   return (
-    <div className="py-14 text-center border border-dashed border-[var(--admin-border)] rounded-lg">
-      <p className="text-sm font-medium">{title}</p>
-      {hint && <p className="text-xs text-[var(--admin-muted)] mt-1">{hint}</p>}
+    <div className="text-center py-20 bg-secondary/30 rounded-2xl border-dashed border-2 border-border text-muted-foreground font-medium">
+      <p>{title}</p>
+      {hint && <p className="text-xs font-normal mt-1">{hint}</p>}
     </div>
   );
 }
