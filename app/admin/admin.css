@@ -61,12 +61,3 @@
 
 .admin-shell .tabular { font-variant-numeric: tabular-nums; }
 .admin-shell main table { border-collapse: collapse; }
-
-/* Login screens: slow drift for the decorative waveforms */
-@keyframes panel-drift {
-  from { transform: translateX(-2.5%) scaleY(0.92); }
-  to   { transform: translateX(2.5%) scaleY(1.08); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .admin-shell path[data-wave] { animation: none !important; }
-}
