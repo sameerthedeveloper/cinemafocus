@@ -50,6 +50,27 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 const mismatches = [];
 const add = (area, issue, detail = '') => mismatches.push({ area, issue, detail: String(detail) });
 const str = (v) => (v === null || v === undefined ? '' : String(v));
+const infos = [];
+const info = (area, note) => infos.push(`${area}: ${note}`);
+
+// Key-order-insensitive JSON (DynamoDB does not preserve object key order).
+const stable = (v) =>
+  Array.isArray(v)
+    ? `[${v.map(stable).join(',')}]`
+    : v && typeof v === 'object'
+      ? `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${stable(v[k])}`).join(',')}}`
+      : JSON.stringify(v ?? null);
+
+// Supabase public-storage URL and CloudFront URL for the same object path are
+// the expected migration, not a mismatch.
+const CDN_HOSTS = [process.env.NEXT_PUBLIC_CDN_DOMAIN, process.env.CDN_DOMAIN].filter(Boolean);
+const SUPA_PREFIX = /^https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/public\/[^/]+\//;
+const CDN_PREFIX = new RegExp(`^https://(${CDN_HOSTS.map((h) => h.replace(/\./g, '\\.')).join('|') || '(?!)'})/`);
+const storagePath = (u) => (typeof u === 'string' ? u.replace(SUPA_PREFIX, '').replace(CDN_PREFIX, '') : u);
+const isHostRewrite = (a, b) => typeof a === 'string' && typeof b === 'string' && a !== b && SUPA_PREFIX.test(a) && CDN_PREFIX.test(b) && storagePath(a) === storagePath(b);
+// Deep-rewrite storage URLs to host-independent paths (for settings).
+const pathsOnly = (v) =>
+  Array.isArray(v) ? v.map(pathsOnly) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, pathsOnly(x)])) : storagePath(v);
 const sample = (arr, n = 10) => (arr.length > n ? `${arr.slice(0, n).join(', ')} … (+${arr.length - n})` : arr.join(', '));
 
 function compareSets(area, label, supa, awsSet) {
@@ -90,16 +111,19 @@ function slugQuality(area, supaRows, awsRows) {
 function compareFields(area, fields, supaRows, awsRows) {
   const awsById = new Map(awsRows.map((r) => [str(r.id), r]));
   const diffs = {};
+  const rewrites = {};
   for (const s of supaRows) {
     const a = awsById.get(str(s.id));
     if (!a) continue;
     for (const f of fields) {
-      const sv = JSON.stringify(f.get(s) ?? null);
-      const av = JSON.stringify(f.get(a) ?? null);
-      if (sv !== av) (diffs[f.name] ||= []).push(str(s.slug || s.id));
+      const sv = f.get(s) ?? null;
+      const av = f.get(a) ?? null;
+      if (isHostRewrite(sv, av)) (rewrites[f.name] ||= []).push(1);
+      else if (stable(sv) !== stable(av)) (diffs[f.name] ||= []).push(str(s.slug || s.id));
     }
   }
   for (const [name, ids] of Object.entries(diffs)) add(area, `field "${name}" differs (${ids.length})`, sample(ids));
+  for (const [name, n] of Object.entries(rewrites)) info(area, `"${name}": ${n.length} URL(s) moved Supabase storage -> CDN, same object path`);
 }
 
 async function paginateSupabase(table, columns) {
@@ -227,7 +251,10 @@ const settings = [
 for (const [id, fromSupa, fromAws] of settings) {
   const s = await fromSupa(supabase);
   const a = await run(`settings:${id}`, () => fromAws());
-  if (a !== null && JSON.stringify(s) !== JSON.stringify(a)) add(`settings:${id}`, 'data differs', '');
+  if (a === null) continue;
+  if (stable(s) === stable(a)) continue;
+  if (stable(pathsOnly(s)) === stable(pathsOnly(a))) info(`settings:${id}`, 'image URLs moved Supabase storage -> CDN, same object paths; otherwise identical');
+  else add(`settings:${id}`, 'data differs', '');
 }
 
 // ---------- Sitemap URL set ----------
@@ -288,6 +315,10 @@ if (CHECK_IMAGES && (awsProducts || awsPress)) {
 }
 
 // ---------- Report ----------
+if (infos.length) {
+  console.log('\nExpected differences (not failures):');
+  for (const i of infos) console.log(`  - ${i}`);
+}
 if (mismatches.length === 0) {
   console.log('\nPARITY: PASS');
   process.exit(0);
