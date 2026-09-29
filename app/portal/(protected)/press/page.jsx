@@ -16,8 +16,8 @@ export default async function PortalPress() {
       {sorted === null ? <EmptyState title="Press releases couldn't be loaded" hint="Refresh to try again." /> : sorted.length === 0 ? <EmptyState title="No press releases yet" /> : (
         <ul className="space-y-4">
           {sorted.map((p) => (
-            <li key={p.id} className="bg-white border border-[var(--admin-border)] rounded-xl shadow-sm p-4 flex gap-4">
-              <span className="w-28 h-20 sm:w-36 sm:h-24 rounded-lg bg-[#f3f4f6] overflow-hidden shrink-0">
+            <li key={p.id} className="bg-white border border-[var(--admin-border)] rounded-[20px] shadow-sm p-4 flex gap-4">
+              <span className="w-28 h-20 sm:w-36 sm:h-24 rounded-lg bg-black/[0.045] overflow-hidden shrink-0">
                 {(p.image_url || p.imageUrl) && <img src={p.image_url || p.imageUrl} alt="" loading="lazy" className="w-full h-full object-cover" />}
               </span>
               <span className="min-w-0 flex-1">

@@ -20,8 +20,8 @@ export default async function PortalBrands() {
       {categories === null ? <EmptyState title="Brands couldn't be loaded" hint="Refresh to try again." /> : brands.length === 0 ? <EmptyState title="No brands yet" /> : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {brands.map((b) => (
-            <li key={b.id} className="bg-white border border-[var(--admin-border)] rounded-xl shadow-sm p-5 flex items-center gap-4">
-              <span className="w-14 h-14 rounded-xl bg-[#f3f4f6] border border-[var(--admin-border)] overflow-hidden shrink-0 flex items-center justify-center">
+            <li key={b.id} className="bg-white border border-[var(--admin-border)] rounded-[20px] shadow-sm p-5 flex items-center gap-4">
+              <span className="w-14 h-14 rounded-xl bg-black/[0.045] border border-[var(--admin-border)] overflow-hidden shrink-0 flex items-center justify-center">
                 {(b.image_url || b.imageUrl) ? <img src={b.image_url || b.imageUrl} alt="" loading="lazy" className="w-full h-full object-contain p-1.5" /> : <span className="text-sm font-semibold text-[var(--admin-muted)]">{String(b.name || '?').slice(0, 2).toUpperCase()}</span>}
               </span>
               <span className="min-w-0 flex-1">

@@ -1,32 +1,63 @@
-/* Admin shell design tokens and refinements.
-   Scoped to .admin-shell so nothing here can affect the public site. */
+/* Admin / portal design tokens — Apple-style: SF type, frosted glass, soft large radii,
+   layered shadows, spring easing. Scoped to .admin-shell so the public site is unaffected. */
 .admin-shell {
-  --admin-bg: #f8fafc;
+  --admin-bg: #f5f5f7;
   --admin-card: #ffffff;
-  --admin-border: #e5e7eb;
-  --admin-text: #111827;
-  --admin-muted: #6b7280;
+  --admin-border: rgba(0, 0, 0, 0.08);
+  --admin-hairline: rgba(0, 0, 0, 0.06);
+  --admin-text: #1d1d1f;
+  --admin-muted: #6e6e73;
+  --admin-subtle: #86868b;
   --admin-accent: #b8862b;
   --admin-accent-soft: #fbf3e2;
-  --admin-success: #16a34a;
-  --admin-warning: #d97706;
-  --admin-danger: #dc2626;
-  --admin-info: #2563eb;
+  --admin-success: #248a3d;
+  --admin-warning: #b25e09;
+  --admin-danger: #d70015;
+  --admin-info: #0071e3;
+  --admin-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --admin-glass: rgba(255, 255, 255, 0.72);
+  --admin-shadow: 0 1px 1px rgba(0, 0, 0, 0.03), 0 8px 24px -12px rgba(0, 0, 0, 0.12);
+  --admin-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.04), 0 18px 40px -16px rgba(0, 0, 0, 0.22);
 
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-inter), system-ui, sans-serif;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
   background: var(--admin-bg);
   color: var(--admin-text);
 }
+.admin-shell h1, .admin-shell h2, .admin-shell h3 {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-inter), system-ui, sans-serif;
+  letter-spacing: -0.022em;
+}
 
-/* Cards: subtle radius, thin border, very restrained shadow (applies to existing admin pages too) */
-.admin-shell .rounded-2xl { border-radius: 12px; }
-.admin-shell .rounded-xl { border-radius: 10px; }
-.admin-shell .shadow-sm { box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); }
-.admin-shell .shadow-2xl { box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12); }
+/* Frosted glass surfaces (sidebar, top bar, overlays) */
+.admin-shell .glass {
+  background: var(--admin-glass);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+}
 
-/* Tables never blow out the page on small screens */
-.admin-shell main table { border-collapse: collapse; }
+/* Cards: large soft corners, hairline border, layered shadow (applies to existing admin pages too) */
+.admin-shell .rounded-2xl { border-radius: 20px; }
+.admin-shell .rounded-xl { border-radius: 16px; }
+.admin-shell .shadow-sm { box-shadow: var(--admin-shadow); }
+.admin-shell .shadow-2xl { box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.35); }
+
+/* Spring easing on interactive surfaces */
+.admin-shell a, .admin-shell button, .admin-shell input, .admin-shell select {
+  transition-timing-function: var(--admin-spring);
+}
+.admin-shell .lift { transition: transform 0.5s var(--admin-spring), box-shadow 0.5s var(--admin-spring), border-color 0.3s; }
+.admin-shell .lift:hover { transform: translateY(-2px); box-shadow: var(--admin-shadow-hover); }
+.admin-shell .press:active { transform: scale(0.97); }
+
+/* Apple-style segmented control */
+.admin-shell .segmented { display: inline-flex; padding: 2px; border-radius: 999px; background: rgba(0, 0, 0, 0.06); }
+.admin-shell .segmented > * { padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--admin-muted); transition: background 0.3s var(--admin-spring), color 0.3s, box-shadow 0.3s; }
+.admin-shell .segmented > [aria-current="true"], .admin-shell .segmented > .is-active { background: #fff; color: var(--admin-text); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04); }
 
 .admin-shell .tabular { font-variant-numeric: tabular-nums; }
+.admin-shell main table { border-collapse: collapse; }
 
 /* Login screens: slow drift for the decorative waveforms */
 @keyframes panel-drift {

@@ -73,7 +73,7 @@ export default function LoginScreen({ eyebrow, title, blurb, placeholder, endpoi
     }
   };
 
-  const field = "w-full h-11 px-3.5 rounded-lg border border-[var(--admin-border)] bg-white text-sm text-[var(--admin-text)] placeholder:text-[#9ca3af] outline-none transition-shadow focus:border-[var(--admin-accent)] focus:shadow-[0_0_0_3px_var(--admin-accent-soft)]";
+  const field = "w-full h-12 px-4 rounded-xl border border-[var(--admin-border)] bg-white/80 text-sm text-[var(--admin-text)] placeholder:text-[var(--admin-subtle)] outline-none transition-shadow focus:border-[var(--admin-accent)] focus:shadow-[0_0_0_3px_var(--admin-accent-soft)]";
 
   return (
     <div ref={root} className="admin-shell min-h-screen grid lg:grid-cols-[1.08fr_1fr]">
@@ -130,7 +130,7 @@ export default function LoginScreen({ eyebrow, title, blurb, placeholder, endpoi
 
           <div data-rise>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--admin-accent)]">{eyebrow}</p>
-            <h1 className="mt-2 text-[28px] leading-tight font-semibold tracking-tight">{title}</h1>
+            <h1 className="mt-2 text-[36px] leading-[1.08] font-bold tracking-[-0.03em]">{title}</h1>
             <p className="mt-2 text-sm text-[var(--admin-muted)]">Sign in with your account to continue.</p>
           </div>
 
@@ -143,7 +143,7 @@ export default function LoginScreen({ eyebrow, title, blurb, placeholder, endpoi
               <label htmlFor="password" className="block text-[13px] font-medium mb-1.5">Password</label>
               <div className="relative">
                 <input id="password" type={show ? 'text' : 'password'} autoComplete="current-password" className={`${field} pr-11`} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" required />
-                <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center rounded-md text-[var(--admin-muted)] hover:text-[var(--admin-text)] hover:bg-[#f3f4f6]" aria-label={show ? 'Hide password' : 'Show password'}>
+                <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center rounded-md text-[var(--admin-muted)] hover:text-[var(--admin-text)] hover:bg-black/[0.045]" aria-label={show ? 'Hide password' : 'Show password'}>
                   {show ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -157,7 +157,7 @@ export default function LoginScreen({ eyebrow, title, blurb, placeholder, endpoi
               data-rise
               type="submit"
               disabled={loading}
-              className="group w-full h-11 rounded-lg bg-[#111827] text-white text-sm font-medium flex items-center justify-center gap-2 transition-all hover:bg-black hover:shadow-[0_6px_18px_-6px_rgba(17,24,39,0.5)] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="press group w-full h-12 rounded-full bg-[#1d1d1f] text-white text-[15px] font-medium flex items-center justify-center gap-2 transition-all hover:bg-black hover:shadow-[0_6px_18px_-6px_rgba(17,24,39,0.5)] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (<><Loader2 size={16} className="animate-spin" /> Signing in…</>) : (<>Sign in <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" /></>)}
             </button>

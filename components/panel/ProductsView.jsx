@@ -28,14 +28,14 @@ export default function ProductsView({ products, brands }) {
   const current = Math.min(page, pages - 1);
   const slice = rows.slice(current * PAGE, current * PAGE + PAGE);
   const reset = (fn) => (e) => { fn(e.target.value); setPage(0); };
-  const ctl = "h-9 rounded-lg border border-[var(--admin-border)] bg-white text-sm outline-none focus:border-[var(--admin-accent)] focus:shadow-[0_0_0_3px_var(--admin-accent-soft)]";
+  const ctl = "h-10 rounded-full border border-transparent bg-black/[0.05] hover:bg-black/[0.07] focus:bg-white text-sm outline-none focus:border-[var(--admin-accent)] focus:shadow-[0_0_0_3px_var(--admin-accent-soft)]";
 
   return (
     <div>
       <div className="flex flex-col md:flex-row gap-3 mb-4">
         <div className="relative md:max-w-sm w-full">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--admin-muted)]" />
-          <input value={q} onChange={reset(setQ)} placeholder="Search products" className={`${ctl} w-full pl-9 pr-3`} />
+          <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--admin-muted)]" />
+          <input value={q} onChange={reset(setQ)} placeholder="Search products" className={`${ctl} w-full pl-10 pr-4`} />
         </div>
         <select value={brand} onChange={reset(setBrand)} className={`${ctl} px-3`}>
           <option value="">All brands</option>
@@ -52,7 +52,7 @@ export default function ProductsView({ products, brands }) {
       {rows.length === 0 ? (
         <EmptyState title="No products match" hint="Try a different search or filter." />
       ) : (
-        <div className="bg-white border border-[var(--admin-border)] rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white border border-[var(--admin-border)] rounded-[20px] shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead>
@@ -66,10 +66,10 @@ export default function ProductsView({ products, brands }) {
               </thead>
               <tbody>
                 {slice.map((p) => (
-                  <tr key={p.id} className="border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors">
+                  <tr key={p.id} className="border-b border-[var(--admin-hairline)] last:border-0 hover:bg-black/[0.025] transition-colors">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <span className="w-11 h-11 rounded-lg bg-[#f3f4f6] border border-[var(--admin-border)] overflow-hidden shrink-0 flex items-center justify-center">
+                        <span className="w-11 h-11 rounded-lg bg-black/[0.045] border border-[var(--admin-border)] overflow-hidden shrink-0 flex items-center justify-center">
                           {p.images?.[0] ? <img src={p.images[0]} alt="" loading="lazy" className="w-full h-full object-contain" /> : null}
                         </span>
                         <span className="min-w-0">
@@ -95,8 +95,8 @@ export default function ProductsView({ products, brands }) {
             <div className="flex items-center justify-between px-5 py-3 border-t border-[var(--admin-border)] text-xs text-[var(--admin-muted)]">
               <span className="tabular">Page {current + 1} of {pages}</span>
               <div className="flex gap-1.5">
-                <button disabled={current === 0} onClick={() => setPage(current - 1)} className="h-8 w-8 rounded-lg border border-[var(--admin-border)] flex items-center justify-center disabled:opacity-40 hover:bg-[#f9fafb]" aria-label="Previous page"><ChevronLeft size={15} /></button>
-                <button disabled={current >= pages - 1} onClick={() => setPage(current + 1)} className="h-8 w-8 rounded-lg border border-[var(--admin-border)] flex items-center justify-center disabled:opacity-40 hover:bg-[#f9fafb]" aria-label="Next page"><ChevronRight size={15} /></button>
+                <button disabled={current === 0} onClick={() => setPage(current - 1)} className="press h-8 w-8 rounded-full bg-black/[0.045] flex items-center justify-center disabled:opacity-40 hover:bg-black/[0.08]" aria-label="Previous page"><ChevronLeft size={15} /></button>
+                <button disabled={current >= pages - 1} onClick={() => setPage(current + 1)} className="press h-8 w-8 rounded-full bg-black/[0.045] flex items-center justify-center disabled:opacity-40 hover:bg-black/[0.08]" aria-label="Next page"><ChevronRight size={15} /></button>
               </div>
             </div>
           )}

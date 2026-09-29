@@ -15,8 +15,8 @@ export default async function PortalGallery() {
       {sorted === null ? <EmptyState title="Gallery couldn't be loaded" hint="Refresh to try again." /> : sorted.length === 0 ? <EmptyState title="No projects yet" /> : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {sorted.map((p) => (
-            <li key={p.id} className="bg-white border border-[var(--admin-border)] rounded-xl shadow-sm overflow-hidden">
-              <div className="aspect-[4/3] bg-[#f3f4f6]">
+            <li key={p.id} className="bg-white border border-[var(--admin-border)] rounded-[20px] shadow-sm overflow-hidden">
+              <div className="aspect-[4/3] bg-black/[0.045]">
                 {(p.image_url || p.imageUrl) && <img src={p.image_url || p.imageUrl} alt={p.title || p.name || 'Project'} loading="lazy" className="w-full h-full object-cover" />}
               </div>
               <div className="p-4 flex items-start justify-between gap-3">

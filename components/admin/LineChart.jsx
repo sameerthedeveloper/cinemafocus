@@ -65,14 +65,14 @@ export default function LineChart({ data = [], color = 'var(--admin-accent)', va
 
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} stroke="#e5e7eb" strokeWidth="1" />
+            <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
             <text x={PAD.left - 8} y={y(t) + 4} textAnchor="end" fontSize="11" fill="#6b7280">{t}</text>
           </g>
         ))}
 
         <path d={area} fill={`url(#${gradId})`} />
         {line2 && <path d={line2} fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeDasharray="4 4" strokeLinejoin="round" strokeLinecap="round" />}
-        <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        <path d={line} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
 
         {data.map((d, i) => (i % labelEvery === 0 || i === data.length - 1) && (
           <text key={i} x={x(i)} y={H - 8} textAnchor="middle" fontSize="11" fill="#6b7280">{d.label}</text>
@@ -88,7 +88,7 @@ export default function LineChart({ data = [], color = 'var(--admin-accent)', va
 
       {h && (
         <div
-          className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-lg border border-[#e5e7eb] bg-white px-2.5 py-1.5 text-xs shadow-sm"
+          className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-xl border border-black/5 bg-white/85 backdrop-blur-xl px-3 py-2 text-xs shadow-[0_8px_24px_-8px_rgba(0,0,0,0.25)]"
           style={{ left: `${(x(hover) / W) * 100}%`, top: `${(y(h.value) / H) * 100}%`, marginTop: -10 }}
         >
           <div className="font-medium text-[#111827] tabular">{h.value} {valueLabel.toLowerCase()}</div>

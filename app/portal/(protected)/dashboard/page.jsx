@@ -68,9 +68,9 @@ export default async function PortalDashboard({ searchParams }) {
           title="Website traffic"
           subtitle={`Page views and visitors per day, last ${range} days`}
           action={
-            <div className="inline-flex rounded-lg border border-[var(--admin-border)] p-0.5 text-xs font-medium">
+            <div className="segmented">
               {RANGES.map((r) => (
-                <Link key={r} href={`/portal/dashboard?range=${r}`} className={`px-2.5 py-1 rounded-md ${r === range ? 'bg-[#f3f4f6] text-[var(--admin-text)]' : 'text-[var(--admin-muted)] hover:text-[var(--admin-text)]'}`}>{r}d</Link>
+                <Link key={r} href={`/portal/dashboard?range=${r}`} className={r === range ? 'is-active' : undefined}>{r}d</Link>
               ))}
             </div>
           }
@@ -92,17 +92,17 @@ export default async function PortalDashboard({ searchParams }) {
         </Card>
 
         <Card title="On your website" subtitle="Live content right now">
-          <ul className="divide-y divide-[#f3f4f6] -my-2">
+          <ul className="divide-y divide-[var(--admin-hairline)] -my-2">
             {content.map((c) => {
               const Icon = c.icon;
               const row = (
                 <div className="flex items-center gap-3 py-3">
-                  <span className="w-8 h-8 rounded-lg bg-[#f3f4f6] text-[var(--admin-muted)] flex items-center justify-center shrink-0"><Icon size={15} strokeWidth={1.75} /></span>
+                  <span className="w-8 h-8 rounded-lg bg-black/[0.045] text-[var(--admin-muted)] flex items-center justify-center shrink-0"><Icon size={15} strokeWidth={1.75} /></span>
                   <span className="flex-1 text-[13px] font-medium">{c.label}{c.sub && <span className="block text-xs font-normal text-[var(--admin-muted)]">{c.sub}</span>}</span>
                   <span className="text-lg font-semibold tabular">{c.n ?? '—'}</span>
                 </div>
               );
-              return <li key={c.label}>{c.href ? <Link href={c.href} className="block hover:bg-[#fafafa] -mx-2 px-2 rounded-lg transition-colors">{row}</Link> : row}</li>;
+              return <li key={c.label}>{c.href ? <Link href={c.href} className="block hover:bg-black/[0.025] -mx-2 px-2 rounded-lg transition-colors">{row}</Link> : row}</li>;
             })}
           </ul>
         </Card>
@@ -130,7 +130,7 @@ export default async function PortalDashboard({ searchParams }) {
               </thead>
               <tbody>
                 {recent.map((m) => (
-                  <tr key={m.id} className="border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors">
+                  <tr key={m.id} className="border-b border-[var(--admin-hairline)] last:border-0 hover:bg-black/[0.025] transition-colors">
                     <td className="px-5 md:px-6 py-3"><div className="font-medium">{m.name || '—'}</div><div className="text-xs text-[var(--admin-muted)]">{m.email}</div></td>
                     <td className="px-3 py-3 text-[var(--admin-muted)]">{m.subject || 'New Inquiry'}</td>
                     <td className="px-3 py-3 text-[var(--admin-muted)] whitespace-nowrap tabular">{m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>

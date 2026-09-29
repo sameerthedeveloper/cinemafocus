@@ -88,7 +88,7 @@ export default function DashboardPage() {
   return (
     <Reveal className="p-4 md:p-8 max-w-[1400px] mx-auto animate-fade-in pb-20 md:pb-10">
       <header className="mb-6 md:mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+        <h1 className="text-[32px] md:text-[34px] leading-[1.1] font-bold tracking-[-0.03em]">Dashboard</h1>
         <p className="text-[var(--admin-muted)] mt-1 text-sm">A snapshot of your catalog and customer enquiries.</p>
       </header>
 
@@ -114,7 +114,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6">
-            <section className="xl:col-span-2 bg-white border border-[var(--admin-border)] rounded-xl p-5 md:p-6 shadow-sm">
+            <section className="xl:col-span-2 bg-white border border-[var(--admin-border)] rounded-[20px] p-5 md:p-6 shadow-sm">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h2 className="text-base font-semibold">Enquiries</h2>
@@ -135,7 +135,7 @@ export default function DashboardPage() {
               )}
             </section>
 
-            <section className="bg-white border border-[var(--admin-border)] rounded-xl p-5 md:p-6 shadow-sm">
+            <section className="bg-white border border-[var(--admin-border)] rounded-[20px] p-5 md:p-6 shadow-sm">
               <h2 className="text-base font-semibold">Catalog by brand</h2>
               <p className="text-xs text-[var(--admin-muted)] mt-0.5 mb-5">Products per brand, top {m.brands.length || 6}</p>
               {m.brands.length === 0 ? (
@@ -148,7 +148,7 @@ export default function DashboardPage() {
                         <span className="font-medium truncate pr-3">{b.name}</span>
                         <span className="text-[var(--admin-muted)] tabular">{b.count}</span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-[#f3f4f6] overflow-hidden">
+                      <div className="h-1.5 rounded-full bg-black/[0.045] overflow-hidden">
                         <div className="h-full rounded-full bg-[var(--admin-accent)]" style={{ width: `${(b.count / maxBrand) * 100}%` }} />
                       </div>
                     </li>
@@ -158,7 +158,7 @@ export default function DashboardPage() {
             </section>
           </div>
 
-          <section className="bg-white border border-[var(--admin-border)] rounded-xl shadow-sm">
+          <section className="bg-white border border-[var(--admin-border)] rounded-[20px] shadow-sm">
             <div className="flex items-center justify-between px-5 md:px-6 py-4 border-b border-[var(--admin-border)]">
               <div>
                 <h2 className="text-base font-semibold">Recent enquiries</h2>
@@ -183,7 +183,7 @@ export default function DashboardPage() {
                     {m.recent.map((msg) => {
                       const d = msgDate(msg);
                       return (
-                        <tr key={msg.id} className="border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors">
+                        <tr key={msg.id} className="border-b border-[var(--admin-hairline)] last:border-0 hover:bg-black/[0.025] transition-colors">
                           <td className="px-5 md:px-6 py-3">
                             <div className="font-medium">{msg.name || '—'}</div>
                             <div className="text-xs text-[var(--admin-muted)]">{msg.email}</div>

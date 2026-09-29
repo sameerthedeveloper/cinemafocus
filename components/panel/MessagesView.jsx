@@ -33,17 +33,17 @@ export default function MessagesView({ messages }) {
     <div>
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mb-4">
         <div className="relative sm:max-w-sm w-full">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--admin-muted)]" />
+          <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--admin-muted)]" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search name, email or message"
-            className="w-full h-9 pl-9 pr-3 rounded-lg border border-[var(--admin-border)] bg-white text-sm outline-none focus:border-[var(--admin-accent)] focus:shadow-[0_0_0_3px_var(--admin-accent-soft)]"
+            className="w-full h-10 pl-10 pr-4 rounded-full border border-transparent bg-black/[0.05] hover:bg-black/[0.07] focus:bg-white text-sm outline-none focus:border-[var(--admin-accent)] focus:shadow-[0_0_0_3px_var(--admin-accent-soft)]"
           />
         </div>
-        <div className="inline-flex rounded-lg border border-[var(--admin-border)] bg-white p-0.5 text-xs font-medium self-start">
+        <div className="segmented self-start">
           {FILTERS.map(([key, label]) => (
-            <button key={key} onClick={() => setFilter(key)} className={clsx("px-3 py-1.5 rounded-md transition-colors tabular", filter === key ? "bg-[#f3f4f6] text-[var(--admin-text)]" : "text-[var(--admin-muted)] hover:text-[var(--admin-text)]")}>
+            <button key={key} onClick={() => setFilter(key)} className={clsx("tabular", filter === key && "is-active")}>
               {label} <span className="text-[var(--admin-muted)]">{counts[key]}</span>
             </button>
           ))}
@@ -60,13 +60,13 @@ export default function MessagesView({ messages }) {
             const unread = m.status !== 'read';
             const reply = `mailto:${encodeURIComponent(m.email || '')}?subject=${encodeURIComponent(`Re: ${m.subject || 'Your enquiry'} — Cinema Focus`)}`;
             return (
-              <li key={m.id} className={clsx("bg-white border rounded-xl shadow-sm transition-colors", unread ? "border-[#e8d7b0]" : "border-[var(--admin-border)]")}>
+              <li key={m.id} className={clsx("bg-white border rounded-[20px] shadow-sm transition-colors", unread ? "border-[#e8d7b0]" : "border-[var(--admin-border)]")}>
                 <button onClick={() => setOpen(isOpen ? null : m.id)} className="w-full text-left px-5 py-4 flex items-start gap-4" aria-expanded={isOpen}>
                   <span className={clsx("mt-2 w-2 h-2 rounded-full shrink-0", unread ? "bg-[var(--admin-accent)]" : "bg-transparent")} />
                   <span className="flex-1 min-w-0">
                     <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <span className={clsx("text-sm", unread ? "font-semibold" : "font-medium")}>{m.name || 'Unknown sender'}</span>
-                      <span className="text-xs text-[var(--admin-muted)] bg-[#f3f4f6] rounded-full px-2 py-0.5">{m.subject || 'New Inquiry'}</span>
+                      <span className="text-xs text-[var(--admin-muted)] bg-black/[0.045] rounded-full px-2 py-0.5">{m.subject || 'New Inquiry'}</span>
                     </span>
                     <span className={clsx("mt-1 block text-[13px] text-[var(--admin-muted)]", !isOpen && "line-clamp-1")}>{m.text}</span>
                   </span>
@@ -78,14 +78,14 @@ export default function MessagesView({ messages }) {
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pl-[3.25rem] border-t border-[#f3f4f6] pt-4">
+                  <div className="px-5 pb-5 pl-[3.25rem] border-t border-[var(--admin-hairline)] pt-4">
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--admin-muted)] mb-3">
                       <span className="inline-flex items-center gap-1.5"><Mail size={13} /> {m.email || 'no email'}</span>
                       {d && <span className="tabular">{d.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</span>}
                     </div>
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{m.text}</p>
                     {m.email && (
-                      <a href={reply} className="mt-4 inline-flex items-center gap-2 h-8 px-3 rounded-lg border border-[var(--admin-border)] text-xs font-medium hover:bg-[#f9fafb] transition-colors">
+                      <a href={reply} className="press mt-4 inline-flex items-center gap-2 h-9 px-4 rounded-full bg-[#1d1d1f] text-white text-xs font-medium hover:bg-black transition-all duration-300">
                         <Reply size={14} /> Reply by email
                       </a>
                     )}

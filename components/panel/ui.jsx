@@ -10,20 +10,20 @@ export function StatCard({ label, value, sub, icon: Icon, href, delta }) {
     <>
       <div className="flex items-center justify-between">
         <span className="text-[13px] font-medium text-[var(--admin-muted)]">{label}</span>
-        <span className="w-8 h-8 rounded-lg bg-[#f3f4f6] text-[var(--admin-muted)] flex items-center justify-center">
+        <span className="w-8 h-8 rounded-lg bg-black/[0.045] text-[var(--admin-muted)] flex items-center justify-center">
           <Icon size={16} strokeWidth={1.75} />
         </span>
       </div>
       <div className="mt-3 flex items-baseline gap-2">
-        <span className="text-[28px] leading-none font-semibold tracking-tight tabular">{value}</span>
+        <span className="text-[34px] leading-none font-semibold tracking-[-0.03em] tabular">{value}</span>
         {delta}
       </div>
       <div className="mt-2 text-xs text-[var(--admin-muted)]">{sub}</div>
     </>
   );
-  const cls = "block bg-white border border-[var(--admin-border)] rounded-xl p-5 md:p-6 shadow-sm";
+  const cls = "block bg-white border border-[var(--admin-border)] rounded-[20px] p-5 md:p-6 shadow-sm";
   return href
-    ? <Link href={href} className={clsx(cls, "hover:border-[#d1d5db] transition-colors")}>{body}</Link>
+    ? <Link href={href} className={clsx(cls, "lift press")}>{body}</Link>
     : <div className={cls}>{body}</div>;
 }
 
@@ -34,7 +34,7 @@ export function Delta({ pct }) {
   const Icon = flat ? Minus : up ? ArrowUpRight : ArrowDownRight;
   return (
     <span className={clsx("inline-flex items-center gap-0.5 text-xs font-medium rounded-full px-2 py-0.5 tabular",
-      flat ? "text-[var(--admin-muted)] bg-[#f3f4f6]" : up ? "text-[var(--admin-success)] bg-green-50" : "text-[var(--admin-danger)] bg-red-50")}>
+      flat ? "text-[var(--admin-muted)] bg-black/[0.045]" : up ? "text-[var(--admin-success)] bg-green-50" : "text-[var(--admin-danger)] bg-red-50")}>
       <Icon size={12} />{Math.abs(pct).toFixed(0)}%
     </span>
   );
@@ -45,7 +45,7 @@ const TONES = {
   warning: "text-[var(--admin-warning)] bg-amber-50",
   danger: "text-[var(--admin-danger)] bg-red-50",
   info: "text-[var(--admin-info)] bg-blue-50",
-  neutral: "text-[var(--admin-muted)] bg-[#f3f4f6]",
+  neutral: "text-[var(--admin-muted)] bg-black/[0.045]",
 };
 const DOTS = {
   success: "bg-[var(--admin-success)]", warning: "bg-[var(--admin-warning)]",
@@ -62,16 +62,16 @@ export function Badge({ tone = 'neutral', children }) {
 }
 
 export function Skeleton({ className }) {
-  return <div className={clsx("bg-[#eef0f3] rounded-xl animate-pulse", className)} />;
+  return <div className={clsx("bg-black/[0.06] rounded-xl animate-pulse", className)} />;
 }
 
 export function Card({ title, subtitle, action, children, className, flush }) {
   return (
-    <section className={clsx("bg-white border border-[var(--admin-border)] rounded-xl shadow-sm", className)}>
+    <section className={clsx("bg-white border border-[var(--admin-border)] rounded-[20px] shadow-sm", className)}>
       {(title || action) && (
         <div className="flex items-start justify-between gap-4 px-5 md:px-6 pt-5 md:pt-6 pb-4">
           <div>
-            {title && <h2 className="text-base font-semibold">{title}</h2>}
+            {title && <h2 className="text-[17px] font-semibold tracking-[-0.022em]">{title}</h2>}
             {subtitle && <p className="text-xs text-[var(--admin-muted)] mt-0.5">{subtitle}</p>}
           </div>
           {action}
@@ -86,7 +86,7 @@ export function PageHeader({ title, description, actions }) {
   return (
     <header className="mb-6 md:mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-[32px] md:text-[34px] leading-[1.1] font-bold tracking-[-0.03em]">{title}</h1>
         {description && <p className="text-[var(--admin-muted)] mt-1 text-sm">{description}</p>}
       </div>
       {actions}
