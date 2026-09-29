@@ -1,5 +1,5 @@
-import { GetCommand, PutCommand, DeleteCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { docClient } from "../lib/aws/dynamo.js";
+import { GetCommand, PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { docClient, scanAll } from "../lib/aws/dynamo.js";
 import { requireAuth, requireAdmin, AuthError, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
 
@@ -8,7 +8,7 @@ const TABLE = () => process.env.USERS_TABLE;
 export async function list(event) {
   try {
     await requireAdmin(event);
-    const { Items } = await docClient.send(new ScanCommand({ TableName: TABLE() }));
+    const Items = await scanAll({ TableName: TABLE() });
     return json(200, Items || []);
   } catch (e) {
     return errorResponse(e);

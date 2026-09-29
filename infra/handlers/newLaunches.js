@@ -1,5 +1,5 @@
-import { PutCommand, DeleteCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-import { docClient } from "../lib/aws/dynamo.js";
+import { PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { docClient, scanAll } from "../lib/aws/dynamo.js";
 import { requireAdmin, errorResponse } from "../lib/aws/authz.js";
 import { assertProductExists } from "../lib/aws/validators.js";
 import { json, parseBody } from "../lib/http.js";
@@ -8,7 +8,7 @@ const TABLE = () => process.env.NEW_LAUNCHES_TABLE;
 
 export async function list() {
   try {
-    const { Items } = await docClient.send(new ScanCommand({ TableName: TABLE() }));
+    const Items = await scanAll({ TableName: TABLE() });
     return json(200, Items || []);
   } catch (e) {
     return errorResponse(e);
