@@ -34,7 +34,7 @@ const products = [
 ];
 
 test('normalize: id mapping from each table key, never generated', () => {
-  for (const k of ['productId', 'categoryId', 'pressId', 'launchId', 'projectId']) {
+  for (const k of ['productId', 'categoryId', 'pressId', 'launchId', 'projectId', 'messageId', 'userId']) {
     assert.equal(a.normalize({ [k]: 'x1' }).id, 'x1');
   }
   assert.equal(a.normalize({ id: 'keep', productId: 'other' }).id, 'keep');
