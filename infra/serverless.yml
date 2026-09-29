@@ -65,6 +65,8 @@ provider:
             - cognito-idp:InitiateAuth
             - cognito-idp:RespondToAuthChallenge
             - cognito-idp:AdminSetUserPassword
+            - cognito-idp:AdminCreateUser
+            - cognito-idp:AdminDeleteUser
           Resource:
             - !GetAtt CognitoUserPool.Arn
 
@@ -88,6 +90,10 @@ functions:
       - httpApi: 'POST /auth/change-password'
 
   # --- Users ---
+  createUser:
+    handler: handlers/users.create
+    events:
+      - httpApi: 'POST /users'
   getUsers:
     handler: handlers/users.list
     events:

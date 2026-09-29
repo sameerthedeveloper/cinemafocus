@@ -41,7 +41,7 @@ export default function AdminUsersPage() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to remove this user's role record from the database? This does not delete their Supabase Auth account.")) {
+    if (window.confirm("Remove this user's role record? Their sign-in stays active until you disable it in AWS Cognito.")) {
       try {
         const { error } = await supabase
           .from('users')
@@ -62,38 +62,40 @@ export default function AdminUsersPage() {
     setError('');
     
     try {
-      // NOTE: Creating a user for someone else requires the Service Role Key 
-      // which is not safe to use in the client-side. 
-      // For now, we will only insert the record into the 'users' table.
-      // In a real scenario, this should be done via a Supabase Edge Function or 
-      // a Server Action using the Service Role Key.
-      
+      // Creates the Cognito sign-in and the role record together (admin-only Lambda).
       const { error: dbError } = await supabase
         .from('users')
         .insert({
-          email: formData.email,
-          name: formData.name,
-          role: formData.role
+          email: formData.email.trim(),
+          name: formData.name.trim(),
+          role: formData.role,
+          password: formData.password,
         });
-      
+
       if (dbError) throw dbError;
       
       fetchUsers();
       setShowModal(false);
       setFormData({ email: '', password: '', name: '', role: 'dealer' });
-      alert("User record created in database. Note: Administrative user creation in Auth requires the Service Role Key to be configured in an Edge Function.");
     } catch (error) {
       console.error("Error adding user:", error);
-      setError("Failed to create user record: " + error.message);
+      setError(
+        error?.status === 404
+          ? "Creating users isn't available yet: the latest backend update hasn't been deployed. Deploy the infra changes (POST /users), then try again."
+          : error?.status === 403
+            ? "Your account isn't allowed to create users."
+            : `Couldn't create the user: ${error?.message || 'unknown error'}`
+      );
     } finally {
       setSaving(false);
     }
   };
 
   const getRoleBadgeClass = (role) => {
-    if (role === 'admin') return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
-    if (role === 'dealer') return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-    return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20';
+    if (role === 'admin') return 'bg-amber-50 text-amber-700 border-amber-200';
+    if (role === 'owner') return 'bg-green-50 text-green-700 border-green-200';
+    if (role === 'dealer') return 'bg-blue-50 text-blue-700 border-blue-200';
+    return 'bg-zinc-100 text-zinc-600 border-zinc-200';
   };
 
   return (
@@ -104,14 +106,14 @@ export default function AdminUsersPage() {
              <Users2 className="text-primary" />
              Access Control
            </h1>
-           <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage administrative and dealer roles.</p>
+           <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage who can sign in, and what they can do.</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity w-full md:w-auto justify-center"
         >
           <Plus size={18} />
-          Add User Record
+          Add User
         </button>
       </header>
 
@@ -132,7 +134,7 @@ export default function AdminUsersPage() {
                   <td colSpan="4" className="p-12 text-center text-muted-foreground">
                     <div className="flex flex-col items-center gap-2">
                        <Shield size={32} className="animate-pulse opacity-20" />
-                       <span className="text-sm font-medium">Fetching secure records...</span>
+                       <span className="text-sm font-medium">Loading users…</span>
                     </div>
                   </td>
                 </tr>
@@ -171,7 +173,7 @@ export default function AdminUsersPage() {
                       <div className="max-w-xs mx-auto space-y-2">
                          <Users2 size={40} className="mx-auto opacity-10" />
                          <p className="font-medium text-foreground">No records found</p>
-                         <p className="text-xs">Database query returned an empty set for public.users</p>
+                         <p className="text-xs">No users have been added yet.</p>
                       </div>
                    </td>
                 </tr>
@@ -185,17 +187,17 @@ export default function AdminUsersPage() {
          <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
            <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6">
               <div className="flex justify-between items-center">
-                 <h2 className="text-xl font-medium tracking-tight">Assign User Role</h2>
+                 <h2 className="text-xl font-medium tracking-tight">Add User</h2>
                  <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground">X</button>
               </div>
 
-              <div className="p-3 bg-blue-500/10 text-blue-400 text-[11px] rounded-lg border border-blue-500/20 flex gap-2 items-start">
+              <div className="p-3 bg-blue-50 text-blue-700 text-[11px] rounded-lg border border-blue-200 flex gap-2 items-start">
                  <AlertCircle size={14} className="shrink-0 mt-0.5" />
-                 <p>This adds a role record to the <b>users</b> table. The user must still register or be added via the Supabase Dashboard to authenticate.</p>
+                 <p>Creates a sign-in for this person and assigns their role. Share the password with them securely; they can sign in straight away.</p>
               </div>
               
               {error && (
-                <div className="p-3 bg-red-500/10 text-red-400 text-sm rounded-lg border border-red-500/20">
+                <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
                   {error}
                 </div>
               )}
@@ -224,20 +226,34 @@ export default function AdminUsersPage() {
                    />
                  </div>
                  <div className="space-y-2">
+                   <label className="text-sm font-medium">Password</label>
+                   <input
+                     type="password"
+                     required
+                     minLength={8}
+                     autoComplete="new-password"
+                     value={formData.password}
+                     onChange={e => setFormData({...formData, password: e.target.value})}
+                     className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none transition-all"
+                     placeholder="At least 8 characters"
+                   />
+                 </div>
+                 <div className="space-y-2">
                    <label className="text-sm font-medium">Access Role</label>
                    <select 
                      value={formData.role}
                      onChange={e => setFormData({...formData, role: e.target.value})}
                      className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none transition-all"
                    >
-                     <option value="dealer">Dealer (Portal Visibility)</option>
-                     <option value="admin">Admin (System Access)</option>
+                     <option value="owner">Owner (read-only portal at /portal)</option>
+                     <option value="dealer">Dealer</option>
+                     <option value="admin">Admin (full admin console)</option>
                    </select>
                  </div>
                  <div className="flex justify-end gap-3 pt-4">
                     <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2 text-muted-foreground hover:bg-secondary rounded-lg font-medium transition-colors">Cancel</button>
                     <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50">
-                      {saving ? 'Saving...' : 'Assign Role'}
+                      {saving ? 'Creating…' : 'Create user'}
                     </button>
                  </div>
               </form>
