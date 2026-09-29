@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 import { optimizeImage } from '@/lib/imageOptimizer';
+import { ACCESS_TOKEN_COOKIE } from '@/lib/aws/cognito';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,21 +11,23 @@ export const dynamic = 'force-dynamic';
  * 1. Receive file and configuration metadata (type, folder)
  * 2. Validate MIME type (must be image) and file size (max 10MB)
  * 3. Process image through Sharp optimizer pipeline (resizing and WebP conversion)
- * 4. Upload optimized WebP buffer to Supabase Storage with CDN Cache-Control headers
+ * 4. Request a presigned S3 PUT URL from the upload Lambda, then PUT the
+ *    optimized buffer directly to S3 (server-side here, since this route
+ *    already has the processed bytes in hand)
  * 5. Return JSON containing the optimized public URL
  */
 export async function POST(request) {
   try {
-    // 1. Authenticate / get Server-side Supabase client
-    const supabase = await createClient();
+    const cookieStore = await cookies();
+    const token = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
 
-    // 2. Parse Multipart Form Data
+    // 1. Parse Multipart Form Data
     const formData = await request.formData();
     const file = formData.get('file');
     const type = formData.get('type') || 'product'; // 'thumbnail' | 'product' | 'hero'
     const folder = formData.get('folder') || 'uploads'; // target directory inside storage bucket
 
-    // 3. Validation Checks
+    // 2. Validation Checks
     if (!file) {
       return NextResponse.json(
         { error: 'No file was provided in the request payload' },
@@ -48,47 +51,55 @@ export async function POST(request) {
       );
     }
 
-    // 4. Run through high-performance Sharp pipeline
+    // 3. Run through high-performance Sharp pipeline
     console.log(`[Upload API] Optimizing file: ${file.name} (type: ${type})`);
     const { buffer, contentType, size } = await optimizeImage(file, { type });
     console.log(`[Upload API] Optimization complete. Initial size: ${(file.size / 1024).toFixed(1)}KB -> WebP size: ${(size / 1024).toFixed(1)}KB`);
 
-    // 5. Generate sanitized WebP filename
+    // 4. Generate sanitized WebP filename
     const baseName = file.name
       .replace(/\s+/g, '_') // Replace whitespace with underscore
       .replace(/\.[^/.]+$/, ""); // Strip original extension
-    const fileName = `${folder}/${Date.now()}_${baseName}.webp`;
+    const fileName = `${baseName}.webp`;
 
-    // 6. Upload WebP buffer to Supabase Storage
-    const BUCKET = 'images';
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from(BUCKET)
-      .upload(fileName, buffer, {
-        contentType: contentType, // 'image/webp'
-        // Deliverable 4 CDN / Supabase bucket Cache header requirement
-        cacheControl: 'public, max-age=31536000, immutable',
-        upsert: false
-      });
+    // 5. Get a presigned PUT URL from the upload Lambda, then upload the
+    // already-optimized buffer directly to S3.
+    const presignRes = await fetch(`${process.env.API_GATEWAY_URL}/upload/presign`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ folder, fileName, contentType }),
+    });
+    const presignData = await presignRes.json();
 
-    if (uploadError) {
-      console.error('[Upload API] Supabase storage upload failed:', uploadError.message);
+    if (!presignRes.ok) {
       return NextResponse.json(
-        { error: `Supabase Storage upload failure: ${uploadError.message}` },
+        { error: presignData.error || 'Failed to get upload URL' },
+        { status: presignRes.status }
+      );
+    }
+
+    const putRes = await fetch(presignData.uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': contentType },
+      body: buffer,
+    });
+
+    if (!putRes.ok) {
+      return NextResponse.json(
+        { error: 'Upload to storage failed' },
         { status: 500 }
       );
     }
 
-    // 7. Retrieve Optimized Public CDN URL
-    const { data: { publicUrl } } = supabase.storage
-      .from(BUCKET)
-      .getPublicUrl(fileName);
-
     return NextResponse.json(
-      { 
-        success: true, 
-        publicUrl,
+      {
+        success: true,
+        publicUrl: presignData.publicUrl,
         size,
-        format: 'webp' 
+        format: 'webp'
       },
       { status: 200 }
     );
