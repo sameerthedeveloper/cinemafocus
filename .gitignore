@@ -49,3 +49,6 @@ scripts/test_connection.js
 infra/node_modules
 infra/.serverless
 *.zip
+
+# Alternate build output for verification builds
+.next-*/

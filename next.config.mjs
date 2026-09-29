@@ -2,6 +2,8 @@ import path from 'path';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Lets test builds use their own folder (NEXT_DIST_DIR=.next-verify) so they never touch a running `next dev`.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   turbopack: {
     root: path.resolve('.'),
   },
