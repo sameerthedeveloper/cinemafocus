@@ -26,13 +26,8 @@ async function forward(request, path, method) {
   const res = await fetch(target, { method, headers: upstreamHeaders, body });
   const text = await res.text();
 
-  // Anonymous GETs are public catalogue data: let the edge cache them briefly so
-  // page views don't each hit Lambda (small account concurrency limit).
-  if (method === "GET" && !token && res.ok) {
-    headers["Cache-Control"] = "public, s-maxage=60, stale-while-revalidate=300";
-  } else {
-    headers["Cache-Control"] = "no-store";
-  }
+  // Authenticated admin traffic: never cache (public reads use /api/aws-public).
+  headers["Cache-Control"] = "no-store";
 
   return new NextResponse(text, { status: res.status, headers });
 }
