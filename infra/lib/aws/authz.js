@@ -37,6 +37,15 @@ export async function requireAdmin(event) {
   return claims;
 }
 
+// Read-only staff access (e.g. the site owner's portal): any of the listed roles.
+export async function requireRole(event, roles) {
+  const claims = await requireAuth(event);
+  if (!roles.includes(claims["custom:role"])) {
+    throw new AuthError(403, "Insufficient role");
+  }
+  return claims;
+}
+
 export class AuthError extends Error {
   constructor(statusCode, message) {
     super(message);

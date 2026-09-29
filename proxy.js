@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyAccessToken, ACCESS_TOKEN_COOKIE } from "@/lib/aws/cognito";
+import { verifyAccessToken, ACCESS_TOKEN_COOKIE, PORTAL_TOKEN_COOKIE, PORTAL_REFRESH_COOKIE, PORTAL_ROLES } from "@/lib/aws/cognito";
 
 // Route protection for the admin portal, based on the httpOnly Cognito ID-token cookie.
 async function updateSession(request) {
@@ -31,6 +31,61 @@ async function updateSession(request) {
   return NextResponse.next({ request });
 }
 
+// Owner portal (/portal/*): separate cookies from /admin. An expired ID token is refreshed
+// transparently from the refresh-token cookie so the owner isn't logged out every hour.
+async function portalGate(request) {
+  const pathname = request.nextUrl.pathname;
+  const isLogin = pathname === '/portal/login';
+
+  let claims = await verifyAccessToken(request.cookies.get(PORTAL_TOKEN_COOKIE)?.value);
+  let refreshedToken = null;
+
+  if (!claims && process.env.API_GATEWAY_URL) {
+    const refreshToken = request.cookies.get(PORTAL_REFRESH_COOKIE)?.value;
+    if (refreshToken) {
+      try {
+        const res = await fetch(`${process.env.API_GATEWAY_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
+          signal: AbortSignal.timeout(4000),
+        });
+        const data = res.ok ? await res.json() : null;
+        const candidate = data?.IdToken ? await verifyAccessToken(data.IdToken) : null;
+        if (candidate) { claims = candidate; refreshedToken = data.IdToken; }
+      } catch {
+        // fall through to the login redirect
+      }
+    }
+  }
+
+  const allowed = !!claims && PORTAL_ROLES.includes(claims['custom:role']);
+
+  if (!isLogin && !allowed) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/portal/login';
+    url.search = '';
+    const redirect = NextResponse.redirect(url);
+    redirect.cookies.delete(PORTAL_TOKEN_COOKIE);
+    return redirect;
+  }
+  if (isLogin && allowed) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/portal/dashboard';
+    return NextResponse.redirect(url);
+  }
+
+  if (refreshedToken) {
+    request.cookies.set(PORTAL_TOKEN_COOKIE, refreshedToken); // visible to this request's server components
+    const response = NextResponse.next({ request });
+    response.cookies.set(PORTAL_TOKEN_COOKIE, refreshedToken, {
+      httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60,
+    });
+    return response;
+  }
+  return NextResponse.next();
+}
+
 // Maintenance settings are read on every public request, so cache them briefly per
 // instance (protects the small Lambda concurrency limit) and never let a slow or
 // failing AWS call block a page: on any error the site is served normally.
@@ -52,6 +107,11 @@ async function getMaintenanceSettings() {
 }
 
 export async function proxy(request) {
+  // Owner portal has its own session handling and never shows the public maintenance page.
+  if (request.nextUrl.pathname === '/portal' || request.nextUrl.pathname.startsWith('/portal/')) {
+    return portalGate(request);
+  }
+
   // 1. Run authenticating/session updates first
   const sessionResponse = await updateSession(request);
   

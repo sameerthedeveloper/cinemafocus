@@ -1,13 +1,13 @@
 import { GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient } from "../lib/aws/dynamo.js";
-import { requireAdmin, errorResponse } from "../lib/aws/authz.js";
+import { requireRole, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
 
 const TABLE = () => process.env.STATS_TABLE;
 
 export async function get(event) {
   try {
-    await requireAdmin(event);
+    await requireRole(event, ["admin", "owner"]);
     const { date } = event.pathParameters;
     const { Item } = await docClient.send(new GetCommand({ TableName: TABLE(), Key: { date } }));
     return json(200, Item || { date, count: 0 });

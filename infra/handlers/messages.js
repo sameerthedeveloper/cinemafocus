@@ -1,7 +1,7 @@
 import { PutCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
 import { docClient, scanAll } from "../lib/aws/dynamo.js";
-import { requireAdmin, errorResponse } from "../lib/aws/authz.js";
+import { requireAdmin, requireRole, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
 
 const TABLE = () => process.env.MESSAGES_TABLE;
@@ -28,7 +28,7 @@ export async function create(event) {
 
 export async function list(event) {
   try {
-    await requireAdmin(event);
+    await requireRole(event, ["admin", "owner"]);
     const Items = await scanAll({ TableName: TABLE() });
     return json(200, Items || []);
   } catch (e) {

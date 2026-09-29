@@ -111,6 +111,26 @@ for (const p of ['/api/aws-public/users', '/api/aws-public/messages', '/api/aws-
 }
 check('admin proxy responses are no-store', /no-store/.test((await get('/api/aws/products')).headers.get('cache-control') || ''));
 
+// ---- 5. owner portal ----
+for (const p of ['/portal', '/portal/dashboard', '/portal/messages', '/portal/products', '/portal/brands', '/portal/gallery', '/portal/press']) {
+  const r = await get(p);
+  check(`${p} without session redirects to /portal/login`, [307, 308].includes(r.status) && /\/portal\/login$/.test(r.headers.get('location') || ''), `${r.status} ${r.headers.get('location')}`);
+}
+const pl = await get('/portal/login');
+check('/portal/login 200', pl.status === 200);
+check('/portal/login is noindex', /<meta[^>]+name="robots"[^>]*noindex/i.test(pl.text));
+const al = await get('/admin/login');
+check('/admin/login is noindex', /<meta[^>]+name="robots"[^>]*noindex/i.test(al.text));
+check('/portal/login and /admin/login share the panel design', /admin-shell/.test(pl.text) && /admin-shell/.test(al.text));
+check('robots.txt disallows /portal', /Disallow: \/portal/.test(robots.text));
+const pbad = await get('/api/portal/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'nobody-test@example.invalid', password: 'not-a-real-password' }) });
+check('portal login with invalid account -> 401', pbad.status === 401, String(pbad.status));
+const pmiss = await get('/api/portal/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+check('portal login without credentials -> 400', pmiss.status === 400, String(pmiss.status));
+check('portal login rejects GET', (await get('/api/portal/login')).status === 405);
+check('portal logout responds', (await get('/api/portal/logout', { method: 'POST' })).status === 200);
+check('sitemap has no /portal URLs', !urls.some((u) => /\/portal(\/|$)/.test(u)));
+
 console.log(`\nPASSED ${passed}, FAILED ${failures.length}  (${urls.length} sitemap URLs crawled)`);
 if (failures.length) {
   console.log(failures.map((f) => ` ✖ ${f}`).join('\n'));
