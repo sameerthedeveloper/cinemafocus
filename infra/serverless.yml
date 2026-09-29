@@ -1,0 +1,521 @@
+service: cinemafocus-aws
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${env:AWS_REGION, 'ap-south-1'}
+  stage: ${opt:stage, 'prod'}
+  httpApi:
+    cors: true
+  environment:
+    USERS_TABLE: ${self:custom.tablePrefix}Users
+    PRODUCTS_TABLE: ${self:custom.tablePrefix}Products
+    CATEGORIES_TABLE: ${self:custom.tablePrefix}Categories
+    NEW_LAUNCHES_TABLE: ${self:custom.tablePrefix}NewLaunches
+    PRESS_RELEASES_TABLE: ${self:custom.tablePrefix}PressReleases
+    PROJECTS_TABLE: ${self:custom.tablePrefix}Projects
+    MESSAGES_TABLE: ${self:custom.tablePrefix}Messages
+    SITE_SETTINGS_TABLE: ${self:custom.tablePrefix}SiteSettings
+    STATS_TABLE: ${self:custom.tablePrefix}Stats
+    COGNITO_POOL_ID: !Ref CognitoUserPool
+    COGNITO_CLIENT_ID: !Ref CognitoUserPoolClient
+    IMAGES_BUCKET: ${self:custom.imagesBucket}
+    CDN_DOMAIN: !GetAtt CloudFrontDistribution.DomainName
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:BatchWriteItem
+            - dynamodb:BatchGetItem
+          Resource:
+            - !GetAtt UsersTable.Arn
+            - !Sub "${UsersTable.Arn}/index/*"
+            - !GetAtt ProductsTable.Arn
+            - !Sub "${ProductsTable.Arn}/index/*"
+            - !GetAtt CategoriesTable.Arn
+            - !Sub "${CategoriesTable.Arn}/index/*"
+            - !GetAtt NewLaunchesTable.Arn
+            - !Sub "${NewLaunchesTable.Arn}/index/*"
+            - !GetAtt PressReleasesTable.Arn
+            - !Sub "${PressReleasesTable.Arn}/index/*"
+            - !GetAtt ProjectsTable.Arn
+            - !Sub "${ProjectsTable.Arn}/index/*"
+            - !GetAtt MessagesTable.Arn
+            - !Sub "${MessagesTable.Arn}/index/*"
+            - !GetAtt SiteSettingsTable.Arn
+            - !GetAtt StatsTable.Arn
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource:
+            - !Sub "arn:aws:s3:::${self:custom.imagesBucket}/*"
+        - Effect: Allow
+          Action:
+            - cognito-idp:InitiateAuth
+            - cognito-idp:RespondToAuthChallenge
+          Resource:
+            - !GetAtt CognitoUserPool.Arn
+
+custom:
+  tablePrefix: cinemafocus-
+  imagesBucket: cinemafocus-images
+
+functions:
+  # --- Auth ---
+  authLogin:
+    handler: handlers/auth.login
+    events:
+      - httpApi: 'POST /auth/login'
+  authRefresh:
+    handler: handlers/auth.refresh
+    events:
+      - httpApi: 'POST /auth/refresh'
+
+  # --- Users ---
+  getUsers:
+    handler: handlers/users.list
+    events:
+      - httpApi: 'GET /users'
+  getUser:
+    handler: handlers/users.get
+    events:
+      - httpApi: 'GET /users/{userId}'
+  updateUser:
+    handler: handlers/users.update
+    events:
+      - httpApi: 'PUT /users/{userId}'
+  deleteUser:
+    handler: handlers/users.remove
+    events:
+      - httpApi: 'DELETE /users/{userId}'
+
+  # --- Products ---
+  getProducts:
+    handler: handlers/products.list
+    events:
+      - httpApi: 'GET /products'
+  getProduct:
+    handler: handlers/products.get
+    events:
+      - httpApi: 'GET /products/{productId}'
+  createProduct:
+    handler: handlers/products.create
+    events:
+      - httpApi: 'POST /products'
+  updateProduct:
+    handler: handlers/products.update
+    events:
+      - httpApi: 'PUT /products/{productId}'
+  deleteProduct:
+    handler: handlers/products.remove
+    events:
+      - httpApi: 'DELETE /products/{productId}'
+
+  # --- Categories ---
+  getCategories:
+    handler: handlers/categories.list
+    events:
+      - httpApi: 'GET /categories'
+  createCategory:
+    handler: handlers/categories.create
+    events:
+      - httpApi: 'POST /categories'
+  updateCategory:
+    handler: handlers/categories.update
+    events:
+      - httpApi: 'PUT /categories/{categoryId}'
+  deleteCategory:
+    handler: handlers/categories.remove
+    events:
+      - httpApi: 'DELETE /categories/{categoryId}'
+
+  # --- New Launches ---
+  getNewLaunches:
+    handler: handlers/newLaunches.list
+    events:
+      - httpApi: 'GET /new-launches'
+  createNewLaunch:
+    handler: handlers/newLaunches.create
+    events:
+      - httpApi: 'POST /new-launches'
+  updateNewLaunch:
+    handler: handlers/newLaunches.update
+    events:
+      - httpApi: 'PUT /new-launches/{launchId}'
+  deleteNewLaunch:
+    handler: handlers/newLaunches.remove
+    events:
+      - httpApi: 'DELETE /new-launches/{launchId}'
+
+  # --- Press Releases ---
+  getPressReleases:
+    handler: handlers/pressReleases.list
+    events:
+      - httpApi: 'GET /press-releases'
+  getPressRelease:
+    handler: handlers/pressReleases.get
+    events:
+      - httpApi: 'GET /press-releases/{pressId}'
+  createPressRelease:
+    handler: handlers/pressReleases.create
+    events:
+      - httpApi: 'POST /press-releases'
+  updatePressRelease:
+    handler: handlers/pressReleases.update
+    events:
+      - httpApi: 'PUT /press-releases/{pressId}'
+  deletePressRelease:
+    handler: handlers/pressReleases.remove
+    events:
+      - httpApi: 'DELETE /press-releases/{pressId}'
+
+  # --- Projects ---
+  getProjects:
+    handler: handlers/projects.list
+    events:
+      - httpApi: 'GET /projects'
+  createProject:
+    handler: handlers/projects.create
+    events:
+      - httpApi: 'POST /projects'
+  updateProject:
+    handler: handlers/projects.update
+    events:
+      - httpApi: 'PUT /projects/{projectId}'
+  deleteProject:
+    handler: handlers/projects.remove
+    events:
+      - httpApi: 'DELETE /projects/{projectId}'
+
+  # --- Messages ---
+  createMessage:
+    handler: handlers/messages.create
+    events:
+      - httpApi: 'POST /messages'
+  getMessages:
+    handler: handlers/messages.list
+    events:
+      - httpApi: 'GET /messages'
+  updateMessage:
+    handler: handlers/messages.update
+    events:
+      - httpApi: 'PUT /messages/{messageId}'
+  deleteMessage:
+    handler: handlers/messages.remove
+    events:
+      - httpApi: 'DELETE /messages/{messageId}'
+
+  # --- Site Settings ---
+  getSiteSettings:
+    handler: handlers/siteSettings.get
+    events:
+      - httpApi: 'GET /site-settings/{settingId}'
+  updateSiteSettings:
+    handler: handlers/siteSettings.update
+    events:
+      - httpApi: 'PUT /site-settings/{settingId}'
+
+  # --- Stats ---
+  getStats:
+    handler: handlers/stats.get
+    events:
+      - httpApi: 'GET /stats/{date}'
+  incrementStat:
+    handler: handlers/stats.increment
+    events:
+      - httpApi: 'POST /stats/increment'
+
+  # --- Upload ---
+  getUploadUrl:
+    handler: handlers/upload.getPresignedUrl
+    events:
+      - httpApi: 'POST /upload/presign'
+
+  # --- Image resize (on-the-fly transform replacement) ---
+  resizeImage:
+    handler: handlers/resizeImage.handler
+    timeout: 60
+    memorySize: 1024
+    events:
+      - s3:
+          bucket: ${self:custom.imagesBucket}
+          event: s3:ObjectCreated:*
+          existing: true
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tablePrefix}Users
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+
+    ProductsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tablePrefix}Products
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: productId
+            AttributeType: S
+          - AttributeName: category
+            AttributeType: S
+        KeySchema:
+          - AttributeName: productId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: category-index
+            KeySchema:
+              - AttributeName: category
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    CategoriesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tablePrefix}Categories
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: categoryId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: categoryId
+            KeyType: HASH
+
+    NewLaunchesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tablePrefix}NewLaunches
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: launchId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: launchId
+            KeyType: HASH
+
+    PressReleasesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tablePrefix}PressReleases
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: pressId
+            AttributeType: S
+          - AttributeName: slug
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pressId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: slug-index
+            KeySchema:
+              - AttributeName: slug
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    ProjectsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tablePrefix}Projects
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: projectId
+            AttributeType: S
+          - AttributeName: category
+            AttributeType: S
+        KeySchema:
+          - AttributeName: projectId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: category-index
+            KeySchema:
+              - AttributeName: category
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    MessagesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tablePrefix}Messages
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: messageId
+            AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+        KeySchema:
+          - AttributeName: messageId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: status-index
+            KeySchema:
+              - AttributeName: status
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    SiteSettingsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tablePrefix}SiteSettings
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: settingId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: settingId
+            KeyType: HASH
+
+    StatsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tablePrefix}Stats
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: date
+            AttributeType: S
+        KeySchema:
+          - AttributeName: date
+            KeyType: HASH
+
+    # --- Cognito ---
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: cinemafocus-users
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+        Schema:
+          - Name: role
+            AttributeDataType: String
+            Mutable: true
+            Required: false
+
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: cinemafocus-web-client
+        UserPoolId: !Ref CognitoUserPool
+        GenerateSecret: false
+        ExplicitAuthFlows:
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
+
+    # --- S3 ---
+    ImagesBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.imagesBucket}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+
+    ImagesBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref ImagesBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: cloudfront.amazonaws.com
+              Action: s3:GetObject
+              Resource: !Sub "arn:aws:s3:::${self:custom.imagesBucket}/*"
+              Condition:
+                StringEquals:
+                  AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
+
+    # --- CloudFront ---
+    CloudFrontOAC:
+      Type: AWS::CloudFront::OriginAccessControl
+      Properties:
+        OriginAccessControlConfig:
+          Name: cinemafocus-images-oac
+          OriginAccessControlOriginType: s3
+          SigningBehavior: always
+          SigningProtocol: sigv4
+
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Enabled: true
+          DefaultCacheBehavior:
+            TargetOriginId: imagesS3Origin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized managed policy
+            AllowedMethods:
+              - GET
+              - HEAD
+          Origins:
+            - Id: imagesS3Origin
+              DomainName: !GetAtt ImagesBucket.RegionalDomainName
+              OriginAccessControlId: !Ref CloudFrontOAC
+              S3OriginConfig:
+                OriginAccessIdentity: ""
+
+    # --- CloudWatch Alarms ---
+    BillingAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: cinemafocus-billing-alarm
+        AlarmDescription: Alerts when estimated AWS charges exceed threshold
+        Namespace: AWS/Billing
+        MetricName: EstimatedCharges
+        Dimensions:
+          - Name: Currency
+            Value: USD
+        Statistic: Maximum
+        Period: 21600
+        EvaluationPeriods: 1
+        Threshold: 50
+        ComparisonOperator: GreaterThanThreshold
+
+    LambdaErrorAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: cinemafocus-lambda-error-alarm
+        AlarmDescription: Alerts on elevated Lambda error rate across the service
+        Namespace: AWS/Lambda
+        MetricName: Errors
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 5
+        ComparisonOperator: GreaterThanThreshold
+        TreatMissingData: notBreaching
+
+  Outputs:
+    CognitoPoolId:
+      Value: !Ref CognitoUserPool
+    CognitoClientId:
+      Value: !Ref CognitoUserPoolClient
+    CdnDomain:
+      Value: !GetAtt CloudFrontDistribution.DomainName
+    ImagesBucketName:
+      Value: !Ref ImagesBucket
