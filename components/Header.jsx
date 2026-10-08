@@ -10,183 +10,210 @@ import gsap from 'gsap';
 const logo = '/images/logo.png';
 const logoLight = '/images/logo-light.webp';
 
+const NAV_LINKS = [
+  { name: 'New Launches', path: '/products?category=new-arrivals' },
+  { name: 'Products', path: '/products' },
+  { name: 'Gallery', path: '/gallery' },
+  { name: 'Press Room', path: '/press' },
+  { name: 'About', path: '/about' },
+  { name: 'Contact', path: '/contact' },
+];
+
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef(null);
+  const headerRef = useRef(null);
+  const mobilePanelRef = useRef(null);
+  const mobileListRef = useRef(null);
   const pathname = usePathname();
-  const { theme, showDesktopMenu } = useSiteSettings();
+  const { showDesktopMenu } = useSiteSettings();
+
   // usePathname() can read the SSR pathname during hydration (mismatch risk from
   // the proxy.js request interception — see next/docs use-pathname.md), so resolve
-  // the real path from the browser once mounted instead of trusting it outright.
-  const [resolvedPathname, setResolvedPathname] = useState(pathname);
+  // the real location from the browser once mounted instead of trusting it outright.
+  const [resolved, setResolved] = useState({ path: pathname, search: '' });
   useEffect(() => {
-    setResolvedPathname(window.location.pathname);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setResolved({ path: window.location.pathname, search: window.location.search });
   }, [pathname]);
 
-  const isHome = resolvedPathname === '/';
+  const isHome = resolved.path === '/';
+  // Over the dark home hero the pill is a translucent dark glass with light
+  // content and the light logo; everywhere else it's a solid themed surface.
+  const overHero = isHome && !isScrolled;
+  const showChrome = isScrolled || isMenuOpen;
 
-  // Text/icon color: follows theme or transparent-header state
-  const useLightContent = theme === 'dark' || (isHome && !isScrolled);
-  // Logo swap: ONLY based on whether header is transparent over dark hero
-  // theme must NOT override — white logo on white bg = invisible
-  const useLightLogo = isHome && !isScrolled;
+  const isActive = (path) => {
+    const [base, query] = path.split('?');
+    if (query) return resolved.path === base && resolved.search.includes(query);
+    if (base === '/products') return resolved.path.startsWith('/products') && !resolved.search.includes('new-arrivals');
+    return resolved.path === base || resolved.path.startsWith(`${base}/`);
+  };
+  const activePath = NAV_LINKS.find((l) => isActive(l.path))?.path ?? null;
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close menu when route changes
-  useEffect(() => {
+  // Close menu on route change and on Escape
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
     setIsMenuOpen(false);
-  }, [pathname]);
-
-  // GSAP Animation for Mobile Menu
+  }
   useEffect(() => {
-    if (menuRef.current) {
-      if (isMenuOpen) {
-        gsap.to(menuRef.current, {
-          y: 0,
-          opacity: 1,
-          duration: 0.5,
-          ease: "power3.out",
-          pointerEvents: "auto",
-        });
-      } else {
-        gsap.to(menuRef.current, {
-          y: -50,
-          opacity: 0,
-          duration: 0.4,
-          ease: "power3.in",
-          pointerEvents: "none",
-        });
-      }
+    if (!isMenuOpen) return;
+    const onKey = (e) => e.key === 'Escape' && setIsMenuOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isMenuOpen]);
+
+  // Entrance: pill drops in, items cascade after it (once)
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const items = header.querySelectorAll('[data-nav-item]');
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const ctx = gsap.context(() => {
+      gsap.set(header, { opacity: 0, y: -18 });
+      gsap.set(items, { opacity: 0, y: -8 });
+      gsap.timeline({ delay: 0.1 })
+        .to(header, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' })
+        .to(items, { opacity: 1, y: 0, duration: 0.5, stagger: 0.06, ease: 'power3.out' }, '-=0.3');
+    }, header);
+    return () => ctx.revert();
+  }, []);
+
+  // Mobile panel expands/collapses; links cascade in
+  useEffect(() => {
+    const panel = mobilePanelRef.current;
+    if (!panel) return;
+    const items = mobileListRef.current?.querySelectorAll('[data-mobile-item]') ?? [];
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    gsap.killTweensOf([panel, ...items]);
+    if (reduced) {
+      gsap.set(panel, { display: isMenuOpen ? 'block' : 'none', height: isMenuOpen ? 'auto' : 0, opacity: isMenuOpen ? 1 : 0 });
+      return;
+    }
+    if (isMenuOpen) {
+      gsap.set(panel, { display: 'block' });
+      gsap.set(items, { opacity: 0, x: -10 });
+      gsap.timeline()
+        .to(panel, { height: 'auto', opacity: 1, duration: 0.35, ease: 'power3.out' })
+        .to(items, { opacity: 1, x: 0, duration: 0.35, stagger: 0.05, ease: 'power3.out' }, '-=0.15');
+    } else {
+      gsap.to(panel, {
+        height: 0,
+        opacity: 0,
+        duration: 0.3,
+        ease: 'power3.in',
+        onComplete: () => gsap.set(panel, { display: 'none' }),
+      });
     }
   }, [isMenuOpen]);
 
-  const navLinks = [
-    { name: 'New Launches', path: '/products?category=new-arrivals' },
-    { name: 'Products', path: '/products' },
-    { name: 'Gallery', path: '/gallery' },
-    { name: 'Press Room', path: '/press' },
-    { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' },
-  ];
-
   return (
     <header
+      ref={headerRef}
       className={clsx(
-        'fixed top-0 left-0 right-0 z-99 transition-all duration-300 ease-in-out',
-        // Mobile: Always visible background
-        'bg-background m-3 rounded-3xl py-3 shadow gap-8 border border-gray-300',
-        // Desktop: Dynamic based on scroll
-        isScrolled 
-          ? 'md:bg-background md:backdrop-blur-2xl md:m-3 md:rounded-4xl md:border md:border-gray-300 md:shadow-lg md:py-3' 
-          : 'md:bg-transparent md:py-5 md:border-transparent md:m-3 md:rounded-4xl md:shadow-none md:backdrop-blur-none'
+        'fixed inset-x-4 top-4 z-99 mx-auto w-auto max-w-5xl border backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-300 sm:inset-x-10 sm:top-5',
+        // Chrome (bg/border/shadow) only appears once scrolled or while the mobile menu is open;
+        // content colour still follows what's behind it (dark hero vs. themed page).
+        showChrome
+          ? overHero
+            ? 'border-white/15 bg-black/60 text-white shadow-none'
+            : 'border-border bg-background/90 text-foreground shadow-[0_8px_30px_-14px_rgba(0,0,0,0.35)]'
+          : clsx('border-transparent bg-transparent shadow-none backdrop-blur-none', overHero ? 'text-white' : 'text-foreground'),
+        isMenuOpen ? 'flex flex-col rounded-[28px]' : 'flex flex-col rounded-full'
       )}
     >
-      <div className="container px-6 mx-auto flex items-center justify-between ">
+      <nav className="mx-auto flex h-16 w-full lg:h-[76px] items-center justify-between px-5 sm:px-8 lg:pl-6 lg:pr-8">
         {/* Logo */}
-        <Link href="/" className="block hover:opacity-80 transition-opacity z-50" aria-label="Cinema Focus Home">
-          {/* Mobile Logo — always dark logo (mobile header always has white bg) */}
-          <div className="h-10 w-48 relative md:hidden">
-            <Image
-              src={logo}
-              alt="Cinema Focus Logo"
-              fill
-              priority
-              className="object-contain object-left"
-              sizes="240px"
-            />
-          </div>
-          
-          {/* Desktop Logo (Dynamic) */}
-          <div className={clsx(
-              "hidden md:block relative transition-all duration-500",
-              useLightLogo ? "h-14 md:h-16 w-64 " : "h-10 md:h-12 w-48"
-            )}>
-            {/* Light Logo (used on home hero) */}
-            <Image
-              src={logoLight}
-              alt="Cinema Focus Logo Light"
-              fill
-              priority
-              className={clsx(
-                "object-contain object-left transition-opacity duration-500",
-                useLightLogo ? "opacity-100" : "opacity-0"
-              )}
-              sizes="300px"
-            />
-            {/* Dark Logo (used when scrolled or on other pages) */}
-            <Image
-              src={logo}
-              alt="Cinema Focus Logo Dark"
-              fill
-              priority
-              className={clsx(
-                "object-contain object-left transition-opacity duration-500",
-                useLightLogo ? "opacity-0" : "opacity-100"
-              )}
-              sizes="300px"
-            />
-          </div>
+        <Link
+          href="/"
+          data-nav-item
+          aria-label="Cinema Focus Home"
+          className="relative block h-12 w-52 shrink-0 lg:h-14 lg:w-60 transition-transform duration-200 hover:scale-[1.03] lg:justify-self-start"
+        >
+          <Image
+            src={logoLight}
+            alt="Cinema Focus"
+            fill
+            priority
+            sizes="256px"
+            className={clsx('object-contain object-left transition-opacity duration-300', overHero ? 'opacity-100' : 'opacity-0')}
+          />
+          <Image
+            src={logo}
+            alt=""
+            aria-hidden="true"
+            fill
+            priority
+            sizes="256px"
+            className={clsx('object-contain object-left transition-opacity duration-300', overHero ? 'opacity-0' : 'opacity-100')}
+          />
         </Link>
 
-        {/* Desktop Nav */}
+        {/* Desktop nav */}
         {showDesktopMenu && (
-          <nav className="hidden md:flex justify-between items-center gap-8">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
-                href={link.path} 
+          <ul className="hidden items-center gap-8 lg:flex">
+            {NAV_LINKS.map((link) => (
+              <li key={link.name} data-nav-item>
+                <Link
+                  href={link.path}
+                  data-path={link.path}
+                  aria-current={activePath === link.path ? 'page' : undefined}
+                  className={clsx(
+                    'border-b-2 text-sm font-bold uppercase tracking-widest transition-all',
+                    activePath === link.path
+                      ? 'border-red-600 text-red-600'
+                      : clsx('border-transparent hover:border-red-600 hover:text-red-600', overHero ? 'text-white' : 'text-foreground')
+                  )}
+                >
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* Mobile toggle */}
+        <button
+          type="button"
+          data-nav-item
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-nav"
+          onClick={() => setIsMenuOpen((v) => !v)}
+          className="-m-2.5 p-2.5 lg:hidden"
+        >
+          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          <span className="sr-only">{isMenuOpen ? 'Close menu' : 'Open menu'}</span>
+        </button>
+      </nav>
+
+      {/* Mobile panel */}
+      <div id="mobile-nav" ref={mobilePanelRef} className="hidden w-full overflow-hidden lg:hidden" style={{ height: 0, opacity: 0 }}>
+        <ul ref={mobileListRef} className={clsx('flex flex-col gap-1 border-t px-5 pb-5 pt-4', overHero ? 'border-white/15' : 'border-border')}>
+          {NAV_LINKS.map((link) => (
+            <li key={link.name} data-mobile-item>
+              <Link
+                href={link.path}
+                onClick={() => setIsMenuOpen(false)}
                 className={clsx(
-                  "text-sm font-bold transition-all uppercase tracking-widest border-b-2 border-transparent",
-                  useLightContent 
-                    ? "text-white hover:text-red-500 hover:border-red-500" 
-                    : "text-foreground hover:text-red-600 hover:border-red-600"
+                  'block py-2 text-[15px]',
+                  activePath === link.path ? 'text-red-600 font-medium' : overHero ? 'text-white/80' : 'text-foreground/80'
                 )}
               >
                 {link.name}
               </Link>
-            ))}
-          </nav>
-        )}
-
-        {/* Mobile Menu Toggle - Hidden on Desktop */}
-        <button 
-          className={clsx(
-            "md:hidden z-50 p-2 -mr-2 transition-colors",
-            useLightContent ? "text-black" : "text-foreground"
-          )}
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-
-        {/* Fullscreen Menu - Hidden on Desktop */}
-        <div 
-          ref={menuRef}
-          className="fixed inset-0 mt-65 bg-background backdrop-blur-2xl z-40 flex flex-col items-center justify-center md:hidden  rounded-xl  opacity-0 pointer-events-none border-2 "
-          style={{ transform: 'translateY(-50px)' }}
-        >
-          <nav className="flex  flex-col items-start p-7 rounded-4xl bg-background w-full gap-8 border border-gray-300 shadow mt-2">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
-                href={link.path} 
-                onClick={() => setIsMenuOpen(false)}
-                className="text-xl font-medium text-foreground hover:text-primary transition-colors tracking-tight"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
-        </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </header>
   );
