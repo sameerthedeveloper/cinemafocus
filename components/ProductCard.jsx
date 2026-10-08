@@ -17,11 +17,11 @@ const ProductCard = ({ product }) => {
   const imageSrc = product.image_url || product.images?.[0] || null;
 
   return (
-    <Link href={`/products/${product.slug}`} className="group block" aria-label={`View ${product.name}`}>
+    <Link href={`/products/${product.slug}`} className="group block h-full rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background" aria-label={`View ${product.name}`}>
       {/* Card container — Apple uses soft bg, no visible border, just shadow on hover */}
-      <div className="relative rounded-3xl overflow-hidden bg-secondary/40 transition-all duration-500 ease-out group-hover:bg-secondary/70 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
+      <div className="relative flex h-full flex-col rounded-3xl overflow-hidden bg-secondary/40 transition-all duration-500 ease-out group-hover:bg-secondary/70 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
         {/* Image area */}
-        <div className="relative aspect-square overflow-hidden p-6 pb-4">
+        <div className="relative aspect-square overflow-hidden p-4 pb-2 sm:p-6 sm:pb-4">
           <LazyImage
             src={imageSrc}
             alt={product.name}
@@ -40,11 +40,11 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* Content */}
-        <div className="px-5 pb-6 pt-1 space-y-1">
+        <div className="px-4 pb-5 pt-1 sm:px-5 sm:pb-6 space-y-1">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             {product.brand || (product.category ? product.category.replace(/-/g, ' ') : 'Audio')}
           </p>
-          <h3 className="text-base font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors duration-300">
+          <h3 className="text-[15px] sm:text-base font-semibold text-foreground leading-snug line-clamp-2 sm:min-h-[2.75rem] group-hover:text-primary transition-colors duration-300">
             {product.name}
           </h3>
           {showPrice && product.price ? (

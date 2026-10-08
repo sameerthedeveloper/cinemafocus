@@ -50,7 +50,7 @@ export default function ProductDetailClient({ product }) {
   return (
     <Reveal className="animate-fade-in pt-6">
       {/* Breadcrumb */}
-      <div className="max-w-[1400px] px-4 md:px-8 mx-auto py-4 flex mt-15 items-center text-sm text-muted-foreground">
+      <div className="max-w-[1400px] px-4 md:px-8 mx-auto py-4 flex mt-20 md:mt-24 items-center text-sm text-muted-foreground">
         <Link href={`/brand/${product.category}`} className="hover:text-primary transition-colors capitalize">
           {product.category?.replace('-', ' ')}
         </Link>
@@ -58,11 +58,11 @@ export default function ProductDetailClient({ product }) {
         <span className="text-foreground font-medium" aria-current="page">{product.name}</span>
       </div>
 
-      <Section className="py-12 md:py-20" container={false}>
+      <Section className="pt-4 pb-16 md:pt-8 md:pb-24" container={false}>
          <div className="max-w-[1400px] mx-auto px-4 md:px-8">
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 xl:gap-24">
              {/* Images Gallery */}
-             <div className="space-y-6 lg:sticky lg:top-32 h-fit">
+             <div className="space-y-6 lg:sticky lg:top-36 h-fit">
                 <div className="relative group aspect-square md:aspect-[4/3] bg-white overflow-hidden rounded-2xl flex items-center justify-center p-8">
                   <LazyImage 
                     key={activeIndex}
@@ -125,10 +125,10 @@ export default function ProductDetailClient({ product }) {
              </div>
   
              {/* Details */}
-             <div className="space-y-10 py-4">
+             <div className="space-y-8 md:space-y-10 lg:py-4">
                <div>
                  <h3 className="text-primary font-medium text-sm mb-4 tracking-wide uppercase opacity-70">{product.brand}</h3>
-                 <h1 className="text-3xl md:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.1] mb-6">{product.name}</h1>
+                 <h1 className="text-3xl md:text-5xl xl:text-6xl font-medium tracking-tight leading-[1.1] mb-6 text-balance">{product.name}</h1>
                  {showPrice && product.price && (
                    <p className="text-2xl font-light text-foreground mb-6 opacity-90">
                      {formatPrice(product.price)}
@@ -137,16 +137,16 @@ export default function ProductDetailClient({ product }) {
                  <div className="h-px w-full bg-border" />
                </div>
   
-               <div className="prose prose-invert prose-lg text-muted-foreground leading-relaxed font-light">
+               <div className="prose prose-invert prose-lg max-w-[62ch] text-muted-foreground leading-relaxed font-light">
                  <p>{product.longDescription}</p>
                </div>
   
                {/* Specs */}
                <div className="border-t border-border pt-8">
                  <h4 className="font-medium text-lg text-foreground mb-6">Specifications</h4>
-                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2">
                    {(product.specifications || []).map((spec, idx) => (
-                     <div key={idx} className="pb-4 border-b border-border mx-2">
+                     <div key={idx} className="py-3 border-b border-border">
                        <dt className="text-xs uppercase tracking-wider font-medium text-muted-foreground mb-1 opacity-70">{spec.key === 'Category' ? 'Brand Category' : spec.key}</dt>
                        <dd className="text-base text-foreground font-medium">{spec.value}</dd>
                      </div>
@@ -155,21 +155,21 @@ export default function ProductDetailClient({ product }) {
                </div>
   
                {/* Actions */}
-               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                 <Button href="/contact" size="lg" className="rounded-full px-10 py-6 text-lg">Enquire Now</Button>
+               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 pt-4">
+                 <Button href="/contact" size="lg" className="rounded-full px-8 md:px-10 py-6 text-lg w-full sm:w-auto">Enquire Now</Button>
                  {product.catalogUrl && (
                    <Button 
                      href={product.catalogUrl} 
                      target="_blank" 
                      variant="outline" 
                      size="lg" 
-                     className="rounded-full px-10 py-6 text-lg flex items-center justify-center gap-2"
+                     className="rounded-full px-8 md:px-10 py-6 text-lg w-full sm:w-auto flex items-center justify-center gap-2"
                    >
                      <FileText size={20} />
                      Download Catalog
                    </Button>
                  )}
-                 <Button href="/contact" variant="outline" size="lg" className="rounded-full px-10 py-6 text-lg">Visit Showroom</Button>
+                 <Button href="/contact" variant="outline" size="lg" className="rounded-full px-8 md:px-10 py-6 text-lg w-full sm:w-auto">Visit Showroom</Button>
                </div>
              </div>
            </div>

@@ -120,7 +120,7 @@ function ProductListContent() {
   return (
     <div className="min-h-screen bg-background">
       {/* ── Hero header ──────────────────────────────────────────────── */}
-      <div className="pt-32 pb-10 text-center px-4">
+      <div className="pt-36 md:pt-44 pb-6 md:pb-8 text-center px-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">
           Cinema Focus
         </p>
@@ -133,8 +133,8 @@ function ProductListContent() {
       </div>
 
       {/* ── Categories (Normal Flow) ─────────────────────────────────── */}
-      <div className="max-w-7xl mt-10 mx-auto px-4 md:px-8 flex flex-col items-center gap-6">
-        <div className="flex overflow-x-auto scrollbar-hide touch-pan-x w-full gap-2 md:gap-4 py-2">
+      <div className="max-w-7xl mt-6 md:mt-8 mx-auto px-4 md:px-8 flex flex-col items-center gap-6">
+        <div className="flex overflow-x-auto scrollbar-hide touch-pan-x w-full gap-2 md:gap-4 pt-3 pb-5 px-1 [&>:first-child]:ml-auto [&>:last-child]:mr-auto">
           {filterTabs.map((tab) => (
             <button
               key={tab.key}
@@ -189,7 +189,7 @@ function ProductListContent() {
       <div
         ref={filtersRef}
         className={clsx(
-          'sticky top-[90px] md:top-[95px] z-40 transition-all duration-300 flex justify-center w-full',
+          'sticky top-[92px] lg:top-[112px] z-40 transition-all duration-300 flex justify-center w-full',
           filtersSticky ? 'px-4' : 'px-0'
         )}
       >
@@ -238,7 +238,7 @@ function ProductListContent() {
 
       {/* ── Product count ─────────────────────────────────────────────── */}
       {!loading && (
-        <div className="max-w-7xl mx-auto px-4 md:px-8 pt-6 pb-2">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4 pb-1">
           <p className="text-xs text-muted-foreground font-medium tracking-wide">
             {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
           </p>
@@ -246,22 +246,22 @@ function ProductListContent() {
       )}
 
       {/* ── Grid ─────────────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4 pb-32">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4 pb-24 md:pb-32">
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-5 sm:gap-x-4 md:gap-x-6 md:gap-y-8">
             {Array.from({ length: 8 }).map((_, i) => (
               <SkeletonCard key={i} />
             ))}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-5 sm:gap-x-4 md:gap-x-6 md:gap-y-8">
             {filteredProducts.map((product) => (
               <ProductCard key={product.slug} product={product} />
             ))}
           </div>
         ) : (
           /* Empty state */
-          <div className="flex flex-col items-center justify-center py-40 text-center gap-4">
+          <div className="flex flex-col items-center justify-center py-24 md:py-32 text-center gap-4">
             <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-2">
               <svg className="w-7 h-7 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
