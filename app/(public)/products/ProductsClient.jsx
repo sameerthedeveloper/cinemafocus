@@ -163,7 +163,7 @@ function ProductListContent({ initialProducts, initialCategories, initialNewLaun
                 ) : tab.key === 'new-arrivals' ? (
                   <svg className="w-8 h-8 text-foreground/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
                 ) : tab.imageSrc ? (
-                  <img src={tab.imageSrc} alt={tab.label} className="w-full h-full object-contain p-1" />
+                  <img src={tab.imageSrc} alt={tab.label || 'Brand'} className="w-full h-full object-contain p-1" />
                 ) : (
                   <div className="text-muted-foreground/30 font-bold text-lg uppercase select-none">{tab.label.substring(0, 2)}</div>
                 )}

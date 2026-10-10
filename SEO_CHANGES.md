@@ -96,3 +96,17 @@ It keeps a 5-minute in-memory index (3 GET calls per instance per 5 min) and **f
 - `NewsArticle` on press. `CollectionPage` + `ItemList` on `/products` and brand pages (duplicates/noindex products excluded).
 - No `FAQPage`: there is no FAQ route or content.
 - `scripts/validate-jsonld.mjs` (`npm run seo:validate`): run against a running build; checks parse, required fields, title/description/canonical, no keywords/geo meta, no aggregateRating, no UUID press URLs in the sitemap. (`.mjs`, not `.ts`, because the repo is JS.)
+
+## Phase 6: Rendering + links (no visual change)
+
+- **Server rendering**: verified by `curl` of the production build. Brand, product, press, contact, gallery, press list, about and home all carry their text in the raw HTML. `/products` was the exception: it fetched everything in `useEffect` and `useSearchParams` forced a spinner into the HTML. It is now a server page (`page.jsx`) that passes cached CMS data to the same client component (`ProductsClient.jsx`, markup unchanged); the raw HTML now contains all 169 product links. `/products?category=x` still loads client-side as before. The page now renders per request (reads `searchParams`), data is still cached 1h.
+- **Press detail** now server-rendered (see Phase 2).
+- **Links**: header, footer, cards, breadcrumbs already use `next/link`. Not changed: the brand filter tabs on `/products` are `<button>`s that call `router.push` (JS-only). Brand pages are still crawlable from the sitemap, home and footer. Converting them to `<Link>` changes the DOM element, so I left it for you to decide.
+- **Images**: alt fallbacks added in code for gallery / home gallery / brand tabs (`Cinema Focus installation`, `Brand`). Product and press images already fall back to the product name / title. Hero and product main image already `priority`; the rest lazy. Map iframes (`/contact`, home, `/location`) were already `loading="lazy"`.
+- **Preconnect**: now a real `<link rel="preconnect">` to the CloudFront origin only (`NEXT_PUBLIC_CDN_DOMAIN`, falling back to `d2x0o69dm3vdcd.cloudfront.net`). Supabase and unsplash removed. `images.unsplash.com` is still in `next.config.mjs` `remotePatterns` because `lib/seed-data.js` references it; harmless, remove with the seed data.
+- **Trailing slash**: Next default, `/x/` -> 308 `/x`. Canonicals have no trailing slash.
+- **404s**: real 404 status for unknown routes (verified `/foo`, `/products/nope`, `/brand/nope`, `/press/nope`); see Phase 2 gate.
+
+### Heading audit (fix via CMS, nothing changed in code)
+
+Every page has exactly one `<h1>`. Skipped levels (h1 -> h3 with no h2): `/gallery`, `/press`, `/products`, `/brand/*`, `/products/*`, `/press/*`. `/about` has H1 "Our Philosophy" (the CMS `philosophy.title`), so the page's H1 is not "About Cinema Focus". `/location` uses h2 for a tagline then h3 sections (fine). Home h1 is the hero slide title.

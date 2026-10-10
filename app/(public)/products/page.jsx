@@ -25,7 +25,10 @@ const cardFields = (p) => ({
   is_new_launch: p.is_new_launch,
 });
 
-export default async function ProductsPage() {
+export default async function ProductsPage({ searchParams }) {
+  // Reading searchParams renders per request (data is cached), which lets the client grid be
+  // server-rendered instead of falling back to a spinner until hydration.
+  const { category } = await searchParams;
   let products;
   let categories;
   let newLaunches;
@@ -57,7 +60,7 @@ export default async function ProductsPage() {
         />
       )}
       <ProductsClient
-        initialProducts={products?.map(cardFields)}
+        initialProducts={category ? undefined : products?.map(cardFields)}
         initialCategories={categories}
         initialNewLaunches={newLaunches}
       />

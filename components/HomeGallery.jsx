@@ -81,7 +81,7 @@ export default function HomeGallery({ projects }) {
           >
             <LazyImage 
               src={project.imageUrl} 
-              alt={project.title}
+              alt={project.title || 'Cinema Focus installation'}
               aspectRatio="aspect-video"
               containerClassName="rounded-2xl"
               className="transition-transform duration-1000 group-hover:scale-110" 
@@ -134,7 +134,7 @@ export default function HomeGallery({ projects }) {
                 <div className="relative w-full h-full">
                     <OptimizedImage 
                         src={displayedProjects[lightboxIndex].imageUrl} 
-                        alt={displayedProjects[lightboxIndex].title}
+                        alt={displayedProjects[lightboxIndex].title || 'Cinema Focus installation'}
                         fill
                         className="object-contain shadow-2xl rounded-sm"
                         sizes="90vw"

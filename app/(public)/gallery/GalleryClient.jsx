@@ -81,7 +81,7 @@ export default function GalleryClient({ projects }) {
               >
                 <img 
                   src={item.imageUrl} 
-                  alt={item.title} 
+                  alt={item.title || 'Cinema Focus installation'} 
                   loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   style={{ objectPosition: item.imagePosition || item.image_position || 'center' }}
@@ -143,7 +143,7 @@ export default function GalleryClient({ projects }) {
              >
                 <img 
                   src={projects[lightboxIndex].imageUrl} 
-                  alt={projects[lightboxIndex].title}
+                  alt={projects[lightboxIndex].title || 'Cinema Focus installation'}
                   className="max-w-full max-h-[85vh] object-contain shadow-2xl rounded-sm"
                 />
                 <div className="mt-6 text-center">
