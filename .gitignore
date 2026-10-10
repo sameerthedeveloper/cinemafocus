@@ -52,3 +52,6 @@ infra/.serverless
 
 # Alternate build output for verification builds
 .next-*/
+
+# SEO data-fix backups (contain CMS rows)
+seo-fix-backup-*.json
