@@ -53,13 +53,8 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // 0. Canonical host: www -> apex (301)
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'www.cinemafocus.in' }],
-        destination: 'https://cinemafocus.in/:path*',
-        statusCode: 301,
-      },
+      // www/apex canonicalisation is handled by the Vercel Domains setting, not here:
+      // an app-level rule loops with Vercel's own apex<->www redirect. Canonical host = https://cinemafocus.in
       // 1. WordPress legacy category redirect to brand
       {
         source: '/product-category/:slug',

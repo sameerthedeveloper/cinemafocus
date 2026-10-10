@@ -15,7 +15,7 @@ Living log. One section per phase.
 ## Phase 1: Config + redirects
 
 - Added `lib/site.js` exporting `SITE`, `BUSINESS`, `absoluteUrl()`. Used by metadata + JSON-LD only, never rendered as visible copy.
-- `next.config.mjs` `redirects()`: first rule, host `www.cinemafocus.in` -> `https://cinemafocus.in/:path*`, **301** (`statusCode: 301`; Next's `permanent: true` would emit 308).
+- **Removed later:** the app-level www -> apex rule looped with Vercel's apex -> www domain redirect (live site unreachable). www/apex redirect now lives only in Vercel Settings > Domains: `cinemafocus.in` primary (no redirect), `www.cinemafocus.in` redirects to apex.
 - Hosting note: in Vercel (Project > Settings > Domains) add both `cinemafocus.in` and `www.cinemafocus.in`; the app-level rule handles the redirect. Setting Vercel's own "Redirect to cinemafocus.in" on the www entry is equivalent and faster. DNS: `www` CNAME -> `cname.vercel-dns.com`.
 
 ### Hardcoded placeholders found (report only, NOT changed)

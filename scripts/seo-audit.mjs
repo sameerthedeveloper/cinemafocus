@@ -91,7 +91,8 @@ const www = await new Promise((resolve, reject) => {
     })
     .on('error', reject);
 });
-if (www.status !== 301 || www.location !== `${PROD}/about`) fail(`www redirect: ${www.status} ${www.location}`);
+// www -> apex is configured in the Vercel Domains setting, so it can only be checked against production
+if (base.includes('cinemafocus.in') && (www.status !== 301 && www.status !== 308 || www.location !== `${PROD}/about`)) fail(`www redirect: ${www.status} ${www.location}`);
 
 // ── private routes ───────────────────────────────────────────────────────
 for (const path of ['/admin/dashboard', '/admin/seo', '/portal/dashboard', '/portal/products']) {
