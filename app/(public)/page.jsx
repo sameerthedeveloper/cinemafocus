@@ -12,6 +12,8 @@ import {
   ContactSection
 } from '@/components/HomeSections';
 import { buildMetadata, HOME_TITLE } from '@/lib/metadata';
+import JsonLd from '@/components/JsonLd';
+import { webPageSchema } from '@/lib/schema';
 
 export async function generateMetadata() {
   let seo = null;
@@ -65,6 +67,7 @@ export default async function Home() {
 
   return (
     <div>
+      <JsonLd data={webPageSchema({ path: '/', name: HOME_TITLE, description: 'Hi-fi and home cinema showroom in Chennai.' })} />
       {/* Critical LCP Section - Rendered immediately without animation to minimize LCP delay */}
       <Hero
         {...normalizedHero}

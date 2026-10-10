@@ -1,3 +1,5 @@
+import JsonLd from '@/components/JsonLd';
+import { webPageSchema } from '@/lib/schema';
 import { getProjects } from '@/lib/cms';
 import GalleryClient from './GalleryClient';
 import { buildMetadata } from '@/lib/metadata';
@@ -10,5 +12,10 @@ export const metadata = buildMetadata({
 
 export default async function GalleryPage() {
   const projects = await getProjects();
-  return <GalleryClient projects={projects} />;
+  return (
+    <>
+      <JsonLd data={webPageSchema({ path: '/gallery', name: metadata.title.absolute, description: metadata.description })} />
+      <GalleryClient projects={projects} />
+    </>
+  );
 }

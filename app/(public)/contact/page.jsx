@@ -1,3 +1,5 @@
+import JsonLd from '@/components/JsonLd';
+import { webPageSchema } from '@/lib/schema';
 import { getFooter } from '@/lib/cms';
 import ContactClient from './ContactClient';
 import { buildMetadata } from '@/lib/metadata';
@@ -10,5 +12,10 @@ export const metadata = buildMetadata({
 
 export default async function ContactPage() {
   const info = await getFooter();
-  return <ContactClient initialInfo={info} />;
+  return (
+    <>
+      <JsonLd data={webPageSchema({ path: '/contact', name: metadata.title.absolute, description: metadata.description, type: 'ContactPage' })} />
+      <ContactClient initialInfo={info} />
+    </>
+  );
 }

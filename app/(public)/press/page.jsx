@@ -1,3 +1,5 @@
+import JsonLd from '@/components/JsonLd';
+import { webPageSchema } from '@/lib/schema';
 import { getPressReleases } from '@/lib/cms';
 import PressClient from './PressClient';
 import { buildMetadata } from '@/lib/metadata';
@@ -10,5 +12,10 @@ export const metadata = buildMetadata({
 
 export default async function PressPage() {
   const releases = await getPressReleases();
-  return <PressClient initialReleases={releases} />;
+  return (
+    <>
+      <JsonLd data={webPageSchema({ path: '/press', name: metadata.title.absolute, description: metadata.description })} />
+      <PressClient initialReleases={releases} />
+    </>
+  );
 }

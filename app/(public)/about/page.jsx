@@ -1,3 +1,5 @@
+import JsonLd from '@/components/JsonLd';
+import { webPageSchema } from '@/lib/schema';
 import React from 'react';
 import Section from '@/components/Section';
 import LazyImage from '@/components/LazyImage';
@@ -34,6 +36,7 @@ export default async function AboutPage() {
 
   return (
     <Reveal className="animate-fade-in pt-10">
+      <JsonLd data={webPageSchema({ path: '/about', name: metadata.title.absolute, description: metadata.description, type: 'AboutPage' })} />
       <Section className="py-20 text-center">
         <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-6">{title}</h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">

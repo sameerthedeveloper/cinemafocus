@@ -44,7 +44,12 @@ const nextConfig = {
   async headers() {
     // Crawler-facing files: cache at the edge for an hour, serve stale while revalidating
     const cache = [{ key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=86400' }];
-    return ['/sitemap.xml', '/robots.txt', '/llms.txt', '/llms-full.txt'].map((source) => ({ source, headers: cache }));
+    const rules = ['/sitemap.xml', '/robots.txt', '/llms.txt', '/llms-full.txt'].map((source) => ({ source, headers: cache }));
+    // Never index Vercel preview / non-production deployments
+    if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
+      rules.push({ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] });
+    }
+    return rules;
   },
   async redirects() {
     return [

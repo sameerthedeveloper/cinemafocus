@@ -1,3 +1,5 @@
+import JsonLd from '@/components/JsonLd';
+import { webPageSchema } from '@/lib/schema';
 import { CINEMA_FOCUS_GEO } from "@/lib/geoContext";
 import LocationBreadcrumb from "@/components/LocationBreadcrumb";
 import { buildMetadata } from '@/lib/metadata';
@@ -11,6 +13,7 @@ export const metadata = buildMetadata({
 export default function LocationPage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-6 md:p-12">
+      <JsonLd data={webPageSchema({ path: '/location', name: metadata.title.absolute, description: metadata.description })} />
       <div className="max-w-3xl mx-auto">
         <LocationBreadcrumb />
 
