@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyAccessToken, ACCESS_TOKEN_COOKIE, PORTAL_TOKEN_COOKIE, PORTAL_REFRESH_COOKIE, PORTAL_ROLES } from "@/lib/aws/cognito";
+import { seoRouteGate } from "@/lib/seoRoutes";
 
 // Route protection for the admin portal, based on the httpOnly Cognito ID-token cookie.
 async function updateSession(request) {
@@ -527,6 +528,16 @@ export async function proxy(request) {
       }
     } catch (e) {
       console.error("Proxy maintenance check failed, bypassing:", e);
+    }
+  }
+
+  // 3. Real 308 / 404 status codes for duplicate, legacy-UUID and unknown content URLs
+  if (isPublicRoute) {
+    try {
+      const gated = await seoRouteGate(request);
+      if (gated) return gated;
+    } catch (e) {
+      console.error("Proxy SEO route gate failed, bypassing:", e);
     }
   }
 

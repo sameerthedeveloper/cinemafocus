@@ -1,50 +1,38 @@
-import { getProducts, getCategories, getPressReleases } from '@/lib/cms';
+import { SITE } from '@/lib/site';
+import { getIndexableContent, lastModifiedOf, latestDate } from '@/lib/seo';
 
-const BASE_URL = 'https://cinemafocus.in';
+// Rebuilt at most hourly; matches the CMS cache window.
+export const revalidate = 3600;
 
-/**
- * Reusable helper to safely fetch database records and map them to standard sitemap objects.
- */
-async function fetchSitemapEntries(fetcher, pathPrefix, priority, key = 'slug') {
-  try {
-    const items = await fetcher();
-    if (!items || !Array.isArray(items)) return [];
-
-    return items.map((item) => ({
-      url: `${BASE_URL}${pathPrefix}/${item[key]}`,
-      lastModified: new Date(item.updatedAt || item.created_at || new Date()),
-      changeFrequency: 'weekly',
-      priority,
-    }));
-  } catch (error) {
-    console.error(`Error compiling sitemap entries for ${pathPrefix}:`, error);
-    return [];
-  }
-}
+const STATIC_ROUTES = ['/about', '/contact', '/gallery', '/location'];
 
 export default async function sitemap() {
-  // 1. Static Routes
-  const staticRoutes = [
-    '',
-    '/about',
-    '/contact',
-    '/gallery',
-    '/location',
-    '/press',
-    '/products'
-  ].map((route) => ({
-    url: `${BASE_URL}${route}`,
-    lastModified: new Date(),
-    changeFrequency: route === '/location' ? 'monthly' : 'daily',
-    priority: route === '' ? 1.0 : route === '/location' ? 0.9 : 0.8,
-  }));
+  let products = [];
+  let brands = [];
+  let releases = [];
+  try {
+    ({ products, brands, releases } = await getIndexableContent());
+  } catch (error) {
+    // Fail the request rather than publish a sitemap with no dynamic URLs;
+    // crawlers retry, and a thin sitemap can de-index pages.
+    console.error('Sitemap data fetch failed:', error);
+    throw error;
+  }
 
-  // 2. Fetch Dynamic Routes Concurrently to Optimize Server Response Time
-  const [productRoutes, categoryRoutes, pressRoutes] = await Promise.all([
-    fetchSitemapEntries(getProducts, '/products', 0.7),
-    fetchSitemapEntries(getCategories, '/brand', 0.6),
-    fetchSitemapEntries(getPressReleases, '/press', 0.5, 'id')
-  ]);
+  const entry = (path, lastModified) => ({
+    url: `${SITE.url}${path}`,
+    ...(lastModified ? { lastModified } : {}),
+  });
 
-  return [...staticRoutes, ...productRoutes, ...categoryRoutes, ...pressRoutes];
+  const newest = (items) => latestDate(...items.map((i) => lastModifiedOf(i)?.toISOString()));
+
+  return [
+    entry('', newest([...products, ...releases])),
+    ...STATIC_ROUTES.map((r) => entry(r)),
+    entry('/press', newest(releases)),
+    entry('/products', newest(products)),
+    ...brands.map((b) => entry(`/brand/${b.slug}`, lastModifiedOf(b))),
+    ...products.map((p) => entry(`/products/${p.slug}`, lastModifiedOf(p))),
+    ...releases.map((r) => entry(`/press/${r.slug}`, lastModifiedOf(r))),
+  ];
 }

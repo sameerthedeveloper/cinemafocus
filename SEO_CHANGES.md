@@ -49,3 +49,22 @@ Proposed minimal diffs (not applied):
 +<a href="mailto:info@cinemafocus.in" ...>info@cinemafocus.in</a>
 ```
 Also: the lorem-ipsum fallback block should be removed (empty releases should render nothing), and `/location` visible hours (Mon-Sat 10-19, Sun 11-17) and phone numbers come from `lib/geoContext.js` and **disagree** with the hours/phone you gave (Mon-Sat 11-20). Schema uses your values; reconcile `geoContext.js` yourself.
+
+## Phase 2: robots + sitemap
+
+- `app/robots.js`: `*` plus explicit blocks for GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-SearchBot, PerplexityBot, Google-Extended, Applebot-Extended, all with the same disallows (`/admin/`, `/portal/`, `/api/`, `/*?bypass=true`, `/*?offline=true`). Sitemap line points at `https://cinemafocus.in/sitemap.xml`. Non-production still returns `Disallow: /`.
+- Removed `public/robots.txt`. It shadowed `app/robots.js` (static file wins), so the dynamic rules never shipped.
+- `app/sitemap.js` rewritten: static routes + `/products` + brands with >= 1 indexable product + indexable products + press **by slug**. `lastModified` from real `updated_at` (old code read a non-existent `updatedAt`, so everything got "now"). Static pages with no real date omit `lastmod`; `/`, `/products`, `/press` use the newest child date. No `changefreq`/`priority`. `revalidate = 3600`.
+- Shared rules in `lib/seo.js` (`getIndexableContent`), reused by `llms-full.txt`.
+- Pagination: not needed. The AWS API returns full lists (no 1000-row cap). Revisit if the data layer moves back to Supabase.
+- `/faq` and `/guides` do not exist, so not in the sitemap.
+- `/press/<uuid>` -> `/press/<slug>` **308**. Press detail page split into server `page.jsx` + `PressDetailClient.jsx` (markup unchanged, now server-rendered instead of fetched in `useEffect`).
+
+### Real 308 / 404 status codes (`lib/seoRoutes.js` + `proxy.js`)
+
+`app/(public)/loading.jsx` streams the shell with HTTP 200 before a page can call `redirect()`/`notFound()`, so page-level calls only yield meta-refresh / soft-404. The proxy now resolves, for `/products/:slug`, `/press/:id`, `/brand/:slug` only:
+- press UUID -> 308 slug
+- product with `canonical_slug` -> 308 target
+- unknown / inactive product, unknown press, unknown brand -> real 404 (renders `app/not-found.jsx`)
+
+It keeps a 5-minute in-memory index (3 GET calls per instance per 5 min) and **fails open** if the API is down. Behaviour change worth knowing: unknown `/brand/<slug>` used to redirect to `/products`; it now 404s.
