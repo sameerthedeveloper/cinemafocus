@@ -10,6 +10,7 @@ import { clampDescription, HOME_TITLE } from "@/lib/metadata";
 import { preconnect } from "react-dom";
 import JsonLd from "@/components/JsonLd";
 import { siteGraph } from "@/lib/schema";
+import { getAeoGeoResolved } from "@/lib/aeoGeo";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -85,6 +86,7 @@ export default async function RootLayout({ children }) {
     ? `https://${process.env.NEXT_PUBLIC_CDN_DOMAIN}`
     : "https://d2x0o69dm3vdcd.cloudfront.net";
   preconnect(cdnOrigin);
+  const aeoGeo = await getAeoGeoResolved();
 
   let imageSettings = { imageOptimizationMode: 'upload' };
   try {
@@ -96,7 +98,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en" className="h-full">
       <head>
-        <JsonLd data={siteGraph()} />
+        <JsonLd data={siteGraph(aeoGeo.business, aeoGeo.aiSummary)} />
       </head>
       <body className={`${inter.variable} flex flex-col min-h-screen bg-background text-foreground antialiased selection:bg-black/10`}>
         <SiteSettingsProvider initialImageOptimizationMode={imageSettings?.imageOptimizationMode || 'upload'}>

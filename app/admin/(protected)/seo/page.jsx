@@ -11,6 +11,7 @@ import {
 import clsx from 'clsx';
 import { revalidateData } from '@/lib/actions';
 import ImageUpload from '@/components/ImageUpload';
+import AeoGeoPanel from '@/components/admin/AeoGeoPanel';
 
 export default function AdminSEOPage() {
   const [loading, setLoading] = useState(false);
@@ -19,7 +20,7 @@ export default function AdminSEOPage() {
   const supabase = createClient();
   
   // Segmented view state
-  const [activeTab, setActiveTab] = useState('sitewide'); // 'sitewide' | 'products'
+  const [activeTab, setActiveTab] = useState('sitewide'); // 'sitewide' | 'products' | 'aeo-geo'
   
   // Site-wide SEO Settings
   const [seo, setSeo] = useState({
@@ -229,7 +230,22 @@ export default function AdminSEOPage() {
           <Sparkles size={16} />
           Per-Product SEO
         </button>
+        <button
+          onClick={() => setActiveTab('aeo-geo')}
+          className={clsx(
+            "px-6 py-3 font-medium text-sm border-b-2 transition-all cursor-pointer flex items-center gap-2",
+            activeTab === 'aeo-geo'
+              ? 'border-primary text-primary font-semibold'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          )}
+        >
+          <Search size={16} />
+          AEO &amp; GEO
+        </button>
       </div>
+
+      {/* AEO & GEO TAB */}
+      {activeTab === 'aeo-geo' && <AeoGeoPanel />}
 
       {/* SITE WIDE TAB */}
       {activeTab === 'sitewide' && (

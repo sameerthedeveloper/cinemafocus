@@ -1,4 +1,5 @@
 import { SITE } from '@/lib/site';
+import { getAeoGeoResolved } from '@/lib/aeoGeo';
 import { getIndexableContent, lastModifiedOf, latestDate } from '@/lib/seo';
 
 // Rebuilt at most hourly; matches the CMS cache window.
@@ -10,8 +11,9 @@ export default async function sitemap() {
   let products = [];
   let brands = [];
   let releases = [];
+  let faqs = [];
   try {
-    ({ products, brands, releases } = await getIndexableContent());
+    [{ products, brands, releases }, { faqs }] = await Promise.all([getIndexableContent(), getAeoGeoResolved()]);
   } catch (error) {
     // Fail the request rather than publish a sitemap with no dynamic URLs;
     // crawlers retry, and a thin sitemap can de-index pages.
@@ -29,6 +31,7 @@ export default async function sitemap() {
   return [
     entry('', newest([...products, ...releases])),
     ...STATIC_ROUTES.map((r) => entry(r)),
+    ...(faqs.length ? [entry('/faq')] : []),
     entry('/press', newest(releases)),
     entry('/products', newest(products)),
     ...brands.map((b) => entry(`/brand/${b.slug}`, lastModifiedOf(b))),
