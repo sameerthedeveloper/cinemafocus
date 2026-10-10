@@ -41,6 +41,11 @@ const nextConfig = {
     // component manually apply the unoptimized prop based on the selected mode.
     unoptimized: true,
   },
+  async headers() {
+    // Crawler-facing files: cache at the edge for an hour, serve stale while revalidating
+    const cache = [{ key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=86400' }];
+    return ['/sitemap.xml', '/robots.txt', '/llms.txt', '/llms-full.txt'].map((source) => ({ source, headers: cache }));
+  },
   async redirects() {
     return [
       // 0. Canonical host: www -> apex (301)

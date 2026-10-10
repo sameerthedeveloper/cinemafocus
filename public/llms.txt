@@ -1,0 +1,40 @@
+# Cinema Focus
+
+> Hi-fi and home cinema showroom in Mylapore, Chennai, India. Browse and listen to high-end speakers, amplifiers, streamers, DACs and home cinema systems from the brands below.
+
+## Visit
+
+- Address: New Decor Towers, No. 71, Dr. Radhakrishnan Salai, Mylapore, Chennai 600004, Tamil Nadu, India
+- Phone: +91 98410 35821
+- Email: info@cinemafocus.in
+- Hours: Monday to Saturday, 11:00 to 20:00
+
+## Key pages
+
+- [Home](https://cinemafocus.in/): showroom overview
+- [Products](https://cinemafocus.in/products): full product catalogue
+- [About](https://cinemafocus.in/about): who we are
+- [Gallery](https://cinemafocus.in/gallery): installations
+- [Press Room](https://cinemafocus.in/press): news and launches
+- [Contact](https://cinemafocus.in/contact): enquiries
+- [Location](https://cinemafocus.in/location): directions and showroom details
+
+## Brands
+
+- [ATC](https://cinemafocus.in/brand/atc)
+- [Audio Vector](https://cinemafocus.in/brand/audio-vector)
+- [Aurender](https://cinemafocus.in/brand/aurender)
+- [Ferrum](https://cinemafocus.in/brand/ferrum)
+- [Hifirose](https://cinemafocus.in/brand/hifirose)
+- [KII](https://cinemafocus.in/brand/kii)
+- [Lumin](https://cinemafocus.in/brand/lumin)
+- [MJ Acoustics](https://cinemafocus.in/brand/mj-acoustics)
+- [Octave](https://cinemafocus.in/brand/octave)
+- [ORBID SOUND](https://cinemafocus.in/brand/stereo-line)
+- [ProAc](https://cinemafocus.in/brand/proac)
+- [SYSTEM AUDIO](https://cinemafocus.in/brand/system-audio)
+
+## Full catalogue
+
+- [llms-full.txt](https://cinemafocus.in/llms-full.txt): every brand and product with canonical URLs and one-line summaries
+- [Sitemap](https://cinemafocus.in/sitemap.xml)
