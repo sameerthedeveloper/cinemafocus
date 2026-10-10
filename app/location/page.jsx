@@ -3,6 +3,7 @@ import { webPageSchema } from '@/lib/schema';
 import { CINEMA_FOCUS_GEO } from "@/lib/geoContext";
 import LocationBreadcrumb from "@/components/LocationBreadcrumb";
 import { buildMetadata } from '@/lib/metadata';
+import { getIndexableContent } from '@/lib/seo';
 
 export const metadata = buildMetadata({
   title: 'Visit Our Hi-Fi Showroom in Mylapore, Chennai',
@@ -10,7 +11,15 @@ export const metadata = buildMetadata({
   path: '/location',
 });
 
-export default function LocationPage() {
+export default async function LocationPage() {
+  // Brands that actually have products in the catalogue
+  let brands = [];
+  try {
+    brands = (await getIndexableContent()).brands.map((b) => b.name);
+  } catch (e) {
+    console.error('Failed to load brands for /location:', e);
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-6 md:p-12">
       <JsonLd data={webPageSchema({ path: '/location', name: metadata.title.absolute, description: metadata.description })} />
@@ -94,16 +103,18 @@ export default function LocationPage() {
         </section>
 
         {/* Brands Section */}
-        <section className="mb-12">
-          <h3 className="text-2xl font-semibold mb-6">🎵 Premium Brands Stocked</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {["ATC", "PROAC", "Krell", "Octave", "Esoteric", "Perreaux", "MIT", "Van den Hul", "Earthquake", "Lumin"].map(brand => (
-              <div key={brand} className="bg-zinc-900/50 p-4 rounded border border-zinc-800 text-center hover:border-indigo-500/50 transition-colors">
-                {brand}
-              </div>
-            ))}
-          </div>
-        </section>
+        {brands.length > 0 && (
+          <section className="mb-12">
+            <h3 className="text-2xl font-semibold mb-6">🎵 Premium Brands Stocked</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {brands.map(brand => (
+                <div key={brand} className="bg-zinc-900/50 p-4 rounded border border-zinc-800 text-center hover:border-indigo-500/50 transition-colors">
+                  {brand}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Map Embed */}
         <section className="mt-16">
@@ -111,7 +122,7 @@ export default function LocationPage() {
           <div className="w-full h-96 bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800">
             <iframe
               title="Cinema Focus Location Map"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3887.023428473396!2d80.26990632346937!3d13.041498513020506!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a526f6e5e5e5e5d%3A0x5e5e5e5e5e5e5e5e!2sNew%20Decor%20Towers%2C%20Dr.%20Radhakrishnan%20Salai%2C%20Mylapore!5e0!3m2!1sen!2sin!4v1234567890"
+              src="https://maps.google.com/maps?q=Cinema%20Focus%2C%20Dr.%20Radhakrishnan%20Salai%2C%20Mylapore%2C%20Chennai%2C%20Tamil%20Nadu%20600004&t=&z=16&ie=UTF8&iwloc=&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0 }}
