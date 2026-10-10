@@ -124,18 +124,6 @@ export default function LocationPage() {
             Map shows approximate location of Cinema Focus in Mylapore, Chennai
           </p>
         </section>
-
-        {/* Rating Section */}
-        <section className="mt-12 bg-zinc-900/50 p-6 rounded-lg border border-zinc-800">
-          <h3 className="text-lg font-semibold mb-3">⭐ Customer Reviews</h3>
-          <div className="flex items-center gap-4">
-            <div className="text-4xl font-bold text-indigo-400">{CINEMA_FOCUS_GEO.rating}</div>
-            <div>
-              <p className="text-zinc-300">{CINEMA_FOCUS_GEO.reviews} verified reviews</p>
-              <p className="text-sm text-zinc-500">Trusted by audio enthusiasts across India</p>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   );
