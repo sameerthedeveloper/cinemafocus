@@ -56,10 +56,6 @@ export default function LocationPage() {
               <span className="font-medium">Monday – Saturday:</span>
               <span>{CINEMA_FOCUS_GEO.hours.weekday.open} – {CINEMA_FOCUS_GEO.hours.weekday.close}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Sunday:</span>
-              <span>{CINEMA_FOCUS_GEO.hours.sunday.open} – {CINEMA_FOCUS_GEO.hours.sunday.close}</span>
-            </div>
           </div>
         </section>
 
@@ -69,24 +65,6 @@ export default function LocationPage() {
             📞 Contact Us
           </h3>
           <div className="space-y-3">
-            <p>
-              <a
-                href={`tel:${CINEMA_FOCUS_GEO.phone}`}
-                className="text-indigo-400 hover:text-indigo-300 transition-colors"
-              >
-                {CINEMA_FOCUS_GEO.phone}
-              </a>
-              <span className="text-zinc-500 text-sm ml-2">(Main)</span>
-            </p>
-            <p>
-              <a
-                href={`tel:${CINEMA_FOCUS_GEO.phone_alt}`}
-                className="text-indigo-400 hover:text-indigo-300 transition-colors"
-              >
-                {CINEMA_FOCUS_GEO.phone_alt}
-              </a>
-              <span className="text-zinc-500 text-sm ml-2">(Alt)</span>
-            </p>
             <p>
               <a
                 href={`tel:${CINEMA_FOCUS_GEO.mobile}`}
