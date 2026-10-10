@@ -1,6 +1,8 @@
 import { getProduct, getProductSeo } from '@/lib/cms';
 import ProductDetailClient from './ProductDetailClient';
 import JsonLd from '@/components/JsonLd';
+import { permanentRedirect } from 'next/navigation';
+import { canonicalSlugOf, seoNoindex } from '@/lib/seo';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -22,6 +24,7 @@ export async function generateMetadata({ params }) {
   }
 
   const title = productSeo.title || product.name;
+  const noindex = seoNoindex(product) || !!canonicalSlugOf(product);
   const description = productSeo.description || product.shortDescription || product.longDescription?.substring(0, 160) || product.name;
   const keywords = productSeo.keywords || '';
 
@@ -29,6 +32,7 @@ export async function generateMetadata({ params }) {
     title,
     description,
     keywords,
+    ...(noindex ? { robots: { index: false, follow: true } } : {}),
     alternates: {
       canonical: `/products/${slug}`,
     },
@@ -58,6 +62,10 @@ export default async function ProductDetailPage({ params }) {
       </div>
     );
   }
+
+  // Duplicate listing -> permanent redirect to the canonical product (308)
+  const canonicalSlug = canonicalSlugOf(product);
+  if (canonicalSlug) permanentRedirect(`/products/${canonicalSlug}`);
 
   // Breadcrumb schema
   const breadcrumbSchema = {

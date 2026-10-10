@@ -25,7 +25,12 @@ export default function EditProductPage() {
     longDescription: '',
     featured: false,
     images: [],
-    specifications: [{ key: '', value: '' }]
+    specifications: [{ key: '', value: '' }],
+    seoTitle: '',
+    seoDescription: '',
+    canonicalSlug: '',
+    seoNoindex: false,
+    priceVerified: false
   });
 
   const [imageFiles, setImageFiles] = useState([]);
@@ -58,7 +63,12 @@ export default function EditProductPage() {
             longDescription: product.long_description || '',
             featured: product.featured || false,
             images: product.images || [],
-            specifications: product.specifications || [{ key: '', value: '' }]
+            specifications: product.specifications || [{ key: '', value: '' }],
+            seoTitle: product.seo_title || '',
+            seoDescription: product.seo_description || '',
+            canonicalSlug: product.canonical_slug || '',
+            seoNoindex: product.seo_noindex === true,
+            priceVerified: product.price_verified === true
           });
         } else {
           console.error("Product fetch error:", error);
@@ -158,6 +168,11 @@ export default function EditProductPage() {
         featured: formData.featured,
         images: finalImages.length > 0 ? finalImages : ['https://placehold.co/600x400?text=No+Image'],
         specifications: formData.specifications.filter(s => s.key && s.value),
+        seo_title: formData.seoTitle.trim() || null,
+        seo_description: formData.seoDescription.trim() || null,
+        canonical_slug: formData.canonicalSlug.trim() || null,
+        seo_noindex: formData.seoNoindex,
+        price_verified: formData.priceVerified,
         updated_at: new Date().toISOString()
       };
 
@@ -274,6 +289,31 @@ export default function EditProductPage() {
                <span className="font-medium">Click to upload new images</span>
                <span className="text-sm text-muted-foreground">{imageFiles.length} new file(s) selected</span>
             </label>
+          </div>
+        </div>
+
+        {/* Search & indexing (SEO) */}
+        <div className="bg-background p-6 rounded-2xl border border-border space-y-6">
+          <h2 className="text-xl font-medium">Search &amp; Indexing</h2>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">SEO Title <span className="text-xs font-normal text-muted-foreground ml-1">(Optional - max 60 characters)</span></label>
+            <input name="seoTitle" maxLength={70}value={formData.seoTitle} onChange={handleChange} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">SEO Description <span className="text-xs font-normal text-muted-foreground ml-1">(Optional - 120 to 160 characters)</span></label>
+            <textarea rows={2} name="seoDescription" maxLength={200} value={formData.seoDescription} onChange={handleChange} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Canonical Product Slug <span className="text-xs font-normal text-muted-foreground ml-1">(Only for duplicates: visitors and search engines are redirected to this product)</span></label>
+            <input name="canonicalSlug" value={formData.canonicalSlug} onChange={handleChange} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" />
+          </div>
+          <div className="flex items-center gap-3">
+            <input type="checkbox" id="seoNoindex" name="seoNoindex" checked={formData.seoNoindex} onChange={handleChange} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
+            <label htmlFor="seoNoindex" className="text-sm font-medium">Hide from search engines (noindex)</label>
+          </div>
+          <div className="flex items-center gap-3">
+            <input type="checkbox" id="priceVerified" name="priceVerified" checked={formData.priceVerified} onChange={handleChange} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
+            <label htmlFor="priceVerified" className="text-sm font-medium">Price is verified INR (allow price in Google rich results)</label>
           </div>
         </div>
 

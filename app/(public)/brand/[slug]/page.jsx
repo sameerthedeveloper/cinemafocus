@@ -2,10 +2,11 @@ import { getProducts, getCategories } from '@/lib/cms';
 import BrandClient from './BrandClient';
 import { redirect } from 'next/navigation';
 import JsonLd from '@/components/JsonLd';
+import { seoNoindex, isIndexableProduct } from '@/lib/seo';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const cats = await getCategories();
+  const [cats, brandProducts] = await Promise.all([getCategories(), getProducts({ category: slug })]);
   const category = cats.find(c => c.slug === slug);
 
   if (!category) {
@@ -14,10 +15,14 @@ export async function generateMetadata({ params }) {
     };
   }
 
+  // Thin / empty brand pages stay out of the index
+  const noindex = seoNoindex(category) || brandProducts.filter(isIndexableProduct).length === 0;
+
   return {
     title: `${category.name} — Cinema Focus`,
     description: `Browse the complete Cinema Focus ${category.name} collection — handpicked for the ultimate audio experience in Chennai, India.`,
     keywords: `${category.name}, ${category.name} speakers, premium audio Chennai, buy ${category.name} India`,
+    ...(noindex ? { robots: { index: false, follow: true } } : {}),
     alternates: {
       canonical: `/brand/${slug}`,
     },

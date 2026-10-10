@@ -68,3 +68,11 @@ Also: the lorem-ipsum fallback block should be removed (empty releases should re
 - unknown / inactive product, unknown press, unknown brand -> real 404 (renders `app/not-found.jsx`)
 
 It keeps a 5-minute in-memory index (3 GET calls per instance per 5 min) and **fails open** if the API is down. Behaviour change worth knowing: unknown `/brand/<slug>` used to redirect to `/products`; it now 404s.
+
+## Phase 3: Duplicates + indexing control
+
+- Data is DynamoDB (schemaless), so there is **no migration to run**. New optional attributes: products `canonical_slug`, `seo_noindex`, `seo_title`, `seo_description`, `price_verified`; categories (brands) `seo_noindex`, `seo_title`, `seo_description`; press `seo_title`, `seo_description`. `lib/supabase/migrations/002_seo_fields.sql` is provided only for the legacy Supabase schema.
+- Product page: `canonical_slug` -> 308 (proxy gate, with a `permanentRedirect` fallback in the page); `seo_noindex` -> `robots: noindex`.
+- Brand page: `noindex` when it has 0 indexable products (e.g. `aune-audio`) or `seo_noindex`; excluded from sitemap by the same rule.
+- Admin: new **Search & Indexing** card on Edit Product and extra inputs in the Brand modal. Both forms rebuild the saved object, so the fields are included in the save payload (otherwise an edit would wipe them). The "New product" form was not touched; set the fields after creating.
+- `SEO_DUPLICATES.md` written from live data.

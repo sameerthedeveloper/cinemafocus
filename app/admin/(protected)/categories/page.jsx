@@ -19,7 +19,10 @@ export default function AdminCategoriesPage() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    imageUrl: ''
+    imageUrl: '',
+    seoTitle: '',
+    seoDescription: '',
+    seoNoindex: false
   });
 
   useEffect(() => {
@@ -31,7 +34,10 @@ export default function AdminCategoriesPage() {
     setFormData({
       name: category.name,
       description: category.description || '',
-      imageUrl: category.image_url || ''
+      imageUrl: category.image_url || '',
+      seoTitle: category.seo_title || '',
+      seoDescription: category.seo_description || '',
+      seoNoindex: category.seo_noindex === true
     });
     setShowModal(true);
   };
@@ -42,7 +48,10 @@ export default function AdminCategoriesPage() {
     setFormData({
       name: '',
       description: '',
-      imageUrl: ''
+      imageUrl: '',
+      seoTitle: '',
+      seoDescription: '',
+      seoNoindex: false
     });
   };
 
@@ -122,7 +131,10 @@ export default function AdminCategoriesPage() {
           description: formData.description,
           image_url: formData.imageUrl || "https://placehold.co/600x400?text=No+Image",
           product_count: editingCategory.productCount || editingCategory.product_count || 0,
-          featured: editingCategory.featured || false
+          featured: editingCategory.featured || false,
+          seo_title: formData.seoTitle.trim() || null,
+          seo_description: formData.seoDescription.trim() || null,
+          seo_noindex: formData.seoNoindex
         };
 
         const { error } = await supabase
@@ -141,7 +153,10 @@ export default function AdminCategoriesPage() {
           description: formData.description,
           image_url: formData.imageUrl || "https://placehold.co/600x400?text=No+Image",
           product_count: 0,
-          featured: false
+          featured: false,
+          seo_title: formData.seoTitle.trim() || null,
+          seo_description: formData.seoDescription.trim() || null,
+          seo_noindex: formData.seoNoindex
         };
 
         const { error } = await supabase
@@ -178,7 +193,7 @@ export default function AdminCategoriesPage() {
         <button 
           onClick={() => {
             setEditingCategory(null);
-            setFormData({ name: '', description: '', imageUrl: '' });
+            setFormData({ name: '', description: '', imageUrl: '', seoTitle: '', seoDescription: '', seoNoindex: false });
             setShowModal(true);
           }}
           className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity w-full md:w-auto justify-center"
@@ -272,6 +287,21 @@ export default function AdminCategoriesPage() {
                    onUploadComplete={(url) => setFormData({...formData, imageUrl: url})}
                    initialImage={formData.imageUrl}
                  />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">SEO Title <span className="text-xs font-normal text-muted-foreground ml-1">(Optional - max 60 characters)</span></label>
+                <input maxLength={70} value={formData.seoTitle} onChange={(e) => setFormData({...formData, seoTitle: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">SEO Description <span className="text-xs font-normal text-muted-foreground ml-1">(Optional - 120 to 160 characters)</span></label>
+                <textarea rows={2} maxLength={200} value={formData.seoDescription} onChange={(e) => setFormData({...formData, seoDescription: e.target.value})} className="w-full p-3 bg-secondary/30 rounded-lg border border-border focus:border-primary outline-none" />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input type="checkbox" id="brandNoindex" checked={formData.seoNoindex} onChange={(e) => setFormData({...formData, seoNoindex: e.target.checked})} className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary" />
+                <label htmlFor="brandNoindex" className="text-sm font-medium">Hide this brand page from search engines (noindex)</label>
               </div>
 
               <div className="pt-4 flex justify-end gap-3">
