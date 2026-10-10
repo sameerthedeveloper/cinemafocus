@@ -5,7 +5,11 @@ import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
 import { getImageSettings } from "@/lib/getImageSettings";
 
 import { getSeo } from "@/lib/cms";
-import { getLocalBusinessSchema, getServiceAreaSchema } from "@/lib/structuredData";
+import { SITE, absoluteUrl } from "@/lib/site";
+import { clampDescription, HOME_TITLE } from "@/lib/metadata";
+import { preconnect } from "react-dom";
+import JsonLd from "@/components/JsonLd";
+import { siteGraph } from "@/lib/schema";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -25,51 +29,40 @@ export async function generateMetadata() {
     console.error("Failed to load site SEO settings:", e);
   }
 
-  const siteTitle = seoData?.siteTitle || "Cinema Focus";
-  const titleSuffix = seoData?.titleSuffix || "- Cinema Focus";
-  const description = seoData?.defaultDescription || "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Chennai, India. Explore our curated collection of speakers, subwoofers, amplifiers, and turntables.";
-  const keywords = seoData?.defaultKeywords || "home cinema, hi-fi audio, speakers, subwoofers, amplifiers, turntables, premium audio, Chennai, India, Cinema Focus";
-  const ogImage = seoData?.ogImage || "/images/og-image.jpg";
+  const description = clampDescription(
+    seoData?.defaultDescription,
+    "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Chennai, India. Explore our curated collection of speakers, subwoofers, amplifiers, and turntables."
+  );
+  const ogImage = seoData?.ogImage || SITE.defaultOgImage;
   const googleVerification = seoData?.googleVerification || "YOLdFRVvcOEOjjo66oERr9NlrwHPjUofprZheVZkajU";
 
   return {
-    metadataBase: new URL("https://cinemafocus.in"),
+    metadataBase: new URL(SITE.url),
     title: {
-      default: `${siteTitle} - Premium Audio & Home Cinema Systems`,
-      template: `%s ${titleSuffix}`
+      default: HOME_TITLE,
+      template: `%s | ${SITE.name}`,
     },
     description,
-    keywords,
-    alternates: {
-      canonical: "/",
-    },
     openGraph: {
-      title: `${siteTitle} | Ultimate Audio & Visual Experiences`,
+      title: HOME_TITLE,
       description,
-      url: "https://cinemafocus.in",
-      siteName: siteTitle,
-      locale: "en_US",
+      siteName: SITE.name,
+      locale: SITE.locale,
       type: "website",
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: `${siteTitle} - Premium Home Cinema & Audio`,
-        },
-      ],
+      images: [{ url: absoluteUrl(ogImage), width: 1200, height: 630, alt: HOME_TITLE }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${siteTitle} | Ultimate Audio & Visual Experiences`,
+      title: HOME_TITLE,
       description,
-      site: "@cinemafocus",
-      images: [ogImage],
+      site: SITE.twitter,
+      creator: SITE.twitter,
+      images: [absoluteUrl(ogImage)],
     },
     appleWebApp: {
       capable: true,
       statusBarStyle: "black-translucent",
-      title: siteTitle,
+      title: SITE.name,
     },
     icons: {
       icon: [
@@ -83,21 +76,16 @@ export async function generateMetadata() {
     verification: {
       google: googleVerification,
     },
-    other: {
-      "dns-prefetch": "https://xdvzchxtbwfdmlxhnzpo.supabase.co",
-      "preconnect": [
-        "https://xdvzchxtbwfdmlxhnzpo.supabase.co",
-        "https://images.unsplash.com"
-      ],
-      "geo.position": "13.0415;80.2720",
-      "ICBM": "13.0415, 80.2720",
-      "geo.placename": "Mylapore, Chennai, Tamil Nadu, India",
-      "geo.region": "IN-TN"
-    }
   };
 }
 
 export default async function RootLayout({ children }) {
+  // Only origins that actually serve page assets (images are on CloudFront)
+  const cdnOrigin = process.env.NEXT_PUBLIC_CDN_DOMAIN
+    ? `https://${process.env.NEXT_PUBLIC_CDN_DOMAIN}`
+    : "https://d2x0o69dm3vdcd.cloudfront.net";
+  preconnect(cdnOrigin);
+
   let imageSettings = { imageOptimizationMode: 'upload' };
   try {
     imageSettings = await getImageSettings();
@@ -108,18 +96,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en" className="h-full">
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(getLocalBusinessSchema())
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(getServiceAreaSchema())
-          }}
-        />
+        <JsonLd data={siteGraph()} />
       </head>
       <body className={`${inter.variable} flex flex-col min-h-screen bg-background text-foreground antialiased selection:bg-black/10`}>
         <SiteSettingsProvider initialImageOptimizationMode={imageSettings?.imageOptimizationMode || 'upload'}>

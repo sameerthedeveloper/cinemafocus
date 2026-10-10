@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import Link from 'next/link';
-import { getHero } from '@/lib/cms';
+import { getHero, getSeo } from '@/lib/cms';
 import Hero from '@/components/Hero';
 import Reveal from '@/components/Reveal';
 import { 
@@ -11,61 +11,26 @@ import {
   GallerySection,
   ContactSection
 } from '@/components/HomeSections';
-import JsonLd from '@/components/JsonLd';
+import { buildMetadata, HOME_TITLE } from '@/lib/metadata';
+
+export async function generateMetadata() {
+  let seo = null;
+  try {
+    seo = await getSeo();
+  } catch (e) {
+    console.error('Failed to load site SEO settings:', e);
+  }
+  return buildMetadata({
+    title: HOME_TITLE,
+    description:
+      seo?.defaultDescription ||
+      'Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Chennai, India. Explore our curated collection of speakers, subwoofers, amplifiers, and turntables.',
+    path: '/',
+    image: seo?.ogImage,
+  });
+}
 
 export default async function Home() {
-  const businessSchema = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "name": "Cinema Focus",
-    "image": "https://www.cinemafocus.in/logo.svg",
-    "description": "Cinema Focus delivers reference-class Home Cinema & Hi-Fi audio systems in Chennai, India.",
-    "@id": "https://www.cinemafocus.in/#localbusiness",
-    "url": "https://www.cinemafocus.in",
-    "telephone": "+919841035821",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "New Decor Towers, 71 Dr. Radhakrishnan Salai, Mylapore",
-      "addressLocality": "Chennai",
-      "postalCode": "600004",
-      "addressCountry": "IN"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": 13.0401,
-      "longitude": 80.2662
-    },
-    "openingHoursSpecification": {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Sunday"
-      ],
-      "opens": "09:00",
-      "closes": "18:00"
-    }
-  };
-
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Cinema Focus",
-    "alternateName": ["CinemaFocus", "Cinema Focus India"],
-    "url": "https://cinemafocus.in",
-    "logo": "https://cinemafocus.in/favico.png"
-  };
-
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Cinema Focus",
-    "url": "https://cinemafocus.in",
-    "logo": "https://cinemafocus.in/favico.png"
-  };
-
   // ONLY fetch critical LCP data upfront to minimize server response time
   const heroData = await getHero();
 
@@ -100,9 +65,6 @@ export default async function Home() {
 
   return (
     <div>
-      <JsonLd data={businessSchema} />
-      <JsonLd data={websiteSchema} />
-      <JsonLd data={organizationSchema} />
       {/* Critical LCP Section - Rendered immediately without animation to minimize LCP delay */}
       <Hero
         {...normalizedHero}

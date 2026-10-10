@@ -3,12 +3,13 @@ import Section from '@/components/Section';
 import LazyImage from '@/components/LazyImage';
 import { getPhilosophy } from '@/lib/cms';
 import Reveal from '@/components/Reveal';
+import { buildMetadata } from '@/lib/metadata';
 
-export const metadata = {
-  title: "About",
-  description: "We are more than just a retailer — we are a destination for those who seek to experience music and film exactly as the artist intended. Visit our showroom in Chennai, India.",
-  keywords: "about Cinema Focus, premium audio showroom, hi-fi retailer Chennai, home cinema specialist",
-};
+export const metadata = buildMetadata({
+  title: 'About Cinema Focus | Hi-Fi & Home Cinema, Chennai',
+  description: 'We are more than just a retailer: a destination for those who seek to experience music and film exactly as the artist intended. Visit our showroom in Chennai, India.',
+  path: '/about',
+});
 
 export default async function AboutPage() {
   const data = await getPhilosophy();

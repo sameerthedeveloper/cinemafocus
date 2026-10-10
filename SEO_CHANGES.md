@@ -76,3 +76,23 @@ It keeps a 5-minute in-memory index (3 GET calls per instance per 5 min) and **f
 - Brand page: `noindex` when it has 0 indexable products (e.g. `aune-audio`) or `seo_noindex`; excluded from sitemap by the same rule.
 - Admin: new **Search & Indexing** card on Edit Product and extra inputs in the Brand modal. Both forms rebuild the saved object, so the fields are included in the save payload (otherwise an edit would wipe them). The "New product" form was not touched; set the fields after creating.
 - `SEO_DUPLICATES.md` written from live data.
+
+## Phase 4: Metadata
+
+- `lib/metadata.js` (`buildMetadata`, `pickTitle`, `clampDescription`): absolute apex canonical, Open Graph, Twitter `summary_large_image` + `@cinemafocus`. Titles <= 60 chars (shorter variants tried before truncating), descriptions 120-160 (long copy trimmed; short copy extended with the long description, then a location tag line).
+- Applied to: `/`, `/about`, `/contact`, `/gallery`, `/location`, `/press`, `/press/[slug]`, `/products`, `/products/[slug]`, `/brand/[slug]`. Templates as specified: Home `Hi-Fi & Home Cinema Showroom in Chennai | Cinema Focus`; Brand `{Brand} in India | Buy {Brand} at Cinema Focus, Chennai`; Product `{Name} | {Brand} | Cinema Focus Chennai`; Press `{Headline} | Cinema Focus Press Room`.
+- CMS overrides honoured (`seo_title`, `seo_description` on products, brands, press). Products also still honour the older `product_seo` setting by slug. There is no `pages` table, so static pages use code defaults.
+- Removed: `keywords` (layout, product, brand, static pages), `geo.*`, `ICBM`, the fake `<meta name="preconnect">`/`dns-prefetch` entries, root-level `alternates.canonical: "/"` (it was inherited by every page without its own canonical), layout-level `og:url`.
+- Kept: theme-color, Google verification, apple web app tags, icons.
+- Fixed: default OG image pointed at `/images/og-image.jpg`, which **does not exist**; now `/images/default-og.jpg`.
+- `noindex` added to `/admin` (new `app/admin/layout.jsx`) and `/soon`. `/portal` and admin login already had it. `/launch/[slug]` countdown pages are left as they were.
+
+## Phase 5: Structured data
+
+- `components/JsonLd.jsx` escapes `<` as `<`. Builders in `lib/schema.js`.
+- Root layout: one `@graph` with `WebSite` (`#website`) + `ElectronicsStore`/`LocalBusiness` (`#org`): your NAP, geo, Mon-Sat 11:00-20:00, `areaServed` India, logo, image, `sameAs` = `https://twitter.com/cinemafocus`. Replaced two old blocks (and three on the home page) that had wrong hours/geo, `www.` URLs and an invented `priceRange`. `lib/structuredData.js` deleted.
+- `Product`: name, brand, description, images, sku (`sku` field, else the DB `productId`), url, `additionalProperty` from specifications. **`offers` only when the product has `price_verified = true` and a price > 0** (new checkbox in the admin). No product has it yet, so none emit offers. Reason: prices are in mixed currencies (e.g. SCM12i Pro 2,400 vs LUMIN L2 382,000). Never `aggregateRating`/`review`; the 4.3 / 72 reviews in `geoContext.js` are deliberately not used.
+- `BreadcrumbList` on brand/product/press/products. Product crumbs link the brand only when a brand page exists.
+- `NewsArticle` on press. `CollectionPage` + `ItemList` on `/products` and brand pages (duplicates/noindex products excluded).
+- No `FAQPage`: there is no FAQ route or content.
+- `scripts/validate-jsonld.mjs` (`npm run seo:validate`): run against a running build; checks parse, required fields, title/description/canonical, no keywords/geo meta, no aggregateRating, no UUID press URLs in the sitemap. (`.mjs`, not `.ts`, because the repo is JS.)

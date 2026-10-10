@@ -1,18 +1,12 @@
 import { CINEMA_FOCUS_GEO } from "@/lib/geoContext";
 import LocationBreadcrumb from "@/components/LocationBreadcrumb";
+import { buildMetadata } from '@/lib/metadata';
 
-export const metadata = {
-  title: `Cinema Focus Showroom | ${CINEMA_FOCUS_GEO.locality}, ${CINEMA_FOCUS_GEO.city}`,
-  description: `Visit Cinema Focus, luxury audio showroom in ${CINEMA_FOCUS_GEO.city}. German & Danish high-end speakers. Open ${CINEMA_FOCUS_GEO.hours.weekday.open}–${CINEMA_FOCUS_GEO.hours.weekday.close}. Address: ${CINEMA_FOCUS_GEO.street_address}, ${CINEMA_FOCUS_GEO.city}.`,
-  keywords: "Cinema Focus showroom, audio showroom Chennai, luxury speakers Mylapore, high-end audio showroom",
-  openGraph: {
-    type: "website",
-    url: "https://cinemafocus.in/location",
-    locale: "en_IN",
-    title: `Visit Cinema Focus | ${CINEMA_FOCUS_GEO.city}`,
-    description: `Luxury audio showroom in ${CINEMA_FOCUS_GEO.city}. German & Danish high-end audio equipment.`,
-  },
-};
+export const metadata = buildMetadata({
+  title: 'Visit Our Hi-Fi Showroom in Mylapore, Chennai',
+  description: `Visit Cinema Focus, luxury audio showroom in ${CINEMA_FOCUS_GEO.city}. German & Danish high-end speakers. Address: ${CINEMA_FOCUS_GEO.street_address}, ${CINEMA_FOCUS_GEO.city}.`,
+  path: '/location',
+});
 
 export default function LocationPage() {
   return (

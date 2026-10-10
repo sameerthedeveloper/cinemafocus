@@ -1,95 +1,77 @@
 import { getProducts, getCategories } from '@/lib/cms';
 import BrandClient from './BrandClient';
-import { redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import JsonLd from '@/components/JsonLd';
-import { seoNoindex, isIndexableProduct } from '@/lib/seo';
+import { seoNoindex, seoTitle, seoDescription, isIndexableProduct } from '@/lib/seo';
+import { buildMetadata, pickTitle } from '@/lib/metadata';
+import { breadcrumbSchema, collectionSchema } from '@/lib/schema';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const [cats, brandProducts] = await Promise.all([getCategories(), getProducts({ category: slug })]);
-  const category = cats.find(c => c.slug === slug);
+  const [cats, products] = await Promise.all([getCategories(), getProducts({ category: slug })]);
+  const category = cats.find((c) => c.slug === slug);
 
   if (!category) {
-    return {
-      title: 'Brand Not Found',
-    };
+    return { title: 'Brand Not Found', robots: { index: false, follow: false } };
   }
 
-  // Thin / empty brand pages stay out of the index
-  const noindex = seoNoindex(category) || brandProducts.filter(isIndexableProduct).length === 0;
+  const name = category.name;
+  const title =
+    seoTitle(category) ||
+    pickTitle(
+      `${name} in India | Buy ${name} at Cinema Focus, Chennai`,
+      `${name} in India | Buy at Cinema Focus, Chennai`,
+      `${name} in India | Cinema Focus Chennai`,
+      `${name} | Cinema Focus`
+    );
+  const description =
+    seoDescription(category) ||
+    `Browse the Cinema Focus ${name} collection in India. Hear ${name} at our Mylapore, Chennai showroom, with expert advice and installation.`;
 
-  return {
-    title: `${category.name} — Cinema Focus`,
-    description: `Browse the complete Cinema Focus ${category.name} collection — handpicked for the ultimate audio experience in Chennai, India.`,
-    keywords: `${category.name}, ${category.name} speakers, premium audio Chennai, buy ${category.name} India`,
-    ...(noindex ? { robots: { index: false, follow: true } } : {}),
-    alternates: {
-      canonical: `/brand/${slug}`,
-    },
-    openGraph: {
-      title: `${category.name} — Cinema Focus`,
-      description: `Browse the complete Cinema Focus ${category.name} collection — handpicked for the ultimate audio experience in Chennai, India.`,
-      url: `https://cinemafocus.in/brand/${slug}`,
-    }
-  };
+  // Thin / empty brand pages stay out of the index
+  const noindex = seoNoindex(category) || products.filter(isIndexableProduct).length === 0;
+
+  return buildMetadata({
+    title,
+    description,
+    path: `/brand/${slug}`,
+    image: category.imageUrl || category.image_url,
+    imageAlt: name,
+    noindex,
+  });
 }
 
 export default async function BrandPage({ params }) {
   const { slug } = await params;
-  
+
   const [cats, products] = await Promise.all([
     getCategories(),
-    getProducts({ category: slug })
+    getProducts({ category: slug }),
   ]);
 
-  const activeCat = cats.find(c => c.slug === slug);
+  const activeCat = cats.find((c) => c.slug === slug);
 
-  if (!activeCat) {
-    redirect('/products');
-  }
+  if (!activeCat) notFound();
 
-  // Breadcrumb schema
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://cinemafocus.in/"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Brands",
-        "item": "https://cinemafocus.in/products"
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": activeCat.name,
-        "item": `https://cinemafocus.in/brand/${slug}`
-      }
-    ]
-  };
-
-  // ItemList schema (CollectionPage)
-  const itemListSchema = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "itemListElement": products.map((prod, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "url": `https://cinemafocus.in/products/${prod.slug}`,
-      "name": prod.name
-    }))
-  };
+  const listed = products.filter(isIndexableProduct);
 
   return (
     <>
-      <JsonLd data={breadcrumbSchema} />
-      <JsonLd data={itemListSchema} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: 'Products', path: '/products' },
+          { name: activeCat.name, path: `/brand/${slug}` },
+        ])}
+      />
+      <JsonLd
+        data={collectionSchema({
+          path: `/brand/${slug}`,
+          name: `${activeCat.name} at Cinema Focus`,
+          description: activeCat.description,
+          items: listed,
+        })}
+      />
       <BrandClient category={activeCat} products={products} />
     </>
   );

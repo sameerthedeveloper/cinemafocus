@@ -1,134 +1,89 @@
-import { getProduct, getProductSeo } from '@/lib/cms';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { getProduct, getProductSeo, getCategories } from '@/lib/cms';
 import ProductDetailClient from './ProductDetailClient';
 import JsonLd from '@/components/JsonLd';
-import { permanentRedirect } from 'next/navigation';
-import { canonicalSlugOf, seoNoindex } from '@/lib/seo';
+import { canonicalSlugOf, seoNoindex, seoTitle, seoDescription } from '@/lib/seo';
+import { buildMetadata, pickTitle } from '@/lib/metadata';
+import { breadcrumbSchema, productSchema } from '@/lib/schema';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const product = await getProduct(slug);
 
   if (!product) {
-    return {
-      title: 'Product Not Found',
-    };
+    return { title: 'Product Not Found', robots: { index: false, follow: false } };
   }
 
-  // Load custom SEO overrides
-  let productSeo = {};
+  // Legacy per-slug overrides from the `product_seo` setting
+  let legacySeo = {};
   try {
     const seoData = await getProductSeo();
-    productSeo = seoData?.[slug] || {};
+    legacySeo = seoData?.[slug] || {};
   } catch (e) {
-    console.error("Failed to load product SEO overrides:", e);
+    console.error('Failed to load product SEO overrides:', e);
   }
 
-  const title = productSeo.title || product.name;
-  const noindex = seoNoindex(product) || !!canonicalSlugOf(product);
-  const description = productSeo.description || product.shortDescription || product.longDescription?.substring(0, 160) || product.name;
-  const keywords = productSeo.keywords || '';
+  const brand = product.brand || '';
+  const title =
+    seoTitle(product) ||
+    legacySeo.title ||
+    pickTitle(
+      [product.name, brand, 'Cinema Focus Chennai'].filter(Boolean).join(' | '),
+      [product.name, brand, 'Cinema Focus'].filter(Boolean).join(' | '),
+      [product.name, 'Cinema Focus'].join(' | '),
+      product.name
+    );
+  const description =
+    seoDescription(product) ||
+    legacySeo.description ||
+    product.shortDescription ||
+    product.longDescription ||
+    `${product.name}${brand ? ` by ${brand}` : ''} at Cinema Focus, Chennai.`;
 
-  return {
+  const noindex = seoNoindex(product) || !!canonicalSlugOf(product);
+
+  return buildMetadata({
     title,
     description,
-    keywords,
-    ...(noindex ? { robots: { index: false, follow: true } } : {}),
-    alternates: {
-      canonical: `/products/${slug}`,
-    },
-    openGraph: {
-      title: `${title} - Cinema Focus`,
-      description,
-      url: `https://cinemafocus.in/products/${slug}`,
-      images: product.images?.[0] ? [{ url: product.images[0] }] : [],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${title} - Cinema Focus`,
-      description,
-    }
-  };
+    path: `/products/${slug}`,
+    image: product.images?.[0],
+    imageAlt: product.name,
+    noindex,
+    extraDescriptions: [product.longDescription],
+  });
 }
 
 export default async function ProductDetailPage({ params }) {
   const { slug } = await params;
   const product = await getProduct(slug);
 
-  if (!product) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center">
-        <h2 className="text-2xl font-serif mb-4">Product Not Found</h2>
-        <a href="/products" className="text-primary hover:underline">Back to Products</a>
-      </div>
-    );
-  }
+  if (!product) notFound();
 
   // Duplicate listing -> permanent redirect to the canonical product (308)
   const canonicalSlug = canonicalSlugOf(product);
   if (canonicalSlug) permanentRedirect(`/products/${canonicalSlug}`);
 
-  // Breadcrumb schema
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://cinemafocus.in/"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Products",
-        "item": "https://cinemafocus.in/products"
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": product.brand || product.category || "Brand",
-        "item": `https://cinemafocus.in/brand/${product.category || 'all'}`
-      },
-      {
-        "@type": "ListItem",
-        "position": 4,
-        "name": product.name,
-        "item": `https://cinemafocus.in/products/${product.slug}`
-      }
-    ]
-  };
+  // Link the brand crumb only when the brand page exists
+  let brandCrumb = null;
+  try {
+    const cats = await getCategories();
+    const cat = cats.find((c) => c.slug === product.category);
+    if (cat) brandCrumb = { name: cat.name, path: `/brand/${cat.slug}` };
+  } catch (e) {
+    console.error('Failed to load categories for breadcrumb:', e);
+  }
 
-  // Dynamic Product JSON-LD structured data
-  const productSchema = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": product.name,
-    "image": product.images || [],
-    "description": product.shortDescription || product.longDescription || product.name,
-    "sku": product.id || product.slug,
-    "brand": {
-      "@type": "Brand",
-      "name": product.brand || "Cinema Focus"
-    },
-    "offers": {
-      "@type": "Offer",
-      "url": `https://cinemafocus.in/products/${product.slug}`,
-      "priceCurrency": "INR",
-      "price": product.price || 0,
-      "availability": "https://schema.org/InStock",
-      "itemCondition": "https://schema.org/NewCondition",
-      "seller": {
-        "@type": "Organization",
-        "name": "Cinema Focus"
-      }
-    }
-  };
+  const crumbs = [
+    { name: 'Home', path: '/' },
+    { name: 'Products', path: '/products' },
+    ...(brandCrumb ? [brandCrumb] : []),
+    { name: product.name, path: `/products/${product.slug}` },
+  ];
 
   return (
     <>
-      <JsonLd data={breadcrumbSchema} />
-      <JsonLd data={productSchema} />
+      <JsonLd data={breadcrumbSchema(crumbs)} />
+      <JsonLd data={productSchema(product)} />
       <ProductDetailClient product={product} />
     </>
   );
