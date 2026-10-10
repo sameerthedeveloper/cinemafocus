@@ -146,3 +146,13 @@ Every page has exactly one `<h1>`. Skipped levels (h1 -> h3 with no h2): `/galle
 9. Reconcile `lib/geoContext.js` (hours, phones, reviews block) with the real details.
 10. Hosting: add the `www` domain redirect (Phase 1), set `INDEXNOW_KEY`, and verify `NEXT_PUBLIC_CDN_DOMAIN` is set so image preconnect hits the right origin.
 11. Re-run `node scripts/generate-llms-txt.mjs` after brand changes.
+
+## Verification
+
+- `npm run lint`: 43 errors / 69 warnings, all pre-existing (baseline was 44 errors before my changes; none new). `npm run build`: passes. There is no `tsc` step (JS repo).
+- `npm run seo:validate`: passes against the production build.
+- `curl` of `/`, `/brand/atc`, `/products/a20`, `/press/atc-launch`: title, absolute apex canonical and JSON-LD all present in raw HTML.
+- Sitemap: 0 UUID URLs, no flagged duplicates (none flagged yet), real `lastmod`.
+- Status codes: `www` -> apex 301 (verified with a `Host` header), press UUID -> 308 slug, unknown product/brand/press -> 404, `/x/` -> 308 `/x`.
+- Screenshots (Playwright, 1440px full page, original commit `5c45da8` vs. now): `/brand/atc`, `/products`, `/press/atc-launch`, `/contact` pixel-identical (contact: sub-threshold antialiasing only). Home differs only by the auto-scrolling brand marquee offset (animation timing).
+- Found while comparing: product-page thumbnails could stay invisible. `LazyImage` reset its "loaded" state after hydration even when the image had already loaded (the preconnect makes this more likely). Fixed in `components/LazyImage.jsx` (no look change; re-verified thumbnails render).

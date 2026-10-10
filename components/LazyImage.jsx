@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import OptimizedImage from './OptimizedImage';
 import clsx from 'clsx';
 
@@ -27,19 +27,31 @@ const LazyImage = ({
   const [isLoaded, setIsLoaded] = useState(priority);
   const [hasError, setHasError] = useState(false);
 
-  // Reset states when src changes
+  // Reset states when src changes (not on first mount: the server-rendered <img> may
+  // already have finished loading before hydration, and its load event is then never replayed)
+  const isFirstRun = useRef(true);
   useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
     if (!priority) {
       setIsLoaded(false);
       setHasError(false);
     }
   }, [src, priority]);
 
+  // Pick up an image that finished loading before React attached onLoad
+  const markIfAlreadyLoaded = (el) => {
+    const img = el?.querySelector('img');
+    if (img && img.complete && img.naturalWidth > 0) setIsLoaded(true);
+  };
+
   // Handle fallback if src is missing
   const imageSrc = src || '/images/placeholder.svg';
 
   return (
-    <div className={clsx(
+    <div ref={markIfAlreadyLoaded} className={clsx(
       "relative overflow-hidden bg-secondary/20", 
       aspectRatio,
       containerClassName
