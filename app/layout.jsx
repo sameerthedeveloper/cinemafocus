@@ -1,4 +1,4 @@
-import { Inter } from 'next/font/google';
+import { Instrument_Serif, Hanken_Grotesk } from 'next/font/google';
 import "./globals.css";
 // Root Layout base
 import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
@@ -12,10 +12,18 @@ import JsonLd from "@/components/JsonLd";
 import { siteGraph } from "@/lib/schema";
 import { getAeoGeoResolved } from "@/lib/aeoGeo";
 
-const inter = Inter({
+const display = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-display',
+});
+
+const body = Hanken_Grotesk({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-body',
 });
 
 export const viewport = {
@@ -100,7 +108,7 @@ export default async function RootLayout({ children }) {
       <head>
         <JsonLd data={siteGraph(aeoGeo.business, aeoGeo.aiSummary)} />
       </head>
-      <body className={`${inter.variable} flex flex-col min-h-screen bg-background text-foreground antialiased selection:bg-black/10`}>
+      <body className={`${display.variable} ${body.variable} flex flex-col min-h-screen bg-background text-foreground antialiased selection:bg-black/10`}>
         <SiteSettingsProvider initialImageOptimizationMode={imageSettings?.imageOptimizationMode || 'upload'}>
           {children}
         </SiteSettingsProvider>

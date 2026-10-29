@@ -1,32 +1,33 @@
 /* Admin / portal design tokens — Apple-style: SF type, frosted glass, soft large radii,
    layered shadows, spring easing. Scoped to .admin-shell so the public site is unaffected. */
 .admin-shell {
-  --admin-bg: #f5f5f7;
-  --admin-card: #ffffff;
+  /* Aliases of the shared tokens in app/design-tokens.css — change values there, not here. */
+  --admin-bg: var(--cf-ink-50);
+  --admin-card: var(--cf-white);
   --admin-border: rgba(0, 0, 0, 0.08);
   --admin-hairline: rgba(0, 0, 0, 0.06);
   --admin-text: #1d1d1f;
-  --admin-muted: #6e6e73;
-  --admin-subtle: #86868b;
-  --admin-accent: #b8862b;
-  --admin-accent-soft: #fbf3e2;
-  --admin-success: #248a3d;
-  --admin-warning: #b25e09;
-  --admin-danger: #d70015;
-  --admin-info: #0071e3;
-  --admin-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --admin-muted: var(--cf-ink-500);
+  --admin-subtle: var(--cf-ink-400);
+  --admin-accent: var(--cf-brass-700);
+  --admin-accent-soft: var(--cf-brass-50);
+  --admin-success: var(--cf-green-600);
+  --admin-warning: var(--cf-amber-600);
+  --admin-danger: var(--cf-red-600);
+  --admin-info: var(--cf-blue-600);
+  --admin-spring: var(--ease-out);
   --admin-glass: rgba(255, 255, 255, 0.72);
-  --admin-shadow: 0 1px 1px rgba(0, 0, 0, 0.03), 0 8px 24px -12px rgba(0, 0, 0, 0.12);
-  --admin-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.04), 0 18px 40px -16px rgba(0, 0, 0, 0.22);
+  --admin-shadow: var(--shadow-1);
+  --admin-shadow-hover: var(--shadow-2);
 
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-inter), system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-body), system-ui, sans-serif;
   letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
   background: var(--admin-bg);
   color: var(--admin-text);
 }
 .admin-shell h1, .admin-shell h2, .admin-shell h3 {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-inter), system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-body), system-ui, sans-serif;
   letter-spacing: -0.022em;
 }
 
