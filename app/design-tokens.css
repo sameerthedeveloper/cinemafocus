@@ -24,10 +24,10 @@
   --cf-brass-300: #dcb872; /* brass on dark (9:1 on ink-950) */
   --cf-brass-50:  #fbf3e2;
 
-  --cf-green-600: #248a3d;
-  --cf-amber-600: #b25e09;
-  --cf-red-600:   #d70015;
-  --cf-blue-600:  #0071e3;
+  --cf-green-600: #1b7a34;
+  --cf-amber-600: #a35708;
+  --cf-red-600:   #c80014;
+  --cf-blue-600:  #0067cf;
 
   /* ── Semantic roles (space-separated HSL channels kept for the existing shadcn-style theme) ── */
   --background: 0 0% 100%;
@@ -47,14 +47,14 @@
   --ring: 40 62% 44%;          /* focus ring is brass, everywhere */
 
   --brand: 40 62% 44%;         /* = brass-500 */
-  --brand-foreground: 0 0% 100%;
+  --brand-foreground: 0 0% 4%;       /* ink on brass: 6.1:1 (white is 3.2:1) */
   --brand-soft: 40 80% 94%;
   --brand-ink: 38 62% 34%;     /* brass for text on light */
 
-  --success: 137 57% 33%;
-  --warning: 30 90% 37%;
-  --danger: 355 100% 42%;
-  --info: 211 100% 45%;
+  --success: 137 64% 30%;
+  --warning: 30 91% 34%;
+  --danger: 355 100% 39%;
+  --info: 211 100% 40%;
 
   /* ── Type ─────────────────────────────────────────────────────── */
   --font-display-stack: var(--font-display), 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
