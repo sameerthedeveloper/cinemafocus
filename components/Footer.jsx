@@ -125,8 +125,22 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="container px-4 mx-auto border-t border-border pt-8 text-center text-muted-foreground text-sm">
+      <div className="container px-4 mx-auto border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-2 text-muted-foreground text-sm">
         <p>&copy; {new Date().getFullYear()} Cinema Focus. All rights reserved.</p>
+        <p>
+          Designed By{' '}
+          <a
+            href="https://www.cogniheim.com"
+            target="_blank"
+            rel="noopener"
+            title="Cogniheim - Web Design & Development"
+            aria-label="Designed by Cogniheim (www.cogniheim.com)"
+            className="text-primary hover:underline transition-colors"
+          >
+            Cogniheim
+          </a>{' '}
+          [<a href="https://www.cogniheim.com" target="_blank" rel="noopener" title="Visit www.cogniheim.com" className="hover:text-primary hover:underline transition-colors">www.cogniheim.com</a>]
+        </p>
       </div>
     </footer>
   );
