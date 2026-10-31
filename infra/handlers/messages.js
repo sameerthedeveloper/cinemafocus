@@ -3,19 +3,24 @@ import { randomUUID } from "crypto";
 import { docClient, scanAll } from "../lib/aws/dynamo.js";
 import { requireAdmin, requireRole, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
+import { pick, str, email, oneOf } from "../lib/validate.js";
+import { MESSAGE_STATUSES } from "../lib/schemas.js";
+import { rateLimit } from "../lib/aws/ratelimit.js";
 
 const TABLE = () => process.env.MESSAGES_TABLE;
 
 // Public insert only — contact form. No auth check by design (per authz policy table).
 export async function create(event) {
   try {
-    const body = parseBody(event);
+    // Whole-route cap (the API only ever sees Vercel's IP): 20 submissions per 10 minutes.
+    await rateLimit("messages", "all", { limit: 20, windowSec: 600 });
+    const body = pick(parseBody(event), ["name", "email", "subject", "text"]);
     const item = {
       messageId: randomUUID(),
-      name: body.name,
-      email: body.email,
-      subject: body.subject,
-      text: body.text,
+      name: str(body.name, "name", { required: true, max: 100 }),
+      email: email(body.email),
+      subject: str(body.subject, "subject", { max: 200 }) ?? "",
+      text: str(body.text, "text", { required: true, max: 5000 }),
       status: "unread",
       createdAt: new Date().toISOString(),
     };
@@ -40,7 +45,8 @@ export async function update(event) {
   try {
     await requireAdmin(event);
     const { messageId } = event.pathParameters;
-    const body = parseBody(event);
+    const body = pick(parseBody(event), ["status"]);
+    oneOf(body.status, MESSAGE_STATUSES, "status");
     await docClient.send(new UpdateCommand({
       TableName: TABLE(),
       Key: { messageId },

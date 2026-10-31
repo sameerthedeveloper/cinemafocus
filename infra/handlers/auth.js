@@ -1,12 +1,18 @@
 import { CognitoIdentityProviderClient, InitiateAuthCommand, AdminSetUserPasswordCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { requireAuth, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
+import { pick, str } from "../lib/validate.js";
+import { rateLimit } from "../lib/aws/ratelimit.js";
 
 const client = new CognitoIdentityProviderClient({});
 
 export async function login(event) {
   try {
-    const { email, password } = parseBody(event);
+    const body = pick(parseBody(event), ["email", "password"]);
+    const email = str(body.email, "email", { required: true, max: 254 }).toLowerCase();
+    const password = str(body.password, "password", { required: true, max: 256 });
+    // Brute-force guard: 10 attempts per email per 15 minutes (counted before the attempt).
+    await rateLimit("login", email, { limit: 10, windowSec: 900 });
     const result = await client.send(new InitiateAuthCommand({
       AuthFlow: "USER_PASSWORD_AUTH",
       ClientId: process.env.COGNITO_CLIENT_ID,

@@ -2,6 +2,8 @@ import { GetCommand, PutCommand, DeleteCommand, QueryCommand } from "@aws-sdk/li
 import { docClient, scanAll } from "../lib/aws/dynamo.js";
 import { requireAdmin, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
+import { pick, pathId, assertItemSize } from "../lib/validate.js";
+import { PRESS_FIELDS } from "../lib/schemas.js";
 
 const TABLE = () => process.env.PRESS_RELEASES_TABLE;
 
@@ -37,7 +39,8 @@ export async function get(event) {
 export async function create(event) {
   try {
     await requireAdmin(event);
-    const body = parseBody(event);
+    const raw = parseBody(event);
+    const body = assertItemSize({ ...pick(raw, PRESS_FIELDS), pressId: pathId(raw.pressId, "pressId") });
     await docClient.send(new PutCommand({ TableName: TABLE(), Item: body }));
     return json(201, body);
   } catch (e) {
@@ -49,7 +52,7 @@ export async function update(event) {
   try {
     await requireAdmin(event);
     const { pressId } = event.pathParameters;
-    const body = parseBody(event);
+    const body = assertItemSize(pick(parseBody(event), PRESS_FIELDS));
     await docClient.send(new PutCommand({ TableName: TABLE(), Item: { ...body, pressId } }));
     return json(200, { ...body, pressId });
   } catch (e) {

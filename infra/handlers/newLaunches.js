@@ -3,6 +3,8 @@ import { docClient, scanAll } from "../lib/aws/dynamo.js";
 import { requireAdmin, errorResponse } from "../lib/aws/authz.js";
 import { assertProductExists } from "../lib/aws/validators.js";
 import { json, parseBody } from "../lib/http.js";
+import { pick, pathId, assertItemSize } from "../lib/validate.js";
+import { LAUNCH_FIELDS } from "../lib/schemas.js";
 
 const TABLE = () => process.env.NEW_LAUNCHES_TABLE;
 
@@ -18,7 +20,8 @@ export async function list() {
 export async function create(event) {
   try {
     await requireAdmin(event);
-    const body = parseBody(event);
+    const raw = parseBody(event);
+    const body = assertItemSize({ ...pick(raw, LAUNCH_FIELDS), launchId: pathId(raw.launchId, "launchId") });
     await assertProductExists(body.originalProductId); // throws 400 if dangling ref
     await docClient.send(new PutCommand({ TableName: TABLE(), Item: body }));
     return json(201, body);
@@ -31,7 +34,7 @@ export async function update(event) {
   try {
     await requireAdmin(event);
     const { launchId } = event.pathParameters;
-    const body = parseBody(event);
+    const body = assertItemSize(pick(parseBody(event), LAUNCH_FIELDS));
     await assertProductExists(body.originalProductId);
     await docClient.send(new PutCommand({ TableName: TABLE(), Item: { ...body, launchId } }));
     return json(200, { ...body, launchId });

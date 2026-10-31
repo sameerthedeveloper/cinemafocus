@@ -70,7 +70,8 @@ export async function POST(request) {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ folder, fileName, contentType }),
+      // size is signed into the presigned URL, so S3 rejects any other body length.
+      body: JSON.stringify({ folder, fileName, contentType, size: buffer.length }),
     });
     const presignData = await presignRes.json();
 

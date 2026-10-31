@@ -2,6 +2,8 @@ import { PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient, scanAll } from "../lib/aws/dynamo.js";
 import { requireAdmin, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
+import { pick, pathId, assertItemSize } from "../lib/validate.js";
+import { PROJECT_FIELDS } from "../lib/schemas.js";
 
 const TABLE = () => process.env.PROJECTS_TABLE;
 
@@ -17,7 +19,8 @@ export async function list() {
 export async function create(event) {
   try {
     await requireAdmin(event);
-    const body = parseBody(event);
+    const raw = parseBody(event);
+    const body = assertItemSize({ ...pick(raw, PROJECT_FIELDS), projectId: pathId(raw.projectId, "projectId") });
     await docClient.send(new PutCommand({ TableName: TABLE(), Item: body }));
     return json(201, body);
   } catch (e) {
@@ -29,7 +32,7 @@ export async function update(event) {
   try {
     await requireAdmin(event);
     const { projectId } = event.pathParameters;
-    const body = parseBody(event);
+    const body = assertItemSize(pick(parseBody(event), PROJECT_FIELDS));
     await docClient.send(new PutCommand({ TableName: TABLE(), Item: { ...body, projectId } }));
     return json(200, { ...body, projectId });
   } catch (e) {

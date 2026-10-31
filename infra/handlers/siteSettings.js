@@ -2,6 +2,8 @@ import { GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient } from "../lib/aws/dynamo.js";
 import { requireAdmin, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
+import { pick, pathId, assertItemSize } from "../lib/validate.js";
+import { ValidationError } from "../lib/aws/validators.js";
 
 const TABLE = () => process.env.SITE_SETTINGS_TABLE;
 
@@ -20,8 +22,10 @@ export async function update(event) {
   try {
     await requireAdmin(event);
     const { settingId } = event.pathParameters;
-    const body = parseBody(event);
-    const item = { settingId, data: body.data, updatedAt: new Date().toISOString() };
+    pathId(settingId, "settingId");
+    const { data } = pick(parseBody(event), ["data"]);
+    if (!data || typeof data !== "object" || Array.isArray(data)) throw new ValidationError("data must be an object");
+    const item = assertItemSize({ settingId, data, updatedAt: new Date().toISOString() });
     await docClient.send(new PutCommand({ TableName: TABLE(), Item: item }));
     return json(200, item);
   } catch (e) {

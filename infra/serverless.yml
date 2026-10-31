@@ -4,11 +4,26 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs20.x
+  runtime: nodejs22.x
   region: ${env:AWS_REGION, 'ap-south-1'}
   stage: ${opt:stage, 'prod'}
+  logRetentionInDays: 30
   httpApi:
-    cors: true
+    # Browsers never call this API directly (Next.js server routes do), so only the site origins are allowed.
+    cors:
+      allowedOrigins:
+        - https://cinemafocus.in
+        - https://www.cinemafocus.in
+      allowedHeaders:
+        - content-type
+        - authorization
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      maxAge: 600
   environment:
     USERS_TABLE: ${self:custom.tablePrefix}Users
     PRODUCTS_TABLE: ${self:custom.tablePrefix}Products
@@ -254,11 +269,41 @@ functions:
       - httpApi: 'POST /upload/presign'
 
 resources:
+  extensions:
+    # Route throttling. The account has a shared Lambda concurrency quota of 10, so these are
+    # deliberately modest. HTTP API throttles per route across all callers.
+    HttpApiStage:
+      Properties:
+        DefaultRouteSettings:
+          ThrottlingBurstLimit: 30
+          ThrottlingRateLimit: 15
+        RouteSettings:
+          "POST /auth/login":
+            ThrottlingBurstLimit: 5
+            ThrottlingRateLimit: 2
+          "POST /auth/refresh":
+            ThrottlingBurstLimit: 10
+            ThrottlingRateLimit: 3
+          "POST /auth/change-password":
+            ThrottlingBurstLimit: 3
+            ThrottlingRateLimit: 1
+          "POST /messages":
+            ThrottlingBurstLimit: 5
+            ThrottlingRateLimit: 1
+          "POST /stats/increment":
+            ThrottlingBurstLimit: 10
+            ThrottlingRateLimit: 5
+          "POST /upload/presign":
+            ThrottlingBurstLimit: 5
+            ThrottlingRateLimit: 2
   Resources:
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tablePrefix}Users
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        DeletionProtectionEnabled: true
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: userId
@@ -271,6 +316,9 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tablePrefix}Products
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        DeletionProtectionEnabled: true
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: productId
@@ -292,6 +340,9 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tablePrefix}Categories
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        DeletionProtectionEnabled: true
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: categoryId
@@ -304,6 +355,9 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tablePrefix}NewLaunches
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        DeletionProtectionEnabled: true
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: launchId
@@ -316,6 +370,9 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tablePrefix}PressReleases
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        DeletionProtectionEnabled: true
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: pressId
@@ -337,6 +394,9 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tablePrefix}Projects
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        DeletionProtectionEnabled: true
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: projectId
@@ -358,6 +418,9 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tablePrefix}Messages
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        DeletionProtectionEnabled: true
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: messageId
@@ -379,6 +442,9 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tablePrefix}SiteSettings
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        DeletionProtectionEnabled: true
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: settingId
@@ -391,6 +457,13 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tablePrefix}Stats
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        DeletionProtectionEnabled: true
+        # Expires the "rl#" rate-limit counters written by lib/aws/ratelimit.js.
+        TimeToLiveSpecification:
+          AttributeName: expiresAt
+          Enabled: true
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: date
@@ -404,10 +477,15 @@ resources:
       Type: AWS::Cognito::UserPool
       Properties:
         UserPoolName: cinemafocus-users
+        DeletionProtection: ACTIVE
         UsernameAttributes:
           - email
         AutoVerifiedAttributes:
           - email
+        # Accounts are created only by the admin Lambdas (AdminCreateUser); public SignUp is disabled.
+        AdminCreateUserConfig:
+          AllowAdminCreateUserOnly: true
+        # Schema must stay as-is: changing an existing attribute forces pool replacement.
         Schema:
           - Name: role
             AttributeDataType: String
@@ -420,6 +498,11 @@ resources:
         ClientName: cinemafocus-web-client
         UserPoolId: !Ref CognitoUserPool
         GenerateSecret: false
+        PreventUserExistenceErrors: ENABLED
+        # custom:role is deliberately absent: clients cannot set or change it
+        # (SignUp / UpdateUserAttributes). Only AdminCreateUser can assign a role.
+        WriteAttributes:
+          - email
         ExplicitAuthFlows:
           - ALLOW_USER_PASSWORD_AUTH
           - ALLOW_REFRESH_TOKEN_AUTH
@@ -460,6 +543,30 @@ resources:
           SigningBehavior: always
           SigningProtocol: sigv4
 
+    CdnResponseHeadersPolicy:
+      Type: AWS::CloudFront::ResponseHeadersPolicy
+      Properties:
+        ResponseHeadersPolicyConfig:
+          Name: cinemafocus-images-security-headers
+          SecurityHeadersConfig:
+            ContentTypeOptions:
+              Override: true
+            FrameOptions:
+              FrameOption: DENY
+              Override: true
+            ReferrerPolicy:
+              ReferrerPolicy: strict-origin-when-cross-origin
+              Override: true
+            StrictTransportSecurity:
+              AccessControlMaxAgeSec: 31536000
+              IncludeSubdomains: false
+              Preload: false
+              Override: true
+            # Images only: if a file is ever opened directly it cannot run script.
+            ContentSecurityPolicy:
+              ContentSecurityPolicy: "default-src 'none'; img-src 'self'; sandbox"
+              Override: true
+
     CloudFrontDistribution:
       Type: AWS::CloudFront::Distribution
       Properties:
@@ -469,6 +576,7 @@ resources:
             TargetOriginId: imagesS3Origin
             ViewerProtocolPolicy: https-only
             CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized managed policy
+            ResponseHeadersPolicyId: !Ref CdnResponseHeadersPolicy
             AllowedMethods:
               - GET
               - HEAD
@@ -479,11 +587,21 @@ resources:
               S3OriginConfig:
                 OriginAccessIdentity: ""
 
+    # --- Alerting ---
+    # Main-site topic; the store has its own. Subscribe an address after deploy:
+    #   aws sns subscribe --topic-arn <AlertsTopicArn> --protocol email --notification-endpoint <address>
+    AlertsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: cinemafocus-main-alerts
+
     # --- CloudWatch Alarms ---
     BillingAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: cinemafocus-billing-alarm
+        AlarmActions:
+          - !Ref AlertsTopic
         AlarmDescription: Alerts when estimated AWS charges exceed threshold
         Namespace: AWS/Billing
         MetricName: EstimatedCharges
@@ -500,6 +618,8 @@ resources:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: cinemafocus-lambda-error-alarm
+        AlarmActions:
+          - !Ref AlertsTopic
         AlarmDescription: Alerts on elevated Lambda error rate across the service
         Namespace: AWS/Lambda
         MetricName: Errors
@@ -515,6 +635,8 @@ resources:
       Value: !Ref CognitoUserPool
     CognitoClientId:
       Value: !Ref CognitoUserPoolClient
+    AlertsTopicArn:
+      Value: !Ref AlertsTopic
     CdnDomain:
       Value: !GetAtt CloudFrontDistribution.DomainName
     ImagesBucketName:

@@ -1,8 +1,10 @@
 import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand, AdminDeleteUserCommand } from "@aws-sdk/client-cognito-identity-provider";
-import { GetCommand, PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { docClient, scanAll } from "../lib/aws/dynamo.js";
 import { requireAuth, requireAdmin, AuthError, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
+import { pick, str } from "../lib/validate.js";
+import { USER_FIELDS } from "../lib/schemas.js";
 
 const TABLE = () => process.env.USERS_TABLE;
 const cognito = new CognitoIdentityProviderClient({});
@@ -85,9 +87,20 @@ export async function update(event) {
   try {
     await requireAdmin(event);
     const { userId } = event.pathParameters;
-    const body = parseBody(event);
-    await docClient.send(new PutCommand({ TableName: TABLE(), Item: { ...body, userId } }));
-    return json(200, { ...body, userId });
+    // Only the display name is editable. Email and role are never taken from the body: roles are
+    // assigned at creation (Cognito) and cannot be changed through this endpoint.
+    const body = pick(parseBody(event), USER_FIELDS);
+    const name = str(body.name, "name", { required: true, max: 100 });
+    const { Attributes } = await docClient.send(new UpdateCommand({
+      TableName: TABLE(),
+      Key: { userId },
+      UpdateExpression: "SET #n = :n",
+      ConditionExpression: "attribute_exists(userId)",
+      ExpressionAttributeNames: { "#n": "name" },
+      ExpressionAttributeValues: { ":n": name },
+      ReturnValues: "ALL_NEW",
+    }));
+    return json(200, Attributes);
   } catch (e) {
     return errorResponse(e);
   }

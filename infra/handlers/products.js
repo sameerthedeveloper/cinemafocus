@@ -2,6 +2,8 @@ import { GetCommand, PutCommand, UpdateCommand, DeleteCommand } from "@aws-sdk/l
 import { docClient, scanAll, queryAll } from "../lib/aws/dynamo.js";
 import { requireAdmin, errorResponse } from "../lib/aws/authz.js";
 import { json, parseBody } from "../lib/http.js";
+import { pick, pathId, assertItemSize } from "../lib/validate.js";
+import { PRODUCT_FIELDS } from "../lib/schemas.js";
 
 const TABLE = () => process.env.PRODUCTS_TABLE;
 const NEW_LAUNCHES_TABLE = () => process.env.NEW_LAUNCHES_TABLE;
@@ -39,7 +41,8 @@ export async function get(event) {
 export async function create(event) {
   try {
     await requireAdmin(event);
-    const body = parseBody(event);
+    const raw = parseBody(event);
+    const body = assertItemSize({ ...pick(raw, PRODUCT_FIELDS), productId: pathId(raw.productId, "productId") });
     await docClient.send(new PutCommand({ TableName: TABLE(), Item: body }));
     return json(201, body);
   } catch (e) {
@@ -51,7 +54,7 @@ export async function update(event) {
   try {
     await requireAdmin(event);
     const { productId } = event.pathParameters;
-    const body = parseBody(event);
+    const body = assertItemSize(pick(parseBody(event), PRODUCT_FIELDS));
     await docClient.send(new PutCommand({ TableName: TABLE(), Item: { ...body, productId } }));
     return json(200, { ...body, productId });
   } catch (e) {

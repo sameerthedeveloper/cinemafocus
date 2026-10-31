@@ -58,7 +58,9 @@ export function errorResponse(e) {
     return { statusCode: e.statusCode, body: JSON.stringify({ error: e.message }) };
   }
   if (e.statusCode) {
-    return { statusCode: e.statusCode, body: JSON.stringify({ error: e.message }) };
+    const headers = { "Content-Type": "application/json" };
+    if (e.retryAfter) headers["Retry-After"] = String(e.retryAfter);
+    return { statusCode: e.statusCode, headers, body: JSON.stringify({ error: e.message }) };
   }
   console.error(e);
   return { statusCode: 500, body: JSON.stringify({ error: "Internal server error" }) };
