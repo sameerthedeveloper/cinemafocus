@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import LazyImage from './LazyImage';
+import OptimizedImage from './OptimizedImage';
 
 const CategoryCard = ({ category }) => {
   if (!category) return null;
@@ -16,11 +16,16 @@ const CategoryCard = ({ category }) => {
     >
       <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-background flex items-center justify-center p-4 md:p-6 transition-all duration-500 ease-out group-hover:scale-[1.05] shadow-[inset_0_1px_2px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.02)] border border-border/5 mb-5 md:mb-6">
         {imageSrc ? (
-          <img
-            src={imageSrc}
-            alt={category.name}
-            className="w-full h-full object-contain p-1"
-          />
+          <div className="relative w-full h-full">
+            <OptimizedImage
+              src={imageSrc}
+              alt={category.name}
+              fill
+              optimize
+              sizes="128px"
+              className="object-contain p-1"
+            />
+          </div>
         ) : (
           <div className="text-muted-foreground/30 font-bold text-2xl uppercase select-none">
             {category.name.substring(0, 2)}
@@ -35,7 +40,7 @@ const CategoryCard = ({ category }) => {
         {category.featured ? (
           <span className="text-[10px] md:text-[11px] text-[#e05600] font-bold uppercase tracking-wider block animate-pulse">New</span>
         ) : (
-          <span className="text-[10px] md:text-xs text-muted-foreground/80 font-medium block">
+          <span className="text-[10px] md:text-xs text-muted-foreground font-medium block">
             {category.product_count || 0} {category.product_count === 1 ? 'item' : 'items'}
           </span>
         )}

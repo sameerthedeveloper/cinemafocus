@@ -55,3 +55,6 @@ infra/.serverless
 
 # SEO data-fix backups (contain CMS rows)
 seo-fix-backup-*.json
+
+# Full AWS backups (contain CMS data, user emails)
+aws-backup-*/

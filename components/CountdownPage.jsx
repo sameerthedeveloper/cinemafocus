@@ -51,9 +51,13 @@ export default function CountdownPage({ slug = 'soon' }) {
 
   useEffect(() => {
     if (!cfg) return;
-    setRemaining(getRemaining(cfg.launch_date));
-    const id = setInterval(() => setRemaining(getRemaining(cfg.launch_date)), 1000);
-    return () => clearInterval(id);
+    const tick = () => setRemaining(getRemaining(cfg.launch_date));
+    const first = setTimeout(tick, 0);
+    const id = setInterval(tick, 1000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(id);
+    };
   }, [cfg]);
 
   const units = [

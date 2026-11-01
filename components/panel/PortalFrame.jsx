@@ -34,6 +34,18 @@ export default function PortalFrame({ email, children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 
+  // The inbox fires this after marking a message seen/unseen.
+  useEffect(() => {
+    const onChange = () => {
+      fetch('/api/portal/unread', { cache: 'no-store' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => { if (d) setUnread(d.unread || 0); })
+        .catch(() => {});
+    };
+    window.addEventListener('portal:messages-changed', onChange);
+    return () => window.removeEventListener('portal:messages-changed', onChange);
+  }, []);
+
   const logout = async () => {
     try { await fetch('/api/portal/logout', { method: 'POST' }); } catch {}
     router.push('/portal/login');

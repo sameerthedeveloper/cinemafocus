@@ -262,7 +262,7 @@ function ProductListContent({ initialProducts, initialCategories, initialNewLaun
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-5 sm:gap-x-4 md:gap-x-6 md:gap-y-8">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.slug} product={product} />
+              <ProductCard key={product.slug} product={product} headingLevel="h2" />
             ))}
           </div>
         ) : (

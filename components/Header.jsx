@@ -8,7 +8,6 @@ import { Menu, X, ArrowRight } from 'lucide-react';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import gsap from 'gsap';
 const logo = '/images/logo.png';
-const logoLight = '/images/logo-light.webp';
 
 const NAV_LINKS = [
   { name: 'New Launches', path: '/products?category=new-arrivals', isNew: true },
@@ -44,11 +43,6 @@ const Header = () => {
     setResolved({ path: window.location.pathname, search: window.location.search });
   }, [pathname]);
 
-  const isHome = resolved.path === '/';
-  // Over the dark home hero the pill is a translucent dark glass with light
-  // content and the light logo; everywhere else it's a solid themed surface.
-  const overHero = isHome && !isScrolled;
-  const showChrome = isScrolled || isMenuOpen;
 
   const isActive = (path) => {
     const [base, query] = path.split('?');
@@ -129,13 +123,10 @@ const Header = () => {
       ref={headerRef}
       className={clsx(
         'fixed inset-x-4 top-4 z-99 mx-auto w-auto max-w-6xl border transition-[background-color,border-color,box-shadow] duration-300 sm:inset-x-10 sm:top-5',
-        // Chrome (bg/border/shadow) only appears once scrolled or while the mobile menu is open;
-        // content colour still follows what's behind it (dark hero vs. themed page).
-        showChrome
-          ? overHero
-            ? 'border-white/15 bg-black/85 text-white shadow-none'
-            : 'border-border bg-background text-foreground shadow-float'
-          : clsx('border-transparent bg-transparent shadow-none', overHero ? 'text-white' : 'text-foreground'),
+        // Always a solid white pill on every page (including over the dark hero);
+        // the float shadow only appears once scrolled.
+        'border-border bg-background text-foreground',
+        isScrolled || isMenuOpen ? 'shadow-float' : 'shadow-none',
         isMenuOpen ? 'flex flex-col rounded-[28px]' : 'flex flex-col rounded-full'
       )}
     >
@@ -148,21 +139,12 @@ const Header = () => {
           className="relative block h-12 w-44 shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-52 lg:h-14 lg:w-52"
         >
           <Image
-            src={logoLight}
+            src={logo}
             alt="Cinema Focus"
             fill
             priority
             sizes="256px"
-            className={clsx('object-contain object-left transition-opacity duration-300', overHero ? 'opacity-100' : 'opacity-0')}
-          />
-          <Image
-            src={logo}
-            alt=""
-            aria-hidden="true"
-            fill
-            priority
-            sizes="256px"
-            className={clsx('object-contain object-left transition-opacity duration-300', overHero ? 'opacity-0' : 'opacity-100')}
+            className="object-contain object-left"
           />
         </Link>
 
@@ -177,7 +159,7 @@ const Header = () => {
               aria-hidden="true"
               className={clsx(
                 'pointer-events-none absolute inset-y-0 my-auto h-10 rounded-full transition-[left,width,opacity] duration-300 ease-settle',
-                overHero ? 'bg-white/12' : 'bg-secondary',
+                'bg-secondary',
                 pill.show ? 'opacity-100' : 'opacity-0'
               )}
               style={{ left: pill.left, width: pill.width }}
@@ -193,9 +175,8 @@ const Header = () => {
                     className={clsx(
                       'group relative flex h-10 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-bold uppercase tracking-widest transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                      overHero
-                        ? clsx('hover:text-white', active ? 'text-white' : 'text-white/70')
-                        : clsx('hover:text-foreground', active ? 'text-foreground' : 'text-muted-foreground')
+                      'hover:text-foreground',
+                      active ? 'text-foreground' : 'text-muted-foreground'
                     )}
                   >
                     {link.isNew && <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-signal" />}
@@ -222,7 +203,7 @@ const Header = () => {
             className={clsx(
               'group hidden h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-sm font-bold uppercase tracking-widest transition-colors 2xl:inline-flex',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-              overHero ? 'bg-white text-black hover:bg-white/90' : 'bg-primary text-primary-foreground hover:bg-primary/90'
+              'bg-primary text-primary-foreground hover:bg-primary/90'
             )}
           >
             Visit showroom
@@ -240,7 +221,7 @@ const Header = () => {
           className={clsx(
             '-mr-2 flex h-11 w-11 items-center justify-center rounded-full transition-colors lg:hidden',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-            overHero ? 'hover:bg-white/10' : 'hover:bg-secondary'
+            'hover:bg-secondary'
           )}
         >
           {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -250,7 +231,7 @@ const Header = () => {
 
       {/* Mobile panel */}
       <div id="mobile-nav" ref={mobilePanelRef} className="hidden w-full overflow-hidden lg:hidden" style={{ height: 0, opacity: 0 }}>
-        <ul ref={mobileListRef} className={clsx('flex flex-col border-t px-5 pb-4 pt-2', overHero ? 'border-white/15' : 'border-border')}>
+        <ul ref={mobileListRef} className={clsx('flex flex-col border-t px-5 pb-4 pt-2', 'border-border')}>
           {NAV_LINKS.map((link) => {
             const active = activePath === link.path;
             return (
@@ -262,8 +243,8 @@ const Header = () => {
                   className={clsx(
                     'flex min-h-12 items-center gap-2 text-[15px] transition-colors',
                     active
-                      ? clsx('font-medium', overHero ? 'text-white' : 'text-foreground')
-                      : overHero ? 'text-white/70 hover:text-white' : 'text-muted-foreground hover:text-foreground'
+                      ? 'font-medium text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
                   {link.isNew && <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-signal" />}

@@ -24,7 +24,22 @@
   --color-ring: hsl(var(--ring));
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-serif: 'SF Pro Display', var(--font-inter), sans-serif; 
+  --font-serif: 'SF Pro Display', var(--font-inter), sans-serif;
+
+  /* Design-system tokens — see DESIGN_SYSTEM.md */
+  --color-signal: #e05600;   /* "New" markers only; never decorative */
+  --color-danger: #d70015;   /* errors, destructive actions */
+  --color-stage: #0a0a0a;    /* dark hero / launch surfaces (matches themeColor) */
+
+  --radius-control: 0.75rem; /* inputs, small buttons */
+  --radius-media: 1rem;      /* images inside cards */
+  --radius-card: 1.5rem;     /* product / press cards */
+  --radius-panel: 2rem;      /* category tiles, large panels */
+
+  --shadow-lift: 0 8px 40px rgba(0, 0, 0, 0.08);   /* card hover */
+  --shadow-float: 0 8px 30px -14px rgba(0, 0, 0, 0.35); /* header pill */
+
+  --ease-settle: cubic-bezier(0.215, 0.61, 0.355, 1); /* hero intro, reveals */
 }
 
 @layer base {
@@ -113,4 +128,15 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Hero entrance for the first slide: CSS-only so it runs before JS hydrates. */
+@keyframes hero-intro {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-intro { animation: hero-intro 0.7s cubic-bezier(0.215, 0.61, 0.355, 1) 0.05s backwards; }
+.hero-intro-delayed { animation-delay: 0.15s; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-intro { animation: none; }
 }

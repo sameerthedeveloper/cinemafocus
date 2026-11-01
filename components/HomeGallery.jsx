@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import OptimizedImage from './OptimizedImage';
 import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -8,13 +8,9 @@ import LazyImage from './LazyImage';
 
 export default function HomeGallery({ projects }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const openLightbox = (index) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
@@ -136,6 +132,7 @@ export default function HomeGallery({ projects }) {
                         src={displayedProjects[lightboxIndex].imageUrl} 
                         alt={displayedProjects[lightboxIndex].title || 'Cinema Focus installation'}
                         fill
+                        optimize
                         className="object-contain shadow-2xl rounded-sm"
                         sizes="90vw"
                         priority

@@ -22,6 +22,7 @@ const LazyImage = ({
   loading = "lazy",
   priority = false,
   sizes,
+  optimize = true,
   ...props 
 }) => {
   const [isLoaded, setIsLoaded] = useState(priority);
@@ -29,17 +30,14 @@ const LazyImage = ({
 
   // Reset states when src changes (not on first mount: the server-rendered <img> may
   // already have finished loading before hydration, and its load event is then never replayed)
-  const isFirstRun = useRef(true);
-  useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
+  const [seenSrc, setSeenSrc] = useState(src);
+  if (seenSrc !== src) {
+    setSeenSrc(src);
     if (!priority) {
       setIsLoaded(false);
       setHasError(false);
     }
-  }, [src, priority]);
+  }
 
   // Pick up an image that finished loading before React attached onLoad
   const markIfAlreadyLoaded = (el) => {
@@ -67,6 +65,7 @@ const LazyImage = ({
         alt={alt || "Cinema Focus Asset"}
         fill
         priority={priority}
+        optimize={optimize}
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
         sizes={sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"}

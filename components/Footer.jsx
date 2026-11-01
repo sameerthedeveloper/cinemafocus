@@ -127,20 +127,17 @@ const Footer = () => {
 
       <div className="container px-4 mx-auto border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-2 text-muted-foreground text-sm">
         <p>&copy; {new Date().getFullYear()} Cinema Focus. All rights reserved.</p>
-        <p>
-          Designed By{' '}
-          <a
-            href="https://www.cogniheim.com"
-            target="_blank"
-            rel="noopener"
-            title="Cogniheim - Web Design & Development"
-            aria-label="Designed by Cogniheim (www.cogniheim.com)"
-            className="text-primary hover:underline transition-colors"
-          >
-            Cogniheim
-          </a>{' '}
-          [<a href="https://www.cogniheim.com" target="_blank" rel="noopener" title="Visit www.cogniheim.com" className="hover:text-primary hover:underline transition-colors">www.cogniheim.com</a>]
-        </p>
+        <a
+          href="https://www.cogniheim.com"
+          target="_blank"
+          rel="noopener"
+          title="Cogniheim - Web Design & Development"
+          aria-label="Developed and maintained by Cogniheim (www.cogniheim.com)"
+          className="group inline-flex items-center gap-1.5 font-mono text-[9px] font-medium tracking-[2px] uppercase text-slate-400 whitespace-nowrap transition-colors hover:text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+        >
+          <span>DEVELOPED &amp; MAINTAINED BY</span>
+          <span className="font-semibold text-slate-500 group-hover:text-primary transition-colors">COGNIHEIM</span>
+        </a>
       </div>
     </footer>
   );

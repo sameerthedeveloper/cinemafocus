@@ -1,6 +1,23 @@
+"use client";
+
 import React from 'react';
 import Image from 'next/image';
 import { useImageOptimizationMode } from '@/context/SiteSettingsContext';
+
+// Hosts next.config.mjs allows the Next.js optimizer to fetch from. Anything else must be rendered
+// as-is (the optimizer rejects unknown hosts with a 400).
+const CDN_HOST = process.env.NEXT_PUBLIC_CDN_DOMAIN || 'd2x0o69dm3vdcd.cloudfront.net';
+function canOptimize(src) {
+  if (typeof src !== 'string') return false;
+  if (src.startsWith('/')) return !src.startsWith('//');
+  try {
+    const { hostname, pathname } = new URL(src);
+    if (hostname.endsWith('.supabase.co')) return pathname.startsWith('/storage/v1/object/public/');
+    return hostname === CDN_HOST || hostname === 'images.unsplash.com';
+  } catch {
+    return false;
+  }
+}
 
 /**
  * A premium, mode-aware Image component that switches behavior dynamically
@@ -15,6 +32,10 @@ import { useImageOptimizationMode } from '@/context/SiteSettingsContext';
  * - sizes: Accurate responsive layout sizes string (prevent CLS)
  * - className: Custom styling classes
  * - fill: If true, absolute-stretches the image to fill its parent container
+ * - optimize: If true, always resize/re-encode through the Next.js image optimizer (AVIF/WebP,
+ *   responsive srcset) regardless of mode. Use for content images that may be uploaded at full
+ *   resolution (product shots, press and project photos). Falls back to a plain <img> for hosts
+ *   the optimizer cannot fetch.
  * 
  * Deliverable 5 dynamic rendering logic:
  * - 'upload' mode: priority ? <Image unoptimized> : <img loading="lazy">
@@ -30,6 +51,7 @@ export default function OptimizedImage({
   sizes,
   className,
   fill = false,
+  optimize = false,
   style = {},
   ...props
 }) {
@@ -47,6 +69,9 @@ export default function OptimizedImage({
   if (forceUnoptimized) {
     useNextImage = true;
     useUnoptimized = true;
+  } else if (optimize && canOptimize(src)) {
+    useNextImage = true;
+    useUnoptimized = false;
   } else {
     switch (mode) {
       case 'upload':

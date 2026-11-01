@@ -1,16 +1,42 @@
 "use client";
 
 import React, { useMemo, useState } from 'react';
-import { Search, X, Mail, Reply, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Search, X, Mail, Reply, CheckCircle, Circle } from 'lucide-react';
 import clsx from 'clsx';
 import { EmptyState } from '@/components/panel/ui';
 
 const FILTERS = [['all', 'All'], ['unread', 'Unread'], ['read', 'Read']];
 
-/** Read-only inbox. Cards match the admin Messages page; adds search and a read/unread filter. */
-export default function MessagesView({ messages }) {
+/** Inbox. Cards match the admin Messages page; adds search, a read/unread filter and mark as seen/unseen. */
+export default function MessagesView({ messages: initial }) {
+  const router = useRouter();
+  const [messages, setMessages] = useState(initial);
+  const [pending, setPending] = useState(null);
+  const [failed, setFailed] = useState(null);
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState('all');
+
+  const setSeen = async (message, seen) => {
+    const status = seen ? 'read' : 'unread';
+    setPending(message.id);
+    setFailed(null);
+    try {
+      const res = await fetch(`/api/portal/messages/${encodeURIComponent(message.id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error();
+      setMessages((all) => all.map((m) => (m.id === message.id ? { ...m, status } : m)));
+      window.dispatchEvent(new Event('portal:messages-changed'));
+      router.refresh();
+    } catch {
+      setFailed(message.id);
+    } finally {
+      setPending(null);
+    }
+  };
 
   const counts = useMemo(() => {
     const unread = messages.filter((m) => m.status !== 'read').length;
@@ -94,10 +120,22 @@ export default function MessagesView({ messages }) {
                       <Reply size={18} />
                     </a>
                   )}
-                  {read && (
-                    <div className="p-2 text-green-500" title="Read">
-                      <CheckCircle size={18} />
-                    </div>
+                  {message.id && (
+                    <button
+                      type="button"
+                      onClick={() => setSeen(message, !read)}
+                      disabled={pending === message.id}
+                      aria-label={read ? 'Mark as unseen' : 'Mark as seen'}
+                      title={failed === message.id ? 'Could not update. Try again.' : read ? 'Mark as unseen' : 'Mark as seen'}
+                      className={clsx(
+                        "p-2 rounded-lg transition-colors border disabled:opacity-50 flex items-center justify-center",
+                        failed === message.id ? "text-red-500 border-red-500/30"
+                          : read ? "text-green-500 border-transparent hover:bg-secondary"
+                          : "text-muted-foreground border-transparent hover:text-green-500 hover:bg-green-500/10 hover:border-green-500/20"
+                      )}
+                    >
+                      {read ? <CheckCircle size={18} /> : <Circle size={18} />}
+                    </button>
                   )}
                 </div>
               </div>

@@ -38,7 +38,7 @@ export default function PressClient({ initialReleases = [] }) {
         {/* Featured Release */}
         {featuredRelease && (
           <div className="mb-16">
-            <PressReleaseCard release={featuredRelease} variant="horizontal" />
+            <PressReleaseCard release={featuredRelease} variant="horizontal" headingLevel="h2" />
           </div>
         )}
 
@@ -46,7 +46,7 @@ export default function PressClient({ initialReleases = [] }) {
         {otherReleases.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {otherReleases.map((release) => (
-              <PressReleaseCard key={release.id} release={release} />
+              <PressReleaseCard key={release.id} release={release} headingLevel="h2" />
             ))}
           </div>
         )}

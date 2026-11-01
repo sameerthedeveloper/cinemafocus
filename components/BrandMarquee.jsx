@@ -14,6 +14,13 @@ export default function BrandMarquee({ categories }) {
 
     let animationId;
     let currentScroll = container.scrollLeft;
+    // scrollWidth/clientWidth force layout, so measure on resize instead of every frame
+    let maxScroll = container.scrollWidth - container.clientWidth;
+    const resizeObserver = new ResizeObserver(() => {
+      maxScroll = container.scrollWidth - container.clientWidth;
+    });
+    resizeObserver.observe(container);
+    if (container.firstElementChild) resizeObserver.observe(container.firstElementChild);
 
     const scroll = () => {
       if (!isPaused) {
@@ -25,7 +32,7 @@ export default function BrandMarquee({ categories }) {
         }
 
         // Loop back when we scroll past the end
-        if (currentScroll >= container.scrollWidth - container.clientWidth) {
+        if (currentScroll >= maxScroll) {
           currentScroll = 0;
           container.scrollLeft = 0;
         } else {
@@ -39,7 +46,10 @@ export default function BrandMarquee({ categories }) {
     };
 
     animationId = requestAnimationFrame(scroll);
-    return () => cancelAnimationFrame(animationId);
+    return () => {
+      cancelAnimationFrame(animationId);
+      resizeObserver.disconnect();
+    };
   }, [isPaused]);
 
   return (

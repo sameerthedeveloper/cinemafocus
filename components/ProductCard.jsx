@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCurrency } from '../hooks/useCurrency';
 import LazyImage from './LazyImage';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, headingLevel: Heading = 'h3' }) => {
   const { formatPrice, showPrice } = useCurrency();
   
   if (!product) return null;
@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
   const imageSrc = product.image_url || product.images?.[0] || null;
 
   return (
-    <Link href={`/products/${product.slug}`} className="group block h-full rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background" aria-label={`View ${product.name}`}>
+    <Link href={`/products/${product.slug}`} className="group block h-full rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">
       {/* Card container — Apple uses soft bg, no visible border, just shadow on hover */}
       <div className="relative flex h-full flex-col rounded-3xl overflow-hidden bg-secondary/40 transition-all duration-500 ease-out group-hover:bg-secondary/70 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
         {/* Image area */}
@@ -44,9 +44,9 @@ const ProductCard = ({ product }) => {
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             {product.brand || (product.category ? product.category.replace(/-/g, ' ') : 'Audio')}
           </p>
-          <h3 className="text-[15px] sm:text-base font-semibold text-foreground leading-snug line-clamp-2 sm:min-h-[2.75rem] group-hover:text-primary transition-colors duration-300">
+          <Heading className="text-[15px] sm:text-base font-semibold text-foreground leading-snug line-clamp-2 sm:min-h-[2.75rem] group-hover:text-primary transition-colors duration-300">
             {product.name}
-          </h3>
+          </Heading>
           {showPrice && product.price ? (
             <p className="text-sm font-medium text-foreground/80 pt-0.5">
               {formatPrice(product.price)}

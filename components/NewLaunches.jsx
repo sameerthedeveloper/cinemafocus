@@ -44,22 +44,7 @@ const NewLaunches = ({ products }) => {
     }
   ];
 
-  const [key, setKey] = React.useState(0); // Key to force re-render/reset animation
   const AUTOPLAY_DURATION = 10000;
-
-  // Auto-play Effect
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      handleNext();
-    }, AUTOPLAY_DURATION);
-
-    return () => clearInterval(timer);
-  }, [currentIndex, isTransitioning, displayProducts.length]);
-
-  // Reset animation key on change
-  React.useEffect(() => {
-    setKey(prev => prev + 1);
-  }, [currentIndex]);
 
   const handleNext = () => {
     if (isTransitioning) return;
@@ -78,6 +63,15 @@ const NewLaunches = ({ products }) => {
       setIsTransitioning(false);
     }, 400);
   };
+
+  // Auto-play Effect
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      handleNext();
+    }, AUTOPLAY_DURATION);
+
+    return () => clearInterval(timer);
+  }, [currentIndex, isTransitioning, displayProducts.length]);
 
   const currentProduct = displayProducts[currentIndex];
 
@@ -145,6 +139,7 @@ const NewLaunches = ({ products }) => {
                  src={currentProduct.images?.[0] || '/images/products/speaker-transparent.png'}
                  alt={currentProduct.name}
                  fill
+                 optimize
                  priority={currentIndex === 0}
                  className="object-contain drop-shadow-2xl mt-0 md:mt-0"
                  style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.4))' }}
@@ -183,7 +178,7 @@ const NewLaunches = ({ products }) => {
       {/* Progress Bar */}
       <div className="absolute bottom-0 left-0 h-1.5 bg-white/10 w-full z-30">
           <div 
-            key={key}
+            key={currentIndex}
             className="h-full bg-white origin-left will-change-[width]"
             style={{ 
                 animation: `progress ${AUTOPLAY_DURATION}ms linear forwards`

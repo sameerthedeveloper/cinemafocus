@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/aws/queryClient';
-import { Trash2, Mail, CheckCircle, Loader2, Reply } from 'lucide-react';
+import { Trash2, Mail, CheckCircle, Circle, Loader2, Reply } from 'lucide-react';
 import clsx from 'clsx';
 import Reveal from '@/components/Reveal';
 
@@ -31,18 +31,19 @@ export default function AdminMessagesPage() {
     }
   };
 
-  const handleMarkAsRead = async (id, currentStatus) => {
-    if (currentStatus) return; // Already read
+  const setSeen = async (id, seen) => {
+    const status = seen ? 'read' : 'unread';
     try {
       const { error } = await supabase
         .from('messages')
-        .update({ status: 'read' })
+        .update({ status })
         .eq('id', id);
-      
+
       if (error) throw error;
-      setMessages(messages.map(m => m.id === id ? { ...m, status: 'read' } : m));
+      setMessages(prev => prev.map(m => m.id === id ? { ...m, status } : m));
     } catch (error) {
       console.error("Error updating message:", error);
+      alert("Failed to update message: " + error.message);
     }
   };
 
@@ -82,9 +83,8 @@ export default function AdminMessagesPage() {
            messages.map((message) => (
              <div 
                key={message.id} 
-               onClick={() => handleMarkAsRead(message.id, message.status === 'read')}
                className={clsx(
-                 "bg-background p-6 rounded-2xl border transition-all cursor-pointer group",
+                 "bg-background p-6 rounded-2xl border transition-all group",
                  message.status === 'read' ? "border-border opacity-75" : "border-primary/50 shadow-sm bg-primary/5"
                )}
              >
@@ -110,8 +110,22 @@ export default function AdminMessagesPage() {
                    </p>
                  </div>
 
-                 <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <a 
+                 <div className="flex flex-col gap-2 md:opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => setSeen(message.id, message.status !== 'read')}
+                      aria-label={message.status === 'read' ? 'Mark as unseen' : 'Mark as seen'}
+                      title={message.status === 'read' ? 'Mark as unseen' : 'Mark as seen'}
+                      className={clsx(
+                        "p-2 rounded-lg transition-colors border flex items-center justify-center",
+                        message.status === 'read'
+                          ? "text-green-500 border-transparent hover:bg-secondary"
+                          : "text-muted-foreground border-transparent hover:text-green-500 hover:bg-green-500/10 hover:border-green-500/20"
+                      )}
+                    >
+                      {message.status === 'read' ? <CheckCircle size={18} /> : <Circle size={18} />}
+                    </button>
+                    <a
                       href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(message.email)}&su=${encodeURIComponent(`Re: ${message.subject || 'Inquiry'} - Cinema Focus`)}&body=${encodeURIComponent(`Hello ${message.name},\n\nRegarding the message you sent:\n"${message.text}"\n\n`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -128,11 +142,6 @@ export default function AdminMessagesPage() {
                     >
                       <Trash2 size={18} />
                     </button>
-                    {message.status === 'read' && (
-                      <div className="p-2 text-green-500" title="Read">
-                        <CheckCircle size={18} />
-                      </div>
-                    )}
                  </div>
                </div>
              </div>

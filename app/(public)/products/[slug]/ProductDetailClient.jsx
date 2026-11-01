@@ -20,9 +20,12 @@ export default function ProductDetailClient({ product }) {
 
   // Reset to the newest image whenever we're showing a different product
   // (e.g. client-side navigation between product pages).
-  useEffect(() => {
+  const productKey = `${product?.id ?? ''}|${product?.slug ?? ''}`;
+  const [seenProductKey, setSeenProductKey] = useState(productKey);
+  if (seenProductKey !== productKey) {
+    setSeenProductKey(productKey);
     setActiveIndex(product?.images?.length ? product.images.length - 1 : 0);
-  }, [product?.id, product?.slug]);
+  }
 
   // Preload all gallery images in background
   useEffect(() => {
@@ -127,7 +130,7 @@ export default function ProductDetailClient({ product }) {
              {/* Details */}
              <div className="space-y-8 md:space-y-10 lg:py-4">
                <div>
-                 <h3 className="text-primary font-medium text-sm mb-4 tracking-wide uppercase opacity-70">{product.brand}</h3>
+                 <p className="text-primary font-medium text-sm mb-4 tracking-wide uppercase opacity-70">{product.brand}</p>
                  <h1 className="text-3xl md:text-5xl xl:text-6xl font-medium tracking-tight leading-[1.1] mb-6 text-balance">{product.name}</h1>
                  {showPrice && product.price && (
                    <p className="text-2xl font-light text-foreground mb-6 opacity-90">
@@ -143,11 +146,11 @@ export default function ProductDetailClient({ product }) {
   
                {/* Specs */}
                <div className="border-t border-border pt-8">
-                 <h4 className="font-medium text-lg text-foreground mb-6">Specifications</h4>
+                 <h2 className="font-medium text-lg text-foreground mb-6">Specifications</h2>
                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2">
                    {(product.specifications || []).map((spec, idx) => (
                      <div key={idx} className="py-3 border-b border-border">
-                       <dt className="text-xs uppercase tracking-wider font-medium text-muted-foreground mb-1 opacity-70">{spec.key === 'Category' ? 'Brand Category' : spec.key}</dt>
+                       <dt className="text-xs uppercase tracking-wider font-medium text-muted-foreground mb-1">{spec.key === 'Category' ? 'Brand Category' : spec.key}</dt>
                        <dd className="text-base text-foreground font-medium">{spec.value}</dd>
                      </div>
                    ))}
