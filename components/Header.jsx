@@ -128,14 +128,14 @@ const Header = () => {
     <header
       ref={headerRef}
       className={clsx(
-        'fixed inset-x-4 top-4 z-99 mx-auto w-auto max-w-6xl border backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-300 sm:inset-x-10 sm:top-5',
+        'fixed inset-x-4 top-4 z-99 mx-auto w-auto max-w-6xl border transition-[background-color,border-color,box-shadow] duration-300 sm:inset-x-10 sm:top-5',
         // Chrome (bg/border/shadow) only appears once scrolled or while the mobile menu is open;
         // content colour still follows what's behind it (dark hero vs. themed page).
         showChrome
           ? overHero
-            ? 'border-white/15 bg-black/60 text-white shadow-none'
-            : 'border-border bg-background/90 text-foreground shadow-float'
-          : clsx('border-transparent bg-transparent shadow-none backdrop-blur-none', overHero ? 'text-white' : 'text-foreground'),
+            ? 'border-white/15 bg-black/85 text-white shadow-none'
+            : 'border-border bg-background text-foreground shadow-float'
+          : clsx('border-transparent bg-transparent shadow-none', overHero ? 'text-white' : 'text-foreground'),
         isMenuOpen ? 'flex flex-col rounded-[28px]' : 'flex flex-col rounded-full'
       )}
     >
