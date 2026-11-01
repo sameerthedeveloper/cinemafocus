@@ -133,10 +133,10 @@ const Footer = () => {
           rel="noopener"
           title="Cogniheim - Web Design & Development"
           aria-label="Developed and maintained by Cogniheim (www.cogniheim.com)"
-          className="group inline-flex items-center gap-1.5 font-mono text-[9px] font-medium tracking-[2px] uppercase text-slate-400 whitespace-nowrap transition-colors hover:text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+          className="group inline-flex items-center gap-1.5 font-mono text-[9px] font-medium tracking-[2px] uppercase text-muted-foreground whitespace-nowrap transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
         >
           <span>DEVELOPED &amp; MAINTAINED BY</span>
-          <span className="font-semibold text-slate-500 group-hover:text-primary transition-colors">COGNIHEIM</span>
+          <span className="font-semibold text-foreground/70 group-hover:text-primary transition-colors">COGNIHEIM</span>
         </a>
       </div>
     </footer>

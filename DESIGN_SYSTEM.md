@@ -101,7 +101,7 @@ Square image well on a `secondary/40` fill, `rounded-card`. Order: brand line, p
 Round logo well on a `secondary/10` fill, `rounded-panel`, fixed width 160px (200px at `md`). Subtitle is the item count. The "New" subtitle is the only place `signal` text appears. Remove the pulse animation.
 
 ### Header (`components/Header.jsx`)
-Floating pill, `max-w-6xl`, `top-4`. Links are bold uppercase `tracking-widest`; a grey pill slides between them on hover, active link gets an underline, "New Launches" carries the `signal` dot. "Visit showroom" button (from `2xl`) links to `/location`. Always a solid white surface with dark text and the dark logo, including over the hero. No blur. The shadow appears once scrolled. The mobile menu expands the pill to `rounded-[28px]` and cascades links.
+Floating pill, fit-to-content and centered from `lg`, `top-4`. Links are bold uppercase `tracking-widest`; a grey pill slides between them on hover, active link gets an underline, "New Launches" carries the `signal` dot. "Visit showroom" button (from `xl`) links to `/location`. Transparent over the home hero with white text and the light logo. Past 24px of scroll (back under 8px, so it never flickers) or with the mobile menu open it becomes a solid white pill with dark text, dark logo and `shadow-float`, on every page. No blur. The mobile menu expands the pill to `rounded-[28px]` and cascades links.
 
 ### Footer (`components/Footer.jsx`)
 `card` fill, top border, four columns from `lg`. Column headings are `font-medium`. Links are `muted-foreground`, hover `primary`.

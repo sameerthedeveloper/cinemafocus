@@ -3,24 +3,26 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import Section from './Section';
 import CategoryCard from './CategoryCard';
-import ProductCard from './ProductCard';
 import BrandMarquee from './BrandMarquee';
 import Button from './Button';
+import OpenStatus from './OpenStatus';
+import SectionHeader from './SectionHeader';
+import LatestShowcase from './LatestShowcase';
+import { CINEMA_FOCUS_GEO as geo } from '@/lib/geoContext';
 import PressReleases from './PressReleases';
 const HomeGallery = dynamic(() => import('./HomeGallery'), { 
   ssr: true,
-  loading: () => <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-[400px] bg-white/5 animate-pulse rounded-2xl" />
+  loading: () => <div className="h-[400px] animate-pulse rounded-card bg-secondary/60" />
 });
 import * as LucideIcons from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { 
   getCategories, 
   getFeaturedProducts, 
   getTrustBadges, 
   getProjects, 
-  getPressReleases,
-  getFooter
+  getPressReleases
 } from '@/lib/cms';
-import HomeContact from './HomeContact';
 
 const CustomIcon = ({ name, ...props }) => {
   const LucideIcon = LucideIcons[name];
@@ -36,13 +38,8 @@ export async function CollectionSection() {
   const data = await getCategories();
   return (
     <Section id="categories" className="bg-background">
-      <div className="text-center mb-16 md:mb-24 space-y-4">
-        <h2 className="text-4xl md:text-5xl font-medium tracking-tight">Shop by Brand.</h2>
-        <p className="text-xl text-muted font-light max-w-2xl mx-auto">
-           World-class audio brands, curated for you.
-        </p>
-      </div>
-      <div className="relative w-full max-w-7xl mx-auto md:px-0">
+      <SectionHeader title="Shop by brand" lead="World-class audio brands, curated for you." href="/products" linkLabel="All products" />
+      <div className="relative mx-auto w-full max-w-7xl md:px-0">
         <BrandMarquee categories={data} />
       </div>
     </Section>
@@ -53,34 +50,62 @@ export async function FeaturedSection() {
   const data = await getFeaturedProducts();
   return (
     <Section id="featured" background="bg-secondary/5">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
-        <h2 className="text-4xl md:text-5xl font-medium tracking-tight">The Latest.</h2>
-        <Button href="/products" variant="link" className="text-lg">View All Products ›</Button>
-      </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-16">
-        {data.slice(0, 5).map((product) => (
-          <ProductCard key={product.slug} product={product} />
-        ))}
-      </div>
+      <SectionHeader title="The latest" href="/products" linkLabel="View all products" />
+      <LatestShowcase products={data} />
     </Section>
   );
 }
 
+// Mission statement set large, with the two supporting lines beneath. Copy is unchanged.
+export function AboutTeaser() {
+  return (
+    <Section id="about-teaser" className="!pb-8 md:!pb-12">
+      <p className="text-sm text-muted-foreground">Our mission</p>
+      <p className="mt-4 max-w-4xl text-3xl font-medium leading-[1.15] tracking-tight text-balance md:text-5xl">
+        To reveal the soul of the music. True high-fidelity is about emotion, texture, and presence.
+      </p>
+
+      <div className="mt-12 grid grid-cols-1 gap-8 border-t border-border pt-8 md:mt-16 md:grid-cols-2 md:gap-12 md:pt-10">
+        <div>
+          <h2 className="text-xl font-medium md:text-2xl">Who we are</h2>
+          <p className="mt-3 max-w-md text-base leading-relaxed text-muted-foreground md:text-lg">
+            A collective of audiophiles bridging the gap between artist and listener.
+          </p>
+        </div>
+        <div>
+          <h2 className="text-xl font-medium md:text-2xl">What we do</h2>
+          <p className="mt-3 max-w-md text-base leading-relaxed text-muted-foreground md:text-lg">
+            We curate world-class systems. From intimate 2-channel setups to immersive home cinemas.
+          </p>
+        </div>
+      </div>
+
+      <Link
+        href="/about"
+        className="mt-10 inline-flex h-11 items-center gap-1.5 rounded-full bg-secondary px-5 text-sm font-medium tracking-tight transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        More about Cinema Focus
+        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </Link>
+    </Section>
+  );
+}
+
+// Trust badges as one connected strip: hairline-divided cells, left aligned.
 export async function TrustSection() {
   const data = await getTrustBadges();
   return (
-    <Section id="trust" background="bg-card">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+    <Section id="trust" className="!pt-8 md:!pt-12">
+      <ul className="grid grid-cols-2 gap-px overflow-hidden rounded-card bg-border md:grid-cols-4">
         {data.map((badge, idx) => (
-          <div key={idx} className="space-y-4">
-            <div className="flex justify-center text-foreground">
-              <CustomIcon name={badge.icon} size={32} strokeWidth={1.5} />
-            </div>
-            <h4 className="font-medium text-base text-muted">{badge.title}</h4>
-          </div>
+          <li key={idx} className="flex flex-col items-start gap-4 bg-background p-5 md:p-7">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-foreground">
+              <CustomIcon name={badge.icon} size={20} strokeWidth={1.5} />
+            </span>
+            <span className="text-base font-medium leading-snug md:text-lg">{badge.title}</span>
+          </li>
         ))}
-      </div>
+      </ul>
     </Section>
   );
 }
@@ -89,16 +114,41 @@ export async function GallerySection() {
   const data = await getProjects();
   return (
     <Section id="gallery">
-      <div className="mb-16 text-center">
-         <h2 className="text-4xl md:text-5xl font-medium tracking-tight mb-4">Gallery</h2>
-         <Link href="/gallery" className="text-primary hover:underline text-lg">View Full Gallery ›</Link>
-      </div>
+      <SectionHeader title="Gallery" href="/gallery" linkLabel="View full gallery" />
       <HomeGallery projects={data} />
     </Section>
   );
 }
 
-export async function ContactSection() {
-  const info = await getFooter();
-  return <HomeContact initialInfo={info} />;
+// Short "visit us" band; the full form and map live on /contact and /location.
+export function ContactSection() {
+  const { open, close } = geo.hours.weekday;
+  const actionClass = 'h-12 rounded-full px-7 normal-case! tracking-tight!';
+  return (
+    <Section id="home-contact">
+      <div className="grid gap-8 rounded-panel bg-secondary/40 p-6 md:p-12 lg:grid-cols-12 lg:items-center lg:gap-12">
+        <div className="lg:col-span-7">
+          <OpenStatus open={open} close={close} className="bg-background" />
+          <h2 className="mt-5 text-4xl font-medium tracking-tight md:text-5xl">Hear it for yourself</h2>
+          <p className="mt-3 max-w-xl text-lg text-muted-foreground md:text-xl">
+            Come and hear the systems at our {geo.locality} showroom, or send us a message and we will get back to you.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button href="/location" icon className={actionClass}>Visit showroom</Button>
+            <Button href="/contact" variant="outline" className={actionClass}>Contact us</Button>
+          </div>
+        </div>
+        <address className="not-italic text-muted-foreground lg:col-span-5">
+          <div className="text-lg font-medium text-foreground">{geo.name}</div>
+          <div className="mt-1 leading-relaxed">
+            {geo.street_address}, {geo.locality}, {geo.city} {geo.postal_code}
+          </div>
+          <a href={`tel:${geo.mobile}`} className="mt-4 block text-lg font-medium text-foreground transition-colors hover:text-muted-foreground">
+            {geo.mobile}
+          </a>
+          <a href={`mailto:${geo.email}`} className="transition-colors hover:text-foreground">{geo.email}</a>
+        </address>
+      </div>
+    </Section>
+  );
 }

@@ -12,9 +12,9 @@ import { Search, X } from 'lucide-react';
 function SkeletonCard() {
   return (
     <div className="animate-pulse">
-      <div className="rounded-3xl bg-secondary/40 overflow-hidden">
+      <div className="rounded-card bg-secondary/40 overflow-hidden">
         <div className="aspect-square p-6">
-          <div className="w-full h-full rounded-2xl bg-secondary/60" />
+          <div className="w-full h-full rounded-media bg-secondary/60" />
         </div>
         <div className="px-5 pb-6 pt-1 space-y-2">
           <div className="h-2.5 w-16 bg-secondary/60 rounded-full" />
@@ -113,7 +113,7 @@ function ProductListContent({ initialProducts, initialCategories, initialNewLaun
   /* All filter tabs */
   const filterTabs = [
     { label: 'All', key: 'all', onClick: () => setSearchParams({}) },
-    { label: 'New Arrivals', key: 'new-arrivals', onClick: () => setSearchParams({ category: 'new-arrivals' }) },
+    { label: 'New arrivals', key: 'new-arrivals', onClick: () => setSearchParams({ category: 'new-arrivals' }) },
     ...categories.map((c) => ({
       label: c.name,
       key: c.slug,
@@ -123,170 +123,134 @@ function ProductListContent({ initialProducts, initialCategories, initialNewLaun
     })),
   ];
 
+  const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+  const activeLabel = filterTabs.find((t) => t.key === activeCategory)?.label;
+
   return (
     <div className="min-h-screen bg-background">
-      {/* ── Hero header ──────────────────────────────────────────────── */}
-      <div className="pt-36 md:pt-44 pb-6 md:pb-8 text-center px-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-4">
-          Cinema Focus
+      {/* ── Page header ──────────────────────────────────────────────── */}
+      <header className="mx-auto max-w-7xl px-4 pb-8 pt-32 md:px-8 md:pb-10 md:pt-40">
+        <h1 className="text-4xl font-medium tracking-tight md:text-5xl">Our collection</h1>
+        <p className="mt-3 max-w-xl text-lg text-muted-foreground md:text-xl">
+          Premium audio equipment from the brands we stock, ready to hear at the showroom.
         </p>
-        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight text-foreground mb-5">
-          Our Collection.
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground font-light max-w-xl mx-auto leading-relaxed">
-          Discover premium audio equipment crafted for every&nbsp;experience.
-        </p>
-      </div>
-
-      {/* ── Categories (Normal Flow) ─────────────────────────────────── */}
-      <div className="max-w-7xl mt-6 md:mt-8 mx-auto px-4 md:px-8 flex flex-col items-center gap-6">
-        <div className="flex overflow-x-auto scrollbar-hide touch-pan-x w-full gap-2 md:gap-4 pt-3 pb-5 px-1 [&>:first-child]:ml-auto [&>:last-child]:mr-auto">
-          {filterTabs.map((tab) => (
-            <button
-              key={tab.key}
-              id={`filter-brand-${tab.key}`}
-              onClick={tab.onClick}
-              className={clsx(
-                "flex-shrink-0 cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-primary transition-all duration-300",
-                "group flex flex-col items-center text-center w-[120px] md:w-[140px] p-4 rounded-[1.5rem] ease-out border",
-                activeCategory === tab.key
-                  ? "bg-secondary/30 border-primary/30 shadow-[0_8px_16px_-6px_rgba(0,0,0,0.05)] -translate-y-0.5"
-                  : "bg-secondary/10 border-border/10 hover:bg-secondary/20 hover:border-primary/20 hover:shadow-[0_8px_16px_-6px_rgba(0,0,0,0.05)] hover:-translate-y-0.5"
-              )}
-            >
-              <div className={clsx(
-                "w-16 h-16 md:w-20 md:h-20 rounded-full bg-background flex items-center justify-center p-3 transition-all duration-300 ease-out group-hover:scale-[1.05] shadow-[inset_0_1px_2px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.02)] border mb-3",
-                activeCategory === tab.key ? "border-primary/20" : "border-border/5"
-              )}>
-                {tab.key === 'all' ? (
-                  <svg className="w-8 h-8 text-foreground/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                ) : tab.key === 'new-arrivals' ? (
-                  <svg className="w-8 h-8 text-foreground/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-                ) : tab.imageSrc ? (
-                  <img src={tab.imageSrc} alt={tab.label || 'Brand'} className="w-full h-full object-contain p-1" />
-                ) : (
-                  <div className="text-muted-foreground/30 font-bold text-lg uppercase select-none">{tab.label.substring(0, 2)}</div>
-                )}
-              </div>
-              
-              <div className="space-y-1 w-full">
-                <span className={clsx(
-                  "transition-colors text-xs md:text-sm font-semibold tracking-tight leading-tight line-clamp-1 block",
-                  activeCategory === tab.key ? "text-primary" : "text-foreground group-hover:text-primary"
-                )}>
-                  {tab.label}
-                </span>
-                
-                <span className="text-[9px] md:text-[10px] text-muted-foreground/80 font-medium block">
-                  {tab.key === 'all' ? 'View Everything' : 
-                   tab.key === 'new-arrivals' ? 'Latest Products' : 
-                   `${tab.count || 0} ${tab.count === 1 ? 'item' : 'items'}`}
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
+      </header>
 
       {/* ── Filters sentinel (triggers sticky) ───────────────────────── */}
       <div id="filters-sentinel" className="h-px" />
 
-      {/* ── Sticky Search Bar ────────────────────────────────────────── */}
+      {/* ── Sticky filter bar: search + brand chips ──────────────────── */}
       <div
         ref={filtersRef}
         className={clsx(
-          'sticky top-[92px] lg:top-[112px] z-40 transition-all duration-300 flex justify-center w-full',
-          filtersSticky ? 'px-4' : 'px-0'
+          'sticky top-[88px] z-40 w-full bg-background transition-shadow duration-300 lg:top-[104px]',
+          filtersSticky ? 'shadow-[0_1px_0_0_hsl(var(--border))]' : ''
         )}
       >
-        <div className={clsx(
-          "transition-all duration-500 w-full flex justify-center",
-          filtersSticky
-            ? 'bg-background/85 backdrop-blur-xl border border-border/60 shadow-lg rounded-full py-1.5 max-w-2xl'
-            : 'bg-transparent py-4 max-w-7xl px-4 md:px-8'
-        )}>
-          {/* Search Bar */}
-          <div className={clsx(
-            "relative transition-all duration-500 w-full",
-            filtersSticky ? "max-w-full px-1" : "max-w-2xl"
-          )}>
-            <Search className={clsx(
-              "absolute text-muted-foreground/60 transition-all",
-              filtersSticky ? "left-5 top-2.5 w-4 h-4" : "left-4 top-3.5 w-5 h-5"
-            )} />
+        <div className="mx-auto max-w-7xl space-y-3 px-4 py-3 md:px-8">
+          <div className="relative max-w-md">
+            <Search aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
-              type="text"
-              placeholder="Search our collection..."
+              type="search"
+              aria-label="Search products"
+              placeholder="Search products"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={clsx(
-                "w-full rounded-full border outline-none transition-all duration-300",
-                filtersSticky
-                  ? "pl-11 pr-10 py-2 bg-transparent border-transparent focus:bg-secondary/30 focus:border-border/40 text-sm placeholder:text-muted-foreground/60"
-                  : "pl-12 pr-10 py-3 bg-secondary/30 border-border/40 focus:ring-2 focus:ring-primary/20 text-base shadow-sm placeholder:text-muted-foreground/50"
+                'h-11 w-full rounded-full bg-secondary pl-11 pr-11 text-base outline-none transition-colors placeholder:text-muted-foreground focus:bg-secondary/70 md:text-sm',
+                '[&::-webkit-search-cancel-button]:hidden',
+                focusRing
               )}
             />
             {searchQuery && (
               <button
+                type="button"
                 onClick={() => setSearchQuery('')}
-                className={clsx(
-                  "absolute rounded-full hover:bg-secondary/80 text-muted-foreground transition-colors cursor-pointer",
-                  filtersSticky ? "right-4 top-2 p-1" : "right-4 top-3.5 p-1"
-                )}
-                title="Clear search"
+                aria-label="Clear search"
+                className={clsx('absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground', focusRing)}
               >
-                <X className={clsx(filtersSticky ? "w-4 h-4" : "w-5 h-5")} />
+                <X className="h-4 w-4" />
               </button>
             )}
+          </div>
+
+          <div role="group" aria-label="Filter by brand" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide touch-pan-x md:-mx-8 md:px-8">
+            {filterTabs.map((tab) => {
+              const active = activeCategory === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  id={`filter-brand-${tab.key}`}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={tab.onClick}
+                  className={clsx(
+                    'flex h-11 shrink-0 select-none items-center gap-2 rounded-full pr-4 text-sm font-medium tracking-tight transition-colors',
+                    tab.imageSrc ? 'pl-2' : 'pl-4',
+                    active ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground hover:bg-accent',
+                    focusRing
+                  )}
+                >
+                  {tab.imageSrc ? (
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-background p-1">
+                      <img src={tab.imageSrc} alt="" loading="lazy" className="h-full w-full object-contain" />
+                    </span>
+                  ) : tab.key === 'new-arrivals' ? (
+                    <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-signal" />
+                  ) : null}
+                  <span className="whitespace-nowrap">{tab.label}</span>
+                  {typeof tab.count === 'number' && tab.count > 0 && (
+                    <span className={clsx('text-xs font-normal', active ? 'text-primary-foreground/70' : 'text-muted-foreground')}>{tab.count}</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* ── Product count ─────────────────────────────────────────────── */}
+      {/* ── Result count ─────────────────────────────────────────────── */}
       {!loading && (
-        <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4 pb-1">
-          <p className="text-xs text-muted-foreground font-medium tracking-wide">
+        <div className="mx-auto max-w-7xl px-4 pb-1 pt-5 md:px-8">
+          <p className="text-sm text-muted-foreground" aria-live="polite">
             {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
+            {activeCategory !== 'all' && activeLabel ? ` in ${activeLabel}` : ''}
+            {searchQuery ? ` matching "${searchQuery}"` : ''}
           </p>
         </div>
       )}
 
       {/* ── Grid ─────────────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4 pb-24 md:pb-32">
+      <div className="mx-auto max-w-7xl px-4 pb-24 pt-4 md:px-8 md:pb-32">
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-5 sm:gap-x-4 md:gap-x-6 md:gap-y-8">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4 md:gap-x-6 md:gap-y-8 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <SkeletonCard key={i} />
             ))}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-5 sm:gap-x-4 md:gap-x-6 md:gap-y-8">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4 md:gap-x-6 md:gap-y-8 lg:grid-cols-4">
             {filteredProducts.map((product) => (
               <ProductCard key={product.slug} product={product} headingLevel="h2" />
             ))}
           </div>
         ) : (
-          /* Empty state */
-          <div className="flex flex-col items-center justify-center py-24 md:py-32 text-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-2">
-              <svg className="w-7 h-7 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-              </svg>
-            </div>
-            <p className="text-lg font-medium text-foreground">No products found</p>
-            <p className="text-sm text-muted-foreground max-w-sm px-4">
-              {searchQuery 
-                ? `We couldn't find any products matching "${searchQuery}". Try a different search term.` 
-                : 'We couldn\'t find any products for this brand. Try browsing all products.'}
+          <div className="rounded-panel bg-secondary/40 px-6 py-20 text-center md:py-28">
+            <h2 className="text-xl font-medium md:text-2xl">No products found</h2>
+            <p className="mx-auto mt-2 max-w-sm text-muted-foreground">
+              {searchQuery
+                ? `Nothing matches "${searchQuery}". Try a different word or clear the search.`
+                : 'There are no products here yet. Browse the full collection instead.'}
             </p>
             <button
+              type="button"
               onClick={() => {
                 setSearchQuery('');
                 setSearchParams({});
               }}
-              className="mt-2 px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:opacity-90 transition-opacity cursor-pointer"
+              className={clsx('mt-8 inline-flex h-12 items-center rounded-full bg-primary px-7 text-sm font-medium tracking-tight text-primary-foreground transition-colors hover:bg-primary/90', focusRing)}
             >
-              Reset Filters
+              Show all products
             </button>
           </div>
         )}

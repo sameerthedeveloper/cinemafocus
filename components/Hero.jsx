@@ -4,9 +4,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getImageProps } from 'next/image';
 import Button from './Button';
 import clsx from 'clsx';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { CINEMA_FOCUS_GEO as geo } from '@/lib/geoContext';
 import gsap from 'gsap';
 import Reveal from '@/components/Reveal';
+import Link from 'next/link';
 
 // Waveform Visualizer Component
 const WaveformVisualizer = ({ className = '' }) => {
@@ -43,9 +45,42 @@ const WaveformVisualizer = ({ className = '' }) => {
   );
 };
 
+// Decorative equalizer along the bottom edge. Deterministic per-bar values keep SSR and client identical.
+const SoundWave = ({ light = false }) => {
+  const bars = Array.from({ length: 72 }, (_, i) => {
+    const wave = (Math.sin(i * 0.37) + Math.sin(i * 0.11 + 1.3) + 2) / 4; // 0..1 envelope
+    return {
+      id: i,
+      // Rounded to 2dp: Math.sin can differ in the last digit between Node and the browser,
+      // which would trip a hydration mismatch on the inline style values.
+      hi: (0.35 + wave * 0.65).toFixed(2),
+      lo: (0.12 + ((i * 29) % 17) / 100).toFixed(2),
+      dur: 1.8 + ((i * 13) % 14) / 10,
+      delay: -(((i * 7) % 20) / 10),
+    };
+  });
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex h-28 items-end gap-[3px] px-2 opacity-70 md:h-36 md:gap-1 [mask-image:linear-gradient(to_top,black,transparent)]"
+    >
+      {bars.map((b) => (
+        <span
+          key={b.id}
+          className={clsx('hero-eq-bar h-full flex-1 rounded-t-full', light ? 'bg-black/25' : 'bg-white/25')}
+          style={{ '--hi': b.hi, '--lo': b.lo, '--dur': `${b.dur}s`, '--delay': `${b.delay}s` }}
+        />
+      ))}
+    </div>
+  );
+};
+
 const Hero = ({ 
   // New unified slides array (each slide contains all visual configurations)
   slides = [],
+  // Hero-wide options (set in the admin panel)
+  progressStyle = 'bars',
+  autoplay = true,
   
   // Single-slide legacy fallbacks for robust backwards compatibility
   title, 
@@ -201,7 +236,7 @@ const Hero = ({
 
   // Auto-play loop with dynamic per-slide durations
   useEffect(() => {
-    if (slideItems.length <= 1 || isPaused) {
+    if (slideItems.length <= 1 || isPaused || autoplay === false) {
       if (autoPlayRef.current) clearTimeout(autoPlayRef.current);
       return;
     }
@@ -216,12 +251,15 @@ const Hero = ({
     return () => {
       if (autoPlayRef.current) clearTimeout(autoPlayRef.current);
     };
-  }, [currentIndex, slideItems, isPaused]);
+  }, [currentIndex, slideItems, isPaused, autoplay]);
 
   // Logo/text theming for the current slide. This used to sample the image through a canvas, but
   // the image CDN sends no CORS headers, so the sample always failed (console error + a second
   // download of the hero) and fell back to "dark". Slides can opt in via `isLightBackground`.
-  const isLightBackground = slideItems[currentIndex]?.isLightBackground === true;
+  const activeSlide = slideItems[currentIndex] || {};
+  const isStage = activeSlide.layout === 'product-stage';
+  const isLightBackground = activeSlide.isLightBackground === true || (isStage && activeSlide.stageTone !== 'dark');
+
   useEffect(() => {
     window.dispatchEvent(new CustomEvent('hero-brightness', { detail: { isLight: isLightBackground } }));
   }, [isLightBackground]);
@@ -303,29 +341,29 @@ const Hero = ({
   const getButtonClasses = (slide) => {
     const shape = slide.ctaShape === 'rounded-none' ? 'rounded-none' : slide.ctaShape === 'rounded-lg' ? 'rounded-lg' : 'rounded-full';
     const sizeClass = slide.ctaSize === 'sm' ? 'px-6 py-2 text-xs' : slide.ctaSize === 'lg' ? 'px-10 py-4 text-base' : 'px-8 py-3 text-sm';
-    const hoverBase = "hover:scale-105 hover:-translate-y-1 transition-all duration-200 ease-out";
+    const hoverBase = "normal-case! tracking-tight! transition-colors duration-200";
 
     // SMART OVERRIDE: If light background and using primary variant (default white), flip it to dark button
     if (isLightBackground && (slide.ctaVariant === 'primary' || !slide.ctaVariant)) {
-      return clsx(shape, sizeClass, hoverBase, "bg-black text-white hover:bg-zinc-800 border-none font-bold shadow-lg hover:shadow-black/40");
+      return clsx(shape, sizeClass, hoverBase, "bg-black text-white hover:bg-zinc-800 border-none font-medium");
     }
 
     if (slide.ctaVariant === 'secondary') {
-      return clsx(shape, sizeClass, hoverBase, "bg-zinc-900 text-white hover:bg-zinc-800 border border-zinc-800 font-bold shadow-md hover:shadow-lg hover:shadow-zinc-700/50");
+      return clsx(shape, sizeClass, hoverBase, "bg-zinc-900 text-white hover:bg-zinc-800 border border-zinc-800 font-medium");
     } else if (slide.ctaVariant === 'outline') {
       // Smart override for outline button on bright bg
       if (isLightBackground) {
-        return clsx(shape, sizeClass, hoverBase, "bg-transparent text-black border border-black hover:bg-black hover:text-white font-bold hover:shadow-lg hover:shadow-black/30");
+        return clsx(shape, sizeClass, hoverBase, "bg-transparent text-black border border-black hover:bg-black hover:text-white font-medium");
       }
-      return clsx(shape, sizeClass, hoverBase, "bg-transparent text-white border border-white hover:bg-white hover:text-black font-bold hover:shadow-lg hover:shadow-white/30");
+      return clsx(shape, sizeClass, hoverBase, "bg-transparent text-white border border-white hover:bg-white hover:text-black font-medium");
     } else if (slide.ctaVariant === 'gradient') {
-      return clsx(shape, sizeClass, hoverBase, "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:opacity-90 font-bold border-none shadow-lg hover:shadow-indigo-500/40");
+      return clsx(shape, sizeClass, hoverBase, "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:opacity-90 font-medium border-none");
     } else if (slide.ctaVariant === 'link') {
       return clsx(shape, sizeClass, hoverBase, "bg-transparent text-white hover:underline font-medium border-none p-0", isLightBackground && "text-black");
     }
 
     // Default / Primary: White Button (for dark background)
-    return clsx(shape, sizeClass, hoverBase, "bg-white text-black hover:bg-zinc-200 border-none font-bold shadow-lg hover:shadow-white/40");
+    return clsx(shape, sizeClass, hoverBase, "bg-white text-black hover:bg-white/90 border-none font-medium");
   };
 
   const getButtonStyle = (slide) => {
@@ -356,7 +394,29 @@ const Hero = ({
     return style;
   };
 
-  const renderResponsiveImages = (slide, idx, isActive, isSplit = false) => {
+  // Primary CTA comes from the CMS slide; the secondary one points at the showroom page.
+  const renderCtas = (slide, alignItemsClass) => (
+    <div className={clsx('flex flex-wrap gap-3', alignItemsClass === 'items-center' ? 'justify-center' : alignItemsClass === 'items-end' ? 'justify-end' : 'justify-start')}>
+      <Button to={slide.ctaLink || '/products'} className={getButtonClasses(slide)} style={getButtonStyle(slide)}>
+        {slide.ctaText || 'Discover products'}
+        <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+      </Button>
+      {slide.showSecondaryCta !== false && (
+        <Button
+          to={slide.ctaSecondaryLink || '/location'}
+          variant="ghost"
+          className={clsx(
+            'rounded-full border bg-transparent! px-8 py-3 text-sm font-medium normal-case! tracking-tight! transition-colors',
+            isLightBackground ? 'border-black/40 text-black! hover:bg-black/10!' : 'border-white/40 text-white! hover:bg-white/10!'
+          )}
+        >
+          {slide.ctaSecondaryText || 'Visit showroom'}
+        </Button>
+      )}
+    </div>
+  );
+
+  const renderResponsiveImages = (slide, idx, isActive, isSplit = false, fit = 'cover') => {
     if (!slide.imageUrl && !slide.imageUrlMobile && !slide.imageUrlTablet && !slide.imageUrlUltrawide) {
       return (
         <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-600">
@@ -402,10 +462,10 @@ const Hero = ({
         <img
           {...imgProps}
           srcSet={mobileSrcSet}
-          className={clsx("object-cover transition-all ease-out", isActive ? "scale-105 duration-[8000ms]" : "scale-100 duration-500")}
+          className={clsx(fit === 'contain' ? 'object-contain' : 'object-cover', 'transition-all ease-out', isActive ? (fit === 'contain' ? 'scale-[1.03] duration-[8000ms]' : 'scale-105 duration-[8000ms]') : 'scale-100 duration-500')}
           style={{
             ...baseStyle,
-            objectPosition: slide.imagePosition || 'center',
+            objectPosition: fit === 'contain' ? 'center bottom' : slide.imagePosition || 'center',
             filter: `brightness(${slide.imageBrightness !== undefined ? slide.imageBrightness : 100}%) blur(${slide.imageBlur !== undefined ? slide.imageBlur : 0}px)`,
             opacity: (slide.imageOpacity !== undefined ? slide.imageOpacity : 100) / 100,
           }}
@@ -461,21 +521,13 @@ const Hero = ({
               )}>
                 {isActive && (
                   <Reveal className={clsx("w-full max-w-xl space-y-8 animate-fade-in-up flex flex-col", flexAlignItems)}>
-                     <h1 ref={titleRef} className={clsx("hero-intro text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] drop-shadow-xl", alignClass)} style={getTitleStyle(slide)}>
+                     <h1 ref={titleRef} className={clsx("hero-intro text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] text-balance [text-shadow:0_2px_24px_rgb(0_0_0/0.35)]", alignClass)} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p ref={subtitleRef} className={clsx("hero-intro hero-intro-delayed text-base sm:text-lg md:text-xl font-medium leading-relaxed drop-shadow-lg", pAlignClass)} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("hero-intro hero-intro-delayed text-base sm:text-lg md:text-xl font-normal leading-relaxed", pAlignClass)} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
-                     <div className="pt-4">
-                       <Button 
-                         to={slide.ctaLink || '/products'} 
-                         className={getButtonClasses(slide)}
-                         style={getButtonStyle(slide)}
-                       >
-                         {slide.ctaText || "Discover Products"}
-                       </Button>
-                     </div>
+                     <div className="pt-4 md:pt-6">{renderCtas(slide, flexAlignItems.split(" ").find((c) => c.startsWith("items-")) || "items-center")}</div>
                   </Reveal>
                 )}
               </div>
@@ -487,6 +539,77 @@ const Hero = ({
               )}>
                  {renderResponsiveImages(slide, idx, isActive, true)}
                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent md:bg-gradient-to-r md:from-zinc-950/20 md:to-transparent pointer-events-none" />
+              </div>
+            </div>
+          );
+        }
+
+        // Render Product Stage Layout: studio backdrop, centred name and tagline, product shot anchored below.
+        if (slide.layout === 'product-stage') {
+          const dark = slide.stageTone === 'dark';
+          const fg = dark ? '#ffffff' : '#111111';
+          const subFg = dark ? 'rgb(255 255 255 / 0.75)' : '#52525b';
+          return (
+            <div
+              key={`slide-${idx}`}
+              className={clsx(
+                'absolute inset-0 flex h-full w-full flex-col items-center overflow-hidden transition-all duration-1000 ease-in-out transform z-0',
+                isActive ? 'opacity-100 scale-100 z-10 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
+              )}
+              style={{
+                background: dark
+                  ? 'radial-gradient(ellipse at 50% 35%, #2a2a2e 0%, #121214 55%, #0a0a0a 100%)'
+                  : 'radial-gradient(ellipse at 50% 30%, #ffffff 0%, #ececef 55%, #dcdce1 100%)',
+              }}
+            >
+              {/* Product shot, anchored to the bottom edge */}
+              <div className={clsx("absolute inset-x-0 bottom-0 z-0 mx-auto h-[58%] w-[min(94vw,1180px)] md:h-[64%]", !dark && "mix-blend-multiply")}>
+                {renderResponsiveImages(slide, idx, isActive, false, 'contain')}
+              </div>
+              {/* Soft floor shade so the product sits on the stage */}
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-24"
+                style={{ background: dark ? 'linear-gradient(to top, rgb(0 0 0 / 0.5), transparent)' : 'linear-gradient(to top, rgb(0 0 0 / 0.08), transparent)' }}
+              />
+
+              <div className="relative z-10 mt-28 flex max-w-3xl flex-col items-center px-6 text-center md:mt-32">
+                {isActive && (
+                  <>
+                    <h1
+                      ref={titleRef}
+                      className={clsx('hero-intro text-4xl font-semibold leading-[1.05] text-balance sm:text-5xl md:text-6xl', slide.stageUppercase !== false ? 'uppercase tracking-[0.1em]' : 'tracking-tight')}
+                      style={{ color: fg, ...(slide.titleSize ? { fontSize: `clamp(28px, 6vw, ${slide.titleSize}px)` } : {}) }}
+                    >
+                      {slide.title}
+                    </h1>
+                    <p
+                      ref={subtitleRef}
+                      className="hero-intro hero-intro-delayed mt-4 text-lg font-light text-balance md:text-2xl"
+                      style={{ color: subFg }}
+                    >
+                      {slide.subtitle}
+                    </p>
+                    <div className="hero-intro hero-intro-delayed mt-6 flex items-center gap-6">
+                      <Link
+                        href={slide.ctaLink || '/products'}
+                        className="group inline-flex items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
+                        style={{ color: fg }}
+                      >
+                        {slide.ctaText || 'Learn more'}
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                      </Link>
+                      {slide.showSecondaryCta === true && (
+                        <Link
+                          href={slide.ctaSecondaryLink || '/location'}
+                          className="text-sm font-medium underline-offset-4 hover:underline"
+                          style={{ color: subFg }}
+                        >
+                          {slide.ctaSecondaryText || 'Visit showroom'}
+                        </Link>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           );
@@ -513,21 +636,13 @@ const Hero = ({
                 <div className={`w-full flex flex-col ${alignClass}`}>
                   {isActive && (
                     <Reveal className={`w-full max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                      <h1 ref={titleRef} className={clsx("hero-intro text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl", alignClass)} style={getTitleStyle(slide)}>
+                      <h1 ref={titleRef} className={clsx("hero-intro text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.08] text-balance [text-shadow:0_2px_28px_rgb(0_0_0/0.35)]", alignClass)} style={getTitleStyle(slide)}>
                         {slide.title}
                       </h1>
-                      <p ref={subtitleRef} className={clsx("hero-intro hero-intro-delayed text-base sm:text-lg md:text-2xl font-medium max-w-2xl leading-relaxed drop-shadow-xl", pAlignClass)} style={getSubtitleStyle(slide)}>
+                      <p ref={subtitleRef} className={clsx("hero-intro hero-intro-delayed text-base sm:text-lg md:text-xl font-normal max-w-xl leading-relaxed [text-shadow:0_1px_18px_rgb(0_0_0/0.35)]", pAlignClass)} style={getSubtitleStyle(slide)}>
                         {slide.subtitle}
                       </p>
-                      <div className="pt-8">
-                        <Button 
-                          to={slide.ctaLink || '/products'} 
-                          className={getButtonClasses(slide)}
-                          style={getButtonStyle(slide)}
-                        >
-                          {slide.ctaText || "Discover Products"}
-                        </Button>
-                      </div>
+                      <div className="pt-4 md:pt-6">{renderCtas(slide, flexAlignItems.split(" ").find((c) => c.startsWith("items-")) || "items-center")}</div>
                     </Reveal>
                   )}
                 </div>
@@ -559,6 +674,8 @@ const Hero = ({
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-95 pointer-events-none" />
+              {/* Soft vignette so white text stays legible on bright photos */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgb(0_0_0/0.35)_100%)]" />
             </div>
 
             {/* Content */}
@@ -566,21 +683,13 @@ const Hero = ({
                <div className={`w-full flex flex-col ${alignClass}`}>
                  {isActive && (
                    <Reveal className={`w-full max-w-4xl space-y-6 md:space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                     <h1 ref={titleRef} className={clsx("hero-intro text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl", alignClass)} style={getTitleStyle(slide)}>
+                     <h1 ref={titleRef} className={clsx("hero-intro text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.08] text-balance [text-shadow:0_2px_28px_rgb(0_0_0/0.35)]", alignClass)} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p ref={subtitleRef} className={clsx("hero-intro hero-intro-delayed text-base sm:text-lg md:text-2xl font-medium max-w-2xl leading-relaxed drop-shadow-xl", pAlignClass)} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("hero-intro hero-intro-delayed text-base sm:text-lg md:text-xl font-normal max-w-xl leading-relaxed [text-shadow:0_1px_18px_rgb(0_0_0/0.35)]", pAlignClass)} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
-                     <div className="pt-4 md:pt-8">
-                       <Button 
-                         to={slide.ctaLink || '/products'} 
-                         className={getButtonClasses(slide)}
-                         style={getButtonStyle(slide)}
-                       >
-                         {slide.ctaText || "Discover Products"}
-                       </Button>
-                     </div>
+                     <div className="pt-4 md:pt-6">{renderCtas(slide, flexAlignItems.split(" ").find((c) => c.startsWith("items-")) || "items-center")}</div>
                    </Reveal>
                  )}
                </div>
@@ -589,42 +698,80 @@ const Hero = ({
         );
       })}
 
-      {/* 2. NAVIGATION ARROWS (Only show if multiple slides exist) */}
-      {slideItems.length > 1 && (
-        <>
-          <button 
-            onClick={handlePrev}
-            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-black/30 backdrop-blur-md border border-white/10 hover:border-white/30 text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover/hero:opacity-100 hover:bg-black/60 shadow-lg cursor-pointer"
-            aria-label="Previous Slide"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <button 
-            onClick={handleNext}
-            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-black/30 backdrop-blur-md border border-white/10 hover:border-white/30 text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover/hero:opacity-100 hover:bg-black/60 shadow-lg cursor-pointer"
-            aria-label="Next Slide"
-          >
-            <ChevronRight size={24} />
-          </button>
-        </>
-      )}
+      {(activeSlide.showWaveform !== undefined ? activeSlide.showWaveform : !isStage) && <SoundWave light={isLightBackground} />}
 
-      {/* 3. PAGINATION DOTS (Only show if multiple slides exist) */}
-      {slideItems.length > 1 && (
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex gap-2.5">
-          {slideItems.map((_, idx) => (
+      {/* 2. BOTTOM BAR: showroom line on the left, slide controls on the right */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto flex max-w-7xl items-end justify-center px-4 pb-6 md:justify-between md:px-8 md:pb-8">
+        {activeSlide.showInfoBar !== false ? (
+          <p className={clsx("hidden text-sm md:block", isLightBackground ? "text-black/60" : "text-white/80")}>
+            {activeSlide.infoText || `${geo.locality}, ${geo.city} · Open Monday to Saturday`}
+          </p>
+        ) : (
+          <span className="hidden md:block" />
+        )}
+
+        {slideItems.length > 1 && (
+          <div className="pointer-events-auto flex items-center gap-1" role="group" aria-label="Hero slides">
             <button
-              key={`dot-${idx}`}
-              onClick={() => handleDotClick(idx)}
-              className={clsx(
-                "h-1.5 transition-all duration-300 rounded-full cursor-pointer",
-                idx === currentIndex ? "w-8 bg-white" : "w-2 bg-white/40 hover:bg-white/70"
-              )}
-              aria-label={`Go to slide ${idx + 1}`}
-            />
-          ))}
-        </div>
-      )}
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous slide"
+              className={clsx('flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2', isLightBackground ? 'text-black hover:bg-black/10 focus-visible:ring-black' : 'text-white hover:bg-white/15 focus-visible:ring-white')}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <div className="flex items-center">
+              {progressStyle === 'dots' ? slideItems.map((_, idx) => (
+                <button
+                  key={`dot-${idx}`}
+                  type="button"
+                  onClick={() => handleDotClick(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  aria-current={idx === currentIndex ? 'true' : undefined}
+                  className="flex h-11 w-5 items-center justify-center focus-visible:outline-none"
+                >
+                  <span className={clsx('block h-1.5 rounded-full transition-all duration-300', idx === currentIndex ? (isLightBackground ? 'w-6 bg-black' : 'w-6 bg-white') : (isLightBackground ? 'w-1.5 bg-black/30 hover:bg-black/60' : 'w-1.5 bg-white/40 hover:bg-white/70'))} />
+                </button>
+              )) : slideItems.map((_, idx) => {
+                const isCurrent = idx === currentIndex;
+                const dur = slideItems[idx]?.duration !== undefined ? slideItems[idx].duration : 6;
+                return (
+                  <button
+                    key={`dot-${idx}`}
+                    type="button"
+                    onClick={() => handleDotClick(idx)}
+                    aria-label={`Go to slide ${idx + 1}`}
+                    aria-current={isCurrent ? 'true' : undefined}
+                    className="group/bar flex h-11 w-9 items-center justify-center focus-visible:outline-none sm:w-12"
+                  >
+                    <span className={clsx("relative block h-0.5 w-full overflow-hidden rounded-full group-focus-visible/bar:ring-2 group-focus-visible/bar:ring-offset-4 group-focus-visible/bar:ring-offset-transparent", isLightBackground ? "bg-black/20 group-focus-visible/bar:ring-black" : "bg-white/30 group-focus-visible/bar:ring-white")}>
+                      <span
+                        key={`${idx}-${currentIndex}-${isPaused}`}
+                        className={clsx("hero-progress-fill absolute inset-0 origin-left", isLightBackground ? "bg-black" : "bg-white")}
+                        style={
+                          idx < currentIndex
+                            ? { transform: 'scaleX(1)' }
+                            : isCurrent && !isPaused
+                              ? { animation: `hero-progress ${dur}s linear forwards` }
+                              : { transform: 'scaleX(0)' }
+                        }
+                      />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next slide"
+              className={clsx('flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2', isLightBackground ? 'text-black hover:bg-black/10 focus-visible:ring-black' : 'text-white hover:bg-white/15 focus-visible:ring-white')}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* 4. SCROLL INDICATOR with Chevron Pulse */}
       {/* <div

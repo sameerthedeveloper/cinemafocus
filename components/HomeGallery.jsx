@@ -70,40 +70,48 @@ export default function HomeGallery({ projects }) {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedProjects.length > 0 ? displayedProjects.map((project, i) => (
-          <div 
-            key={project.id || i} 
-            className="relative group cursor-pointer"
+          <button
+            type="button"
+            key={project.id || i}
+            aria-label={`View photo: ${project.title || 'Cinema Focus photo'}`}
+            className="group relative block w-full overflow-hidden rounded-card text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             onClick={() => openLightbox(i)}
           >
             <LazyImage 
               src={project.imageUrl} 
-              alt={project.title || 'Cinema Focus installation'}
+              alt={project.title || 'Cinema Focus photo'}
               aspectRatio="aspect-video"
-              containerClassName="rounded-2xl"
-              className="transition-transform duration-1000 group-hover:scale-110" 
+              containerClassName="rounded-card"
+              className="transition-transform duration-700 ease-out group-hover:scale-[1.04]" 
               style={{ objectPosition: project.imagePosition || project.image_position || 'center' }}
             />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                <span className="text-white font-medium text-lg tracking-wide border border-white/30 px-6 py-2 rounded-full backdrop-blur-sm">View Photo</span>
-            </div>
-          </div>
+            {project.title && (
+              <span className="absolute bottom-4 left-4 z-10 line-clamp-1 max-w-[calc(100%-2rem)] rounded-full bg-background px-4 py-2 text-sm font-medium shadow-float">
+                {project.title}
+              </span>
+            )}
+          </button>
         )) : (
             // Fallback UI if no projects
             [1, 2, 3].map((_, i) => (
-                <div key={i} className="aspect-video rounded-2xl bg-secondary animate-pulse" />
+                <div key={i} className="aspect-video rounded-card bg-secondary/60 animate-pulse" />
             ))
         )}
       </div>
 
       {lightboxIndex !== null && isMounted && createPortal(
         <div 
-          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Photo viewer"
+          className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
             <button 
               onClick={closeLightbox}
+              aria-label="Close photo"
               className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors p-2 z-50 rounded-full hover:bg-white/10"
             >
               <X size={32} strokeWidth={1.5} />
@@ -111,6 +119,7 @@ export default function HomeGallery({ projects }) {
 
             <button 
                 onClick={prevImage}
+                aria-label="Previous photo"
                 className="absolute left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all z-50 hidden md:block"
             >
                 <ChevronLeft size={40} strokeWidth={1} />
@@ -118,6 +127,7 @@ export default function HomeGallery({ projects }) {
 
             <button 
                 onClick={nextImage}
+                aria-label="Next photo"
                 className="absolute right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all z-50 hidden md:block"
             >
                 <ChevronRight size={40} strokeWidth={1} />
@@ -130,7 +140,7 @@ export default function HomeGallery({ projects }) {
                 <div className="relative w-full h-full">
                     <OptimizedImage 
                         src={displayedProjects[lightboxIndex].imageUrl} 
-                        alt={displayedProjects[lightboxIndex].title || 'Cinema Focus installation'}
+                        alt={displayedProjects[lightboxIndex].title || 'Cinema Focus photo'}
                         fill
                         optimize
                         className="object-contain shadow-2xl rounded-sm"
@@ -139,8 +149,8 @@ export default function HomeGallery({ projects }) {
                     />
                 </div>
                 <div className="mt-6 text-center">
-                    <h3 className="text-white text-xl md:text-2xl font-light tracking-wide">{displayedProjects[lightboxIndex].title}</h3>
-                    <p className="text-white/40 text-sm mt-2 font-mono">
+                    <h3 className="text-white text-xl md:text-2xl font-medium">{displayedProjects[lightboxIndex].title}</h3>
+                    <p className="text-white/70 text-sm mt-2">
                         {lightboxIndex + 1} / {displayedProjects.length}
                     </p>
                 </div>

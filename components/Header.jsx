@@ -8,6 +8,7 @@ import { Menu, X, ArrowRight } from 'lucide-react';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import gsap from 'gsap';
 const logo = '/images/logo.png';
+const logoLight = '/images/logo-light.webp';
 
 const NAV_LINKS = [
   { name: 'New Launches', path: '/products?category=new-arrivals', isNew: true },
@@ -21,6 +22,9 @@ const NAV_LINKS = [
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // The hero tells us when its current slide is bright (e.g. a studio-white product stage),
+  // so the transparent header can switch to dark text and the dark logo.
+  const [heroIsLight, setHeroIsLight] = useState(false);
   const headerRef = useRef(null);
   const mobilePanelRef = useRef(null);
   const mobileListRef = useRef(null);
@@ -44,6 +48,12 @@ const Header = () => {
   }, [pathname]);
 
 
+  // Over the dark home hero the header is transparent with light content and the
+  // light logo. Once scrolled (or with the mobile menu open) it becomes a solid
+  // white pill with dark content, on every page.
+  const overHero = resolved.path === '/' && !isScrolled && !isMenuOpen && !heroIsLight;
+  const showChrome = isScrolled || isMenuOpen;
+
   const isActive = (path) => {
     const [base, query] = path.split('?');
     if (query) return resolved.path === base && resolved.search.includes(query);
@@ -53,10 +63,29 @@ const Header = () => {
   const activePath = NAV_LINKS.find((l) => isActive(l.path))?.path ?? null;
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Hysteresis (on past 24px, off under 8px) stops flicker at the threshold;
+    // rAF keeps it to one state check per frame.
+    let frame = 0;
+    const sync = () => {
+      frame = 0;
+      const y = window.scrollY;
+      setIsScrolled((prev) => (prev ? y > 8 : y > 24));
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(sync);
+    };
+    sync();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    const onBrightness = (e) => setHeroIsLight(Boolean(e.detail?.isLight));
+    window.addEventListener('hero-brightness', onBrightness);
+    return () => window.removeEventListener('hero-brightness', onBrightness);
   }, []);
 
   // Close menu on route change and on Escape
@@ -122,29 +151,37 @@ const Header = () => {
     <header
       ref={headerRef}
       className={clsx(
-        'fixed inset-x-4 top-4 z-99 mx-auto w-auto max-w-6xl border transition-[background-color,border-color,box-shadow] duration-300 sm:inset-x-10 sm:top-5',
-        // Always a solid white pill on every page (including over the dark hero);
-        // the float shadow only appears once scrolled.
-        'border-border bg-background text-foreground',
-        isScrolled || isMenuOpen ? 'shadow-float' : 'shadow-none',
+        'fixed inset-x-4 top-4 z-99 mx-auto w-auto max-w-[calc(100vw-2rem)] border lg:w-fit transition-[background-color,border-color,box-shadow] duration-300 sm:inset-x-10 sm:top-5',
+        showChrome
+          ? 'border-border bg-background text-foreground shadow-float'
+          : clsx('border-transparent bg-transparent shadow-none', overHero ? 'text-white' : 'text-foreground'),
         isMenuOpen ? 'flex flex-col rounded-[28px]' : 'flex flex-col rounded-full'
       )}
     >
-      <nav className="mx-auto flex h-16 w-full lg:h-[76px] items-center justify-between px-5 sm:px-8 lg:pl-6 lg:pr-8">
+      <nav className="mx-auto flex h-16 w-full items-center justify-between gap-6 px-5 sm:px-8 lg:h-[76px] lg:pl-7 lg:pr-5 xl:gap-10">
         {/* Logo */}
         <Link
           href="/"
           data-nav-item
           aria-label="Cinema Focus Home"
-          className="relative block h-12 w-44 shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-52 lg:h-14 lg:w-52"
+          className="relative block h-12 w-40 shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-48 lg:h-14 lg:w-48"
         >
           <Image
-            src={logo}
+            src={logoLight}
             alt="Cinema Focus"
             fill
             priority
             sizes="256px"
-            className="object-contain object-left"
+            className={clsx('object-contain object-left transition-opacity duration-300', overHero ? 'opacity-100' : 'opacity-0')}
+          />
+          <Image
+            src={logo}
+            alt=""
+            aria-hidden="true"
+            fill
+            priority
+            sizes="256px"
+            className={clsx('object-contain object-left transition-opacity duration-300', overHero ? 'opacity-0' : 'opacity-100')}
           />
         </Link>
 
@@ -159,7 +196,7 @@ const Header = () => {
               aria-hidden="true"
               className={clsx(
                 'pointer-events-none absolute inset-y-0 my-auto h-10 rounded-full transition-[left,width,opacity] duration-300 ease-settle',
-                'bg-secondary',
+                overHero ? 'bg-white/15' : 'bg-secondary',
                 pill.show ? 'opacity-100' : 'opacity-0'
               )}
               style={{ left: pill.left, width: pill.width }}
@@ -175,8 +212,9 @@ const Header = () => {
                     className={clsx(
                       'group relative flex h-10 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-bold uppercase tracking-widest transition-colors',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                      'hover:text-foreground',
-                      active ? 'text-foreground' : 'text-muted-foreground'
+                      overHero
+                        ? clsx('hover:text-white', active ? 'text-white' : 'text-white/75')
+                        : clsx('hover:text-foreground', active ? 'text-foreground' : 'text-foreground/70')
                     )}
                   >
                     {link.isNew && <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-signal" />}
@@ -201,9 +239,9 @@ const Header = () => {
             href="/location"
             data-nav-item
             className={clsx(
-              'group hidden h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-sm font-bold uppercase tracking-widest transition-colors 2xl:inline-flex',
+              'group hidden h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-sm font-bold uppercase tracking-widest transition-colors xl:inline-flex',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-              'bg-primary text-primary-foreground hover:bg-primary/90'
+              overHero ? 'bg-white text-black hover:bg-white/90' : 'bg-primary text-primary-foreground hover:bg-primary/90'
             )}
           >
             Visit showroom
@@ -221,7 +259,7 @@ const Header = () => {
           className={clsx(
             '-mr-2 flex h-11 w-11 items-center justify-center rounded-full transition-colors lg:hidden',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-            'hover:bg-secondary'
+            overHero ? 'hover:bg-white/10' : 'hover:bg-secondary'
           )}
         >
           {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

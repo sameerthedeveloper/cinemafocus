@@ -165,7 +165,7 @@ export default function HomeContact({ initialInfo }) {
           
           {submitted ? (
             <div className="text-center py-16 space-y-4">
-              <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-16 h-16 bg-secondary text-foreground rounded-full flex items-center justify-center mx-auto">
                  <CheckCircle size={32} />
               </div>
               <h4 className="text-xl font-medium">Message Sent!</h4>

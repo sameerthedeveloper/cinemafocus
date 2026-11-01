@@ -2,139 +2,141 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Share2, FileText, ExternalLink } from 'lucide-react';
-import Section from '@/components/Section';
+import clsx from 'clsx';
+import { ChevronRight, ChevronLeft, FileText, Link2, Check } from 'lucide-react';
 import ContentRenderer from '@/components/ContentRenderer';
+import OptimizedImage from '@/components/OptimizedImage';
 import { formatDate } from '@/lib/utils';
-import Reveal from '@/components/Reveal';
+import { CINEMA_FOCUS_GEO } from '@/lib/geoContext';
+
+const focusRing =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+const pill =
+  'inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-sm font-medium tracking-tight transition-colors';
 
 export default function PressDetailClient({ release }) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [index, setIndex] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  const covers = release.coverImages?.length ? release.coverImages : [release.imageUrl].filter(Boolean);
+  const hasMany = covers.length > 1;
+  const go = (delta) => setIndex((i) => (i + delta + covers.length) % covers.length);
+
+  const share = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: release.title, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* user dismissed the share sheet, or clipboard is blocked */
+    }
+  };
+
+  const hasBody = (release.contentBlocks && release.contentBlocks.length > 0) || release.content;
 
   return (
-    <Reveal className="animate-fade-in pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
-        <Link href="/press" className="group inline-flex items-center text-muted hover:text-foreground mb-12 transition-colors">
-          <ArrowLeft size={20} className="mr-2 group-hover:-translate-x-1 transition-transform" />
-          Back to Press Room
-        </Link>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-24 items-start">
-           {/* Left Column: Title & Image */}
-           <div className="flex flex-col gap-6 md:gap-8 lg:sticky lg:top-24">
-              <h1 className="text-3xl md:text-5xl lg:text-6xl md:leading-tight font-medium text-foreground tracking-tight">
-                {release.title}
-              </h1>
+    <article className="mx-auto w-full max-w-7xl px-4 pb-16 pt-32 md:px-8 md:pb-24 md:pt-40">
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground md:mb-8">
+        <Link href="/press" className="transition-colors hover:text-foreground">Press room</Link>
+        <ChevronRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+        <span className="line-clamp-1 text-foreground" aria-current="page">{release.title}</span>
+      </nav>
 
-              {release.coverImages && release.coverImages.length > 1 ? (
-                 <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-secondary/5 shadow-2xl shadow-black/5 group">
-                    <img 
-                      src={release.coverImages[currentImageIndex]} 
-                      alt={release.title} 
-                      className="w-full h-full object-cover transition-opacity duration-500" 
-                    />
-                    
-                    <button 
-                      onClick={() => setCurrentImageIndex(prev => prev === 0 ? release.coverImages.length - 1 : prev - 1)}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
-                    >
-                      <ArrowLeft size={20} />
-                    </button>
-                    <button 
-                      onClick={() => setCurrentImageIndex(prev => prev === release.coverImages.length - 1 ? 0 : prev + 1)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 rotate-180"
-                    >
-                      <ArrowLeft size={20} />
-                    </button>
+      <header className="max-w-3xl">
+        <p className="text-sm text-muted-foreground">
+          <time dateTime={release.date}>{formatDate(release.date)}</time>
+          <span aria-hidden="true"> · </span>
+          Press release
+        </p>
+        <h1 className="mt-3 text-4xl font-medium leading-[1.1] tracking-tight text-balance md:text-5xl">{release.title}</h1>
+        {release.excerpt && <p className="mt-5 text-lg leading-relaxed text-muted-foreground md:text-xl">{release.excerpt}</p>}
+      </header>
 
-                    <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-                       {release.coverImages.map((_, idx) => (
-                         <button
-                           key={idx}
-                           onClick={() => setCurrentImageIndex(idx)}
-                           className={`w-2 h-2 rounded-full transition-all ${
-                             currentImageIndex === idx ? 'bg-white w-4' : 'bg-white/50 hover:bg-white/80'
-                           }`}
-                         />
-                       ))}
-                    </div>
-                 </div>
-              ) : (
-                <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-secondary/5 shadow-2xl shadow-black/5">
-                   <img src={release.imageUrl || release.coverImages?.[0]} alt={release.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" />
-                </div>
-              )}
-           </div>
-
-           {/* Right Column: Content */}
-           <div className="flex flex-col">
-              <div className="flex items-center gap-4 text-sm text-muted mb-8 md:mb-10 border-b border-border/50 pb-6 md:pb-8">
-                 <span className="flex items-center gap-2 font-medium">
-                    <Calendar size={16} />
-                    {formatDate(release.date)}
-                 </span>
-                 <span className="w-1 h-1 bg-muted rounded-full" />
-                 <span className="uppercase tracking-widest text-xs font-semibold text-primary">Press Release</span>
-              </div>
-
-              <div className="prose prose-base md:prose-lg dark:prose-invert max-w-none text-muted-foreground">
-                <p className="lead text-2xl text-foreground font-light leading-relaxed mb-8">{release.excerpt}</p>
-                
-                {release.contentBlocks && release.contentBlocks.length > 0 ? (
-                   <ContentRenderer blocks={release.contentBlocks} />
-                ) : (
-                   <div className="space-y-6 text-lg leading-relaxed">
-                      {release.content ? (
-                         <p>{release.content}</p>
-                      ) : (
-                         <>
-                            <p>
-                               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                            </p>
-                            <p>
-                               Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                            </p>
-                            <blockquote className="border-l-4 border-primary pl-6 italic text-foreground my-8">
-                               &quot;True high-fidelity is about emotion, texture, and presence. This new release embodies our commitment to that philosophy.&quot;
-                            </blockquote>
-                            <p>
-                               Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
-                            </p>
-                          </>
-                      )}
-                   </div>
-                )}
-               </div>
-              
-              {release.pdfUrl && (
-                  <div className="mt-8">
-                     <a 
-                       href={release.pdfUrl} 
-                       target="_blank" 
-                       rel="noopener noreferrer"
-                       className="inline-flex items-center gap-2 px-6 py-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
-                     >
-                        <FileText size={20} />
-                        Download Press Release (PDF)
-                        <ExternalLink size={16} className="ml-1 opacity-70" />
-                     </a>
-                  </div>
-              )}
-              
-               <div className="pt-12 flex flex-col sm:flex-row justify-between items-start sm:items-center border-t border-border/50 mt-16 gap-6">
-                  <div className="text-sm text-muted">
-                    <strong className="text-foreground block mb-1">Media Contact</strong>
-                    Isabella Chen<br/>
-                    <a href="mailto:media@cinemafocus.com" className="hover:text-primary transition-colors">media@cinemafocus.com</a>
-                  </div>
-                  <button className="flex items-center gap-2 px-6 py-3 rounded-full border border-border hover:border-primary hover:text-primary transition-all active:scale-95">
-                     <Share2 size={18} />
-                     Share Article
-                  </button>
-               </div>
-           </div>
+      {covers.length > 0 && (
+        <div className="group relative mt-10 aspect-[16/10] w-full overflow-hidden rounded-panel bg-secondary/40 md:mt-14 md:aspect-[16/9]">
+          <OptimizedImage
+            key={index}
+            src={covers[index]}
+            alt={release.title}
+            fill
+            optimize
+            priority={index === 0}
+            sizes="(min-width: 1280px) 1216px, 100vw"
+            className="object-cover"
+          />
+          {hasMany && (
+            <>
+              <button
+                type="button"
+                onClick={() => go(-1)}
+                aria-label="Previous image"
+                className={clsx('absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-background shadow-float transition-opacity md:left-4 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100', focusRing)}
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => go(1)}
+                aria-label="Next image"
+                className={clsx('absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-background shadow-float transition-opacity md:right-4 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100', focusRing)}
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+              <p className="absolute bottom-3 left-3 rounded-full bg-background px-3 py-1 text-xs font-medium shadow-float md:bottom-4 md:left-4" aria-live="polite">
+                {index + 1} / {covers.length}
+              </p>
+            </>
+          )}
         </div>
+      )}
+
+      {hasBody && (
+        <div className="mt-10 max-w-3xl md:mt-14">
+          {release.contentBlocks && release.contentBlocks.length > 0 ? (
+            <ContentRenderer blocks={release.contentBlocks} />
+          ) : (
+            <p className="whitespace-pre-line text-base leading-relaxed text-muted-foreground md:text-lg">{release.content}</p>
+          )}
+        </div>
+      )}
+
+      <div className="mt-12 flex max-w-3xl flex-wrap gap-3">
+        {release.pdfUrl && (
+          <a
+            href={release.pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={clsx(pill, 'bg-primary text-primary-foreground hover:bg-primary/90', focusRing)}
+          >
+            <FileText className="h-4 w-4" aria-hidden="true" />
+            Download PDF
+          </a>
+        )}
+        <button type="button" onClick={share} className={clsx(pill, 'bg-secondary hover:bg-accent', focusRing)}>
+          {copied ? <Check className="h-4 w-4" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
+          <span aria-live="polite">{copied ? 'Link copied' : 'Share'}</span>
+        </button>
       </div>
-    </Reveal>
+
+      <footer className="mt-16 grid max-w-3xl gap-8 border-t border-border pt-8 sm:grid-cols-2">
+        <div>
+          <h2 className="text-sm font-medium">Press enquiries</h2>
+          <a href={`mailto:${CINEMA_FOCUS_GEO.email}`} className="mt-1 block text-muted-foreground transition-colors hover:text-foreground">
+            {CINEMA_FOCUS_GEO.email}
+          </a>
+        </div>
+        <div className="sm:text-right">
+          <Link href="/press" className="text-sm font-medium underline-offset-4 hover:underline">
+            All press releases
+          </Link>
+        </div>
+      </footer>
+    </article>
   );
 }

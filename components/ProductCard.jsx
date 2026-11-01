@@ -17,16 +17,16 @@ const ProductCard = ({ product, headingLevel: Heading = 'h3' }) => {
   const imageSrc = product.image_url || product.images?.[0] || null;
 
   return (
-    <Link href={`/products/${product.slug}`} className="group block h-full rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+    <Link href={`/products/${product.slug}`} className="group block h-full rounded-card outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">
       {/* Card container — Apple uses soft bg, no visible border, just shadow on hover */}
-      <div className="relative flex h-full flex-col rounded-3xl overflow-hidden bg-secondary/40 transition-all duration-500 ease-out group-hover:bg-secondary/70 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
+      <div className="relative flex h-full flex-col rounded-card overflow-hidden bg-secondary/40 transition-all duration-500 ease-out group-hover:bg-secondary/70 group-hover:shadow-lift">
         {/* Image area */}
         <div className="relative aspect-square overflow-hidden p-4 pb-2 sm:p-6 sm:pb-4">
           <LazyImage
             src={imageSrc}
             alt={product.name}
             className="transition-transform duration-700 ease-out group-hover:scale-[1.06]"
-            containerClassName="rounded-2xl bg-transparent"
+            containerClassName="rounded-media bg-transparent"
             objectFit="contain"
             aspectRatio="aspect-square"
           />
@@ -51,11 +51,7 @@ const ProductCard = ({ product, headingLevel: Heading = 'h3' }) => {
             <p className="text-sm font-medium text-foreground/80 pt-0.5">
               {formatPrice(product.price)}
             </p>
-          ) : (
-            <p className="text-sm font-medium text-primary/70 pt-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              Learn more →
-            </p>
-          )}
+          ) : null}
         </div>
       </div>
     </Link>

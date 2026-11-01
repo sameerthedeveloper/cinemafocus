@@ -2,12 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Section from '@/components/Section';
+import clsx from 'clsx';
 import Button from '@/components/Button';
 import { useCurrency } from '@/hooks/useCurrency';
 import { ChevronRight, ChevronLeft, FileText } from 'lucide-react';
 import LazyImage from '@/components/LazyImage';
-import Reveal from '@/components/Reveal';
+
+const focusRing =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+const action = 'h-12 w-full rounded-full px-7 normal-case! tracking-tight! sm:w-auto';
 
 export default function ProductDetailClient({ product }) {
   const { formatPrice, showPrice } = useCurrency();
@@ -27,7 +30,7 @@ export default function ProductDetailClient({ product }) {
     setActiveIndex(product?.images?.length ? product.images.length - 1 : 0);
   }
 
-  // Preload all gallery images in background
+  // Preload all gallery images in background so switching is instant
   useEffect(() => {
     if (product?.images?.length > 1) {
       product.images.forEach((url) => {
@@ -37,147 +40,163 @@ export default function ProductDetailClient({ product }) {
     }
   }, [product]);
 
-  // Auto-play slideshow: cycle every 4 seconds, resetting on interaction
-  useEffect(() => {
-    if (!product?.images || product.images.length <= 1) return;
-
-    const timer = setInterval(() => {
-      setActiveIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
-    }, 4000);
-
-    return () => clearInterval(timer);
-  }, [activeIndex, product?.images]);
-
   if (!product) return null;
 
-  return (
-    <Reveal className="animate-fade-in pt-6">
-      {/* Breadcrumb */}
-      <div className="max-w-[1400px] px-4 md:px-8 mx-auto py-4 flex mt-20 md:mt-24 items-center text-sm text-muted-foreground">
-        <Link href={`/brand/${product.category}`} className="hover:text-primary transition-colors capitalize">
-          {product.category?.replace('-', ' ')}
-        </Link>
-        <ChevronRight size={14} className="mx-2" />
-        <span className="text-foreground font-medium" aria-current="page">{product.name}</span>
-      </div>
+  const images = product.images || [];
+  const hasMany = images.length > 1;
+  const go = (delta) => setActiveIndex((i) => (i + delta + images.length) % images.length);
+  const brandLabel = product.brand || product.category?.replace(/-/g, ' ');
+  const specs = product.specifications || [];
 
-      <Section className="pt-4 pb-16 md:pt-8 md:pb-24" container={false}>
-         <div className="max-w-[1400px] mx-auto px-4 md:px-8">
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 xl:gap-24">
-             {/* Images Gallery */}
-             <div className="space-y-6 lg:sticky lg:top-36 h-fit">
-                <div className="relative group aspect-square md:aspect-[4/3] bg-white overflow-hidden rounded-2xl flex items-center justify-center p-8">
-                  <LazyImage 
-                    key={activeIndex}
-                    src={product.images?.[activeIndex]} 
-                    alt={product.name} 
-                    className="transition-all duration-300 shadow-sm"
-                    aspectRatio="w-full h-full"
-                    objectFit="contain"
-                    priority={true}
-                  />
-                 
-                 {product.images?.length > 1 && (
-                   <>
-                     <button 
-                       onClick={() => setActiveIndex((prev) => (prev === 0 ? product.images.length - 1 : prev - 1))}
-                       className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer z-20"
-                       aria-label="Previous image"
-                     >
-                       <ChevronLeft size={24} />
-                     </button>
-                     <button 
-                       onClick={() => setActiveIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1))}
-                       className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer z-20"
-                       aria-label="Next image"
-                     >
-                       <ChevronRight size={24} />
-                     </button>
-                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-background/40 backdrop-blur-sm rounded-full z-20">
-                       {product.images.map((_, idx) => (
-                         <div 
-                           key={idx} 
-                           className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === activeIndex ? 'bg-primary w-4' : 'bg-primary/30'}`}
-                         />
-                       ))}
-                     </div>
-                   </>
-                 )}
-               </div>
-               
-               {product.images?.length > 1 && (
-                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
-                   {product.images.map((img, idx) => (
-                     <button 
-                       key={idx} 
-                       onClick={() => setActiveIndex(idx)}
-                       className={`aspect-square bg-white overflow-hidden rounded-xl cursor-pointer transition-all duration-300 flex items-center justify-center border-2 p-1 ${idx === activeIndex ? 'border-primary opacity-100 ring-4 ring-primary/5' : 'border-transparent opacity-60 hover:opacity-100 shadow-sm'}`}
-                     >
-                       <LazyImage 
-                         src={img} 
-                         alt={`${product.name} ${idx}`} 
-                         className="" 
-                         objectFit="contain" 
-                         aspectRatio="w-full h-full"
-                         containerClassName="bg-transparent"
-                       />
-                     </button>
-                   ))}
-                 </div>
-               )}
-             </div>
-  
-             {/* Details */}
-             <div className="space-y-8 md:space-y-10 lg:py-4">
-               <div>
-                 <p className="text-primary font-medium text-sm mb-4 tracking-wide uppercase opacity-70">{product.brand}</p>
-                 <h1 className="text-3xl md:text-5xl xl:text-6xl font-medium tracking-tight leading-[1.1] mb-6 text-balance">{product.name}</h1>
-                 {showPrice && product.price && (
-                   <p className="text-2xl font-light text-foreground mb-6 opacity-90">
-                     {formatPrice(product.price)}
-                   </p>
-                 )}
-                 <div className="h-px w-full bg-border" />
-               </div>
-  
-               <div className="prose prose-invert prose-lg max-w-[62ch] text-muted-foreground leading-relaxed font-light">
-                 <p>{product.longDescription}</p>
-               </div>
-  
-               {/* Specs */}
-               <div className="border-t border-border pt-8">
-                 <h2 className="font-medium text-lg text-foreground mb-6">Specifications</h2>
-                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2">
-                   {(product.specifications || []).map((spec, idx) => (
-                     <div key={idx} className="py-3 border-b border-border">
-                       <dt className="text-xs uppercase tracking-wider font-medium text-muted-foreground mb-1">{spec.key === 'Category' ? 'Brand Category' : spec.key}</dt>
-                       <dd className="text-base text-foreground font-medium">{spec.value}</dd>
-                     </div>
-                   ))}
-                 </dl>
-               </div>
-  
-               {/* Actions */}
-               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 pt-4">
-                 <Button href="/contact" size="lg" className="rounded-full px-8 md:px-10 py-6 text-lg w-full sm:w-auto">Enquire Now</Button>
-                 {product.catalogUrl && (
-                   <Button 
-                     href={product.catalogUrl} 
-                     target="_blank" 
-                     variant="outline" 
-                     size="lg" 
-                     className="rounded-full px-8 md:px-10 py-6 text-lg w-full sm:w-auto flex items-center justify-center gap-2"
-                   >
-                     <FileText size={20} />
-                     Download Catalog
-                   </Button>
-                 )}
-                 <Button href="/contact" variant="outline" size="lg" className="rounded-full px-8 md:px-10 py-6 text-lg w-full sm:w-auto">Visit Showroom</Button>
-               </div>
-             </div>
-           </div>
-         </div>
-      </Section>
-    </Reveal>
+  return (
+    <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-32 md:px-8 md:pb-24 md:pt-40">
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground md:mb-8">
+        <Link href="/products" className="transition-colors hover:text-foreground">Products</Link>
+        <ChevronRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+        {product.category && (
+          <>
+            <Link href={`/brand/${product.category}`} className={clsx('transition-colors hover:text-foreground', !product.brand && 'capitalize')}>
+              {brandLabel}
+            </Link>
+            <ChevronRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+          </>
+        )}
+        <span className="text-foreground" aria-current="page">{product.name}</span>
+      </nav>
+
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16 xl:gap-24">
+        {/* Gallery */}
+        <div className="h-fit space-y-4 lg:sticky lg:top-32">
+          <div className="group relative flex aspect-square items-center justify-center overflow-hidden rounded-card bg-white p-6 ring-1 ring-border/70 md:aspect-[4/3] md:p-8">
+            <LazyImage
+              key={activeIndex}
+              src={images[activeIndex]}
+              alt={product.name}
+              aspectRatio="w-full h-full"
+              objectFit="contain"
+              priority={true}
+            />
+
+            {hasMany && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => go(-1)}
+                  aria-label="Previous image"
+                  className={clsx(
+                    'absolute left-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-background shadow-float transition-opacity duration-300 md:left-4',
+                    'md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100',
+                    focusRing
+                  )}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => go(1)}
+                  aria-label="Next image"
+                  className={clsx(
+                    'absolute right-3 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-background shadow-float transition-opacity duration-300 md:right-4',
+                    'md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100',
+                    focusRing
+                  )}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+                <p className="absolute bottom-3 left-3 z-20 rounded-full bg-background px-3 py-1 text-xs font-medium shadow-float md:bottom-4 md:left-4" aria-live="polite">
+                  {activeIndex + 1} / {images.length}
+                </p>
+              </>
+            )}
+          </div>
+
+          {hasMany && (
+            <ul className="grid grid-cols-5 gap-2 sm:grid-cols-6 md:gap-3">
+              {images.map((img, idx) => (
+                <li key={idx}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveIndex(idx)}
+                    aria-label={`Show image ${idx + 1} of ${images.length}`}
+                    aria-current={idx === activeIndex ? 'true' : undefined}
+                    className={clsx(
+                      'flex aspect-square w-full items-center justify-center overflow-hidden rounded-media bg-white p-1 ring-1 transition-all duration-300',
+                      idx === activeIndex ? 'opacity-100 ring-2 ring-primary' : 'opacity-60 ring-border/70 hover:opacity-100',
+                      focusRing
+                    )}
+                  >
+                    <LazyImage
+                      src={img}
+                      alt=""
+                      objectFit="contain"
+                      aspectRatio="w-full h-full"
+                      containerClassName="bg-transparent"
+                    />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Details */}
+        <div className="space-y-8 md:space-y-10 lg:py-2">
+          <div>
+            {brandLabel &&
+              (product.category ? (
+                <Link href={`/brand/${product.category}`} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                  {brandLabel}
+                </Link>
+              ) : (
+                <p className="text-sm font-medium text-muted-foreground">{brandLabel}</p>
+              ))}
+            <h1 className="mt-2 text-4xl font-medium leading-[1.1] tracking-tight text-balance md:text-5xl">{product.name}</h1>
+            {showPrice && product.price && (
+              <p className="mt-5 text-2xl font-medium">{formatPrice(product.price)}</p>
+            )}
+          </div>
+
+          {product.longDescription && (
+            <p className="max-w-[62ch] whitespace-pre-line text-base leading-relaxed text-muted-foreground md:text-lg">
+              {product.longDescription}
+            </p>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Button href="/contact" className={action}>Enquire about this product</Button>
+            <Button href="/location" variant="outline" className={action}>Visit showroom</Button>
+            {product.catalogUrl && (
+              <Button
+                href={product.catalogUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="outline"
+                className={clsx(action, 'gap-2')}
+              >
+                <FileText className="h-4 w-4" aria-hidden="true" />
+                Download catalogue
+              </Button>
+            )}
+          </div>
+
+          {/* Specs */}
+          {specs.length > 0 && (
+            <section className="border-t border-border pt-8">
+              <h2 className="mb-4 text-xl font-medium md:text-2xl">Specifications</h2>
+              <dl className="grid grid-cols-1 gap-x-10 sm:grid-cols-2">
+                {specs.map((spec, idx) => (
+                  <div key={idx} className="border-b border-border py-4">
+                    <dt className="mb-1 text-sm text-muted-foreground">{spec.key === 'Category' ? 'Brand category' : spec.key}</dt>
+                    <dd className="text-base font-medium">{spec.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

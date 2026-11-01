@@ -137,6 +137,23 @@
 }
 .hero-intro { animation: hero-intro 0.7s cubic-bezier(0.215, 0.61, 0.355, 1) 0.05s backwards; }
 .hero-intro-delayed { animation-delay: 0.15s; }
+
+/* Hero sound-wave accent: thin bars breathing at different rates, like an equalizer at rest. */
+@keyframes hero-eq {
+  0%, 100% { transform: scaleY(var(--lo, 0.25)); }
+  50% { transform: scaleY(var(--hi, 1)); }
+}
+.hero-eq-bar { transform-origin: bottom; animation: hero-eq var(--dur, 2.4s) ease-in-out var(--delay, 0s) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-eq-bar { animation: none; transform: scaleY(var(--lo, 0.4)); }
+}
+
+/* Slide timer: fills over the slide's duration, in step with the autoplay timeout. */
+@keyframes hero-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
 @media (prefers-reduced-motion: reduce) {
   .hero-intro { animation: none; }
+  .hero-progress-fill { animation: none !important; transform: scaleX(1) !important; }
 }

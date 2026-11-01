@@ -27,15 +27,15 @@ const ContentRenderer = ({ blocks, className }) => {
 
           case 'text':
             return (
-              <div key={block.id} className="prose prose-lg dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
-                <p>{block.data.text}</p>
-              </div>
+              <p key={block.id} className="whitespace-pre-line text-base leading-relaxed text-muted-foreground md:text-lg">
+                {block.data.text}
+              </p>
             );
 
           case 'image':
             return (
-              <figure key={block.id} className="my-8">
-                <div className="rounded-xl overflow-hidden bg-secondary/10">
+              <figure key={block.id} className="my-10">
+                <div className="rounded-media overflow-hidden bg-secondary/40">
                   <img 
                     src={block.data.url} 
                     alt={block.data.caption || "Article image"} 
@@ -44,7 +44,7 @@ const ContentRenderer = ({ blocks, className }) => {
                   />
                 </div>
                 {block.data.caption && (
-                  <figcaption className="text-center text-sm text-muted-foreground mt-3 italic">
+                  <figcaption className="mt-3 text-sm text-muted-foreground">
                     {block.data.caption}
                   </figcaption>
                 )}
@@ -62,8 +62,8 @@ const ContentRenderer = ({ blocks, className }) => {
                   className={clsx(
                     "inline-flex items-center gap-2 transition-all",
                     isButton 
-                      ? "px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 active:scale-95 shadow-sm hover:shadow-md" 
-                      : "text-primary hover:text-primary/80 hover:underline font-medium text-lg"
+                      ? "h-12 px-7 bg-primary text-primary-foreground rounded-full text-sm font-medium tracking-tight hover:bg-primary/90" 
+                      : "text-foreground underline underline-offset-4 hover:text-muted-foreground font-medium text-lg"
                   )}
                 >
                   {block.data.text}
@@ -78,11 +78,11 @@ const ContentRenderer = ({ blocks, className }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {block.data.images?.map((img, idx) => (
                     <figure key={idx} className="group relative">
-                      <div className="aspect-square rounded-xl overflow-hidden bg-secondary/10">
+                      <div className="aspect-square rounded-media overflow-hidden bg-secondary/40">
                         <img 
                           src={img.url} 
                           alt={img.caption || `Gallery image ${idx + 1}`} 
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                         />
                       </div>

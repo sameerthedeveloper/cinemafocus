@@ -107,7 +107,7 @@ const NewLaunches = ({ products }) => {
               <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-semibold tracking-tighter leading-[0.95] whitespace-pre-line mb-6 md:mb-8 drop-shadow-sm bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-zinc-500">
                 {currentProduct.name}
               </h2>
-              <p className="text-lg md:text-xl lg:text-2xl font-normal text-zinc-400 max-w-lg tracking-tight mb-8 md:mb-10 leading-relaxed line-clamp-3 md:line-clamp-none">
+              <p className="text-lg md:text-xl lg:text-2xl font-normal text-white/70 max-w-lg tracking-tight mb-8 md:mb-10 leading-relaxed line-clamp-3 md:line-clamp-none">
                 {currentProduct.shortDescription}
               </p>
               
@@ -152,7 +152,7 @@ const NewLaunches = ({ products }) => {
       {/* Bottom Controls */}
       <div className="absolute bottom-12 left-6 md:left-16 right-6 md:right-16 hidden md:flex justify-between items-end z-20">
          {/* Pagination Number */}
-         <div className="text-sm font-mono tracking-widest text-zinc-400">
+         <div className="text-sm font-mono tracking-widest text-white/70">
             {String(currentIndex + 1).padStart(2, '0')} <span className="mx-2">—</span> {String(displayProducts.length).padStart(2, '0')}
          </div>
 

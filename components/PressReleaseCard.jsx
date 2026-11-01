@@ -1,87 +1,73 @@
-import { Calendar } from 'lucide-react';
-import Link from 'next/link'; 
-import { formatDate } from '../lib/utils'; 
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+import clsx from 'clsx';
+import { formatDate } from '../lib/utils';
 import OptimizedImage from './OptimizedImage';
 
+const focusRing =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background';
+
+/**
+ * One link wraps the whole card, so there is a single tab stop per story and the
+ * accessible name is the headline (not a repeated "Read full story").
+ */
 const PressReleaseCard = ({ release, variant = 'vertical', className, headingLevel: Heading = 'h3' }) => {
-  const isHorizontal = variant === 'horizontal';
-
   if (!release) return null;
+  const isHorizontal = variant === 'horizontal';
+  const href = `/press/${release.slug || release.id}`;
 
-  if (isHorizontal) {
-    return (
-      <div className={`group cursor-pointer grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center ${className || ''}`}>
-         {/* Left Column: Title & Image */}
-         <div className="flex flex-col gap-6">
-            <Heading className="text-3xl md:text-4xl font-medium leading-tight text-foreground group-hover:text-primary transition-colors">
-              {release.title}
-            </Heading>
-            <div className="relative overflow-hidden rounded-xl bg-secondary/5 aspect-video w-full">
-              <OptimizedImage
-                src={release.imageUrl || release.image_url}
-                alt={release.title}
-                fill
-                optimize
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
-            </div>
-         </div>
-
-         {/* Right Column: Details */}
-         <div className="flex flex-col justify-center h-full space-y-6">
-            <div className="flex items-center gap-2 text-sm text-muted uppercase tracking-wider">
-              <Calendar size={16} />
-              <span>{formatDate(release.date)}</span>
-            </div>
-            
-            <p className="text-muted text-lg leading-relaxed line-clamp-6">
-              {release.excerpt}
-            </p>
-            
-            <Link href={`/press/${release.slug || release.id}`} className="text-primary font-medium hover:underline inline-flex items-center text-lg">
-              Read Full Story<span className="sr-only">: {release.title}</span> &rarr;
-            </Link>
-         </div>
-      </div>
-    );
-  }
-
-  // Vertical layout (default)
   return (
-    <div className={`group cursor-pointer flex flex-col h-full ${className || ''}`}>
-      <div className="relative overflow-hidden rounded-xl bg-secondary/5 aspect-[16/9] w-full mb-4">
+    <Link
+      href={href}
+      className={clsx(
+        'group block rounded-card',
+        isHorizontal ? 'grid grid-cols-1 items-center gap-6 md:grid-cols-2 md:gap-12' : 'flex h-full flex-col',
+        focusRing,
+        className
+      )}
+    >
+      <div
+        className={clsx(
+          'relative w-full overflow-hidden rounded-card bg-secondary/40',
+          isHorizontal ? 'aspect-[4/3]' : 'mb-5 aspect-[16/10]'
+        )}
+      >
         <OptimizedImage
           src={release.imageUrl || release.image_url}
-          alt={release.title}
+          alt=""
           fill
           optimize
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          sizes={isHorizontal ? '(max-width: 768px) 100vw, 50vw' : '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'}
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
-        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
       </div>
-      
-      <div className="flex flex-col flex-grow">
-        <div className="flex items-center gap-2 text-sm text-muted mb-3">
-          <Calendar size={14} />
-          <span>{formatDate(release.date)}</span>
-        </div>
-        
-        <Heading className="text-xl font-medium text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2">
+
+      <div className={clsx('flex flex-col', isHorizontal ? 'justify-center md:py-6' : 'flex-1')}>
+        <time dateTime={release.date} className="text-sm text-muted-foreground">
+          {formatDate(release.date)}
+        </time>
+
+        <Heading
+          className={clsx(
+            'mt-2 font-medium tracking-tight text-foreground underline-offset-4 group-hover:underline',
+            isHorizontal ? 'text-3xl leading-tight md:text-4xl' : 'line-clamp-2 text-xl leading-snug'
+          )}
+        >
           {release.title}
         </Heading>
-        
-        <p className="text-muted text-sm mb-4 flex-grow line-clamp-3">
-          {release.excerpt}
-        </p>
-        
-        <Link href={`/press/${release.slug || release.id}`} className="text-primary text-sm font-medium hover:underline mt-auto inline-flex items-center">
-          Read Full Story<span className="sr-only">: {release.title}</span> &rarr;
-        </Link>
+
+        {release.excerpt && (
+          <p className={clsx('mt-3 text-muted-foreground', isHorizontal ? 'line-clamp-5 text-lg leading-relaxed' : 'line-clamp-3 flex-1 leading-relaxed')}>
+            {release.excerpt}
+          </p>
+        )}
+
+        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
+          Read the story
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+        </span>
       </div>
-    </div>
+    </Link>
   );
 };
 
