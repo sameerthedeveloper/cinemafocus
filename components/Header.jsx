@@ -4,14 +4,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ArrowRight } from 'lucide-react';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 import gsap from 'gsap';
 const logo = '/images/logo.png';
 const logoLight = '/images/logo-light.webp';
 
 const NAV_LINKS = [
-  { name: 'New Launches', path: '/products?category=new-arrivals' },
+  { name: 'New Launches', path: '/products?category=new-arrivals', isNew: true },
   { name: 'Products', path: '/products' },
   { name: 'Gallery', path: '/gallery' },
   { name: 'Press Room', path: '/press' },
@@ -25,6 +25,13 @@ const Header = () => {
   const headerRef = useRef(null);
   const mobilePanelRef = useRef(null);
   const mobileListRef = useRef(null);
+  const navListRef = useRef(null);
+  // Sliding hover pill: follows the pointer across desktop links
+  const [pill, setPill] = useState({ left: 0, width: 0, show: false });
+  const movePill = (e) => {
+    const li = e.currentTarget;
+    setPill({ left: li.offsetLeft, width: li.offsetWidth, show: true });
+  };
   const pathname = usePathname();
   const { showDesktopMenu } = useSiteSettings();
 
@@ -121,13 +128,13 @@ const Header = () => {
     <header
       ref={headerRef}
       className={clsx(
-        'fixed inset-x-4 top-4 z-99 mx-auto w-auto max-w-5xl border backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-300 sm:inset-x-10 sm:top-5',
+        'fixed inset-x-4 top-4 z-99 mx-auto w-auto max-w-6xl border backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-300 sm:inset-x-10 sm:top-5',
         // Chrome (bg/border/shadow) only appears once scrolled or while the mobile menu is open;
         // content colour still follows what's behind it (dark hero vs. themed page).
         showChrome
           ? overHero
             ? 'border-white/15 bg-black/60 text-white shadow-none'
-            : 'border-border bg-background/90 text-foreground shadow-[0_8px_30px_-14px_rgba(0,0,0,0.35)]'
+            : 'border-border bg-background/90 text-foreground shadow-float'
           : clsx('border-transparent bg-transparent shadow-none backdrop-blur-none', overHero ? 'text-white' : 'text-foreground'),
         isMenuOpen ? 'flex flex-col rounded-[28px]' : 'flex flex-col rounded-full'
       )}
@@ -138,7 +145,7 @@ const Header = () => {
           href="/"
           data-nav-item
           aria-label="Cinema Focus Home"
-          className="relative block h-12 w-52 shrink-0 lg:h-14 lg:w-60 transition-transform duration-200 hover:scale-[1.03] lg:justify-self-start"
+          className="relative block h-12 w-44 shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-52 lg:h-14 lg:w-52"
         >
           <Image
             src={logoLight}
@@ -161,25 +168,66 @@ const Header = () => {
 
         {/* Desktop nav */}
         {showDesktopMenu && (
-          <ul className="hidden items-center gap-8 lg:flex">
-            {NAV_LINKS.map((link) => (
-              <li key={link.name} data-nav-item>
-                <Link
-                  href={link.path}
-                  data-path={link.path}
-                  aria-current={activePath === link.path ? 'page' : undefined}
-                  className={clsx(
-                    'border-b-2 text-sm font-bold uppercase tracking-widest transition-all',
-                    activePath === link.path
-                      ? 'border-red-600 text-red-600'
-                      : clsx('border-transparent hover:border-red-600 hover:text-red-600', overHero ? 'text-white' : 'text-foreground')
-                  )}
-                >
-                  {link.name}
-                </Link>
-              </li>
-            ))}
+          <ul
+            ref={navListRef}
+            onMouseLeave={() => setPill((p) => ({ ...p, show: false }))}
+            className="relative hidden items-center gap-0.5 lg:flex"
+          >
+            <span
+              aria-hidden="true"
+              className={clsx(
+                'pointer-events-none absolute inset-y-0 my-auto h-10 rounded-full transition-[left,width,opacity] duration-300 ease-settle',
+                overHero ? 'bg-white/12' : 'bg-secondary',
+                pill.show ? 'opacity-100' : 'opacity-0'
+              )}
+              style={{ left: pill.left, width: pill.width }}
+            />
+            {NAV_LINKS.map((link) => {
+              const active = activePath === link.path;
+              return (
+                <li key={link.name} data-nav-item onMouseEnter={movePill} onFocus={movePill}>
+                  <Link
+                    href={link.path}
+                    data-path={link.path}
+                    aria-current={active ? 'page' : undefined}
+                    className={clsx(
+                      'group relative flex h-10 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-bold uppercase tracking-widest transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                      overHero
+                        ? clsx('hover:text-white', active ? 'text-white' : 'text-white/70')
+                        : clsx('hover:text-foreground', active ? 'text-foreground' : 'text-muted-foreground')
+                    )}
+                  >
+                    {link.isNew && <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-signal" />}
+                    {link.name}
+                    <span
+                      aria-hidden="true"
+                      className={clsx(
+                        'absolute inset-x-3 bottom-0.5 h-0.5 origin-center rounded-full bg-current transition-transform duration-300 ease-settle',
+                        active ? 'scale-x-100' : 'scale-x-0'
+                      )}
+                    />
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
+        )}
+
+        {/* Showroom CTA (desktop) */}
+        {showDesktopMenu && (
+          <Link
+            href="/location"
+            data-nav-item
+            className={clsx(
+              'group hidden h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-sm font-bold uppercase tracking-widest transition-colors 2xl:inline-flex',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+              overHero ? 'bg-white text-black hover:bg-white/90' : 'bg-primary text-primary-foreground hover:bg-primary/90'
+            )}
+          >
+            Visit showroom
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+          </Link>
         )}
 
         {/* Mobile toggle */}
@@ -189,7 +237,11 @@ const Header = () => {
           aria-expanded={isMenuOpen}
           aria-controls="mobile-nav"
           onClick={() => setIsMenuOpen((v) => !v)}
-          className="-m-2.5 p-2.5 lg:hidden"
+          className={clsx(
+            '-mr-2 flex h-11 w-11 items-center justify-center rounded-full transition-colors lg:hidden',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            overHero ? 'hover:bg-white/10' : 'hover:bg-secondary'
+          )}
         >
           {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           <span className="sr-only">{isMenuOpen ? 'Close menu' : 'Open menu'}</span>
@@ -198,21 +250,29 @@ const Header = () => {
 
       {/* Mobile panel */}
       <div id="mobile-nav" ref={mobilePanelRef} className="hidden w-full overflow-hidden lg:hidden" style={{ height: 0, opacity: 0 }}>
-        <ul ref={mobileListRef} className={clsx('flex flex-col gap-1 border-t px-5 pb-5 pt-4', overHero ? 'border-white/15' : 'border-border')}>
-          {NAV_LINKS.map((link) => (
-            <li key={link.name} data-mobile-item>
-              <Link
-                href={link.path}
-                onClick={() => setIsMenuOpen(false)}
-                className={clsx(
-                  'block py-2 text-[15px]',
-                  activePath === link.path ? 'text-red-600 font-medium' : overHero ? 'text-white/80' : 'text-foreground/80'
-                )}
-              >
-                {link.name}
-              </Link>
-            </li>
-          ))}
+        <ul ref={mobileListRef} className={clsx('flex flex-col border-t px-5 pb-4 pt-2', overHero ? 'border-white/15' : 'border-border')}>
+          {NAV_LINKS.map((link) => {
+            const active = activePath === link.path;
+            return (
+              <li key={link.name} data-mobile-item>
+                <Link
+                  href={link.path}
+                  onClick={() => setIsMenuOpen(false)}
+                  aria-current={active ? 'page' : undefined}
+                  className={clsx(
+                    'flex min-h-12 items-center gap-2 text-[15px] transition-colors',
+                    active
+                      ? clsx('font-medium', overHero ? 'text-white' : 'text-foreground')
+                      : overHero ? 'text-white/70 hover:text-white' : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {link.isNew && <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-signal" />}
+                  {link.name}
+                  {active && <span aria-hidden="true" className="ml-auto h-1.5 w-1.5 rounded-full bg-current" />}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </header>
