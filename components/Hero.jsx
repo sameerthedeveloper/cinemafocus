@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
+import { getImageProps } from 'next/image';
 import Button from './Button';
 import clsx from 'clsx';
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
@@ -13,7 +13,7 @@ const WaveformVisualizer = ({ className = '' }) => {
   const bars = Array.from({ length: 12 }, (_, i) => ({
     id: i,
     delay: i * 0.08,
-    randomHeight: 40 + Math.random() * 60
+    randomHeight: 40 + ((i * 37) % 60)
   }));
 
   return (
@@ -75,7 +75,11 @@ const Hero = ({
 }) => {
 
   // Normalize slides: if slides array is empty, construct it from legacy props
-  const slideItems = (slides && slides.length > 0) ? slides : [{
+  // Archived slides are kept in the CMS for later but never shown; if every slide
+  // is archived, show them all rather than render an empty hero.
+  const liveSlides = (slides || []).filter((s) => !s.archived);
+  const shownSlides = liveSlides.length > 0 ? liveSlides : slides;
+  const slideItems = (shownSlides && shownSlides.length > 0) ? shownSlides : [{
     title,
     subtitle,
     ctaText,
@@ -105,7 +109,6 @@ const Hero = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [isLightBackground, setIsLightBackground] = useState(false);
   const autoPlayRef = useRef(null);
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
@@ -124,8 +127,14 @@ const Hero = ({
     setCurrentIndex(index);
   };
 
-  // GSAP entrance animation on slide change
+  // GSAP entrance animation on slide change. The first slide's entrance is pure CSS
+  // (.hero-intro) so the headline - the LCP element - paints without waiting for hydration.
+  const isFirstSlideRun = useRef(true);
   useEffect(() => {
+    if (isFirstSlideRun.current) {
+      isFirstSlideRun.current = false;
+      return;
+    }
     if (!titleRef.current || !subtitleRef.current) return;
 
     gsap.fromTo(
@@ -141,21 +150,42 @@ const Hero = ({
     );
   }, [currentIndex]);
 
-  // Scroll indicator fade on scroll
+  // Scroll indicator fade on scroll. Viewport height is cached (reading innerHeight on every
+  // scroll event forces layout) and work is coalesced to one update per frame.
   useEffect(() => {
-    const handleScroll = () => {
-      const scrolled = window.scrollY > 100;
-      if (scrollIndicatorRef.current) {
-        gsap.to(scrollIndicatorRef.current, {
-          opacity: scrolled ? 0 : 0.6,
-          duration: 0.3
-        });
+    let viewportHeight = window.innerHeight || 1;
+    let scrolledPast = false;
+    let lastProgress = -1;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY;
+      const scrolled = y > 100;
+      if (scrolled !== scrolledPast && scrollIndicatorRef.current) {
+        scrolledPast = scrolled;
+        gsap.to(scrollIndicatorRef.current, { opacity: scrolled ? 0 : 0.6, duration: 0.3 });
       }
-      setScrollProgress(Math.min(window.scrollY / window.innerHeight, 1));
+      const progress = Math.min(y / viewportHeight, 1);
+      if (Math.abs(progress - lastProgress) > 0.01 || progress === 0 || progress === 1) {
+        lastProgress = progress;
+        setScrollProgress(progress);
+      }
+    };
+    const handleScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const handleResize = () => {
+      viewportHeight = window.innerHeight || 1;
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   // Keyboard navigation support
@@ -188,66 +218,13 @@ const Hero = ({
     };
   }, [currentIndex, slideItems, isPaused]);
 
-  // SMART LOGO SWITCHING: Analyze current slide's background image brightness
+  // Logo/text theming for the current slide. This used to sample the image through a canvas, but
+  // the image CDN sends no CORS headers, so the sample always failed (console error + a second
+  // download of the hero) and fell back to "dark". Slides can opt in via `isLightBackground`.
+  const isLightBackground = slideItems[currentIndex]?.isLightBackground === true;
   useEffect(() => {
-    if (!slideItems || slideItems.length === 0) return;
-    
-    const currentSlide = slideItems[currentIndex];
-    
-    // If layout doesn't have a background image, assume dark background (white logo)
-    if (currentSlide.layout === 'minimal' || !currentSlide.imageUrl) {
-      setIsLightBackground(false);
-      window.dispatchEvent(new CustomEvent('hero-brightness', { detail: { isLight: false } }));
-      return;
-    }
-
-    const checkImageBrightness = async () => {
-      try {
-        const img = new window.Image();
-        img.crossOrigin = "Anonymous";
-        img.src = currentSlide.imageUrl;
-        
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-        });
-
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        
-        // Analyze top 20% (where header sits)
-        const sampleHeight = Math.max(1, Math.floor(canvas.height * 0.2));
-        const imageData = ctx.getImageData(0, 0, canvas.width, sampleHeight);
-        const data = imageData.data;
-        let colorSum = 0;
-        
-        for (let x = 0, len = data.length; x < len; x += 4) {
-          const r = data[x];
-          const g = data[x + 1];
-          const b = data[x + 2];
-          // relative luminance
-          const avg = Math.floor(0.299 * r + 0.587 * g + 0.114 * b);
-          colorSum += avg;
-        }
-        
-        const brightness = Math.floor(colorSum / (canvas.width * sampleHeight));
-        // If brightness is high (e.g. > 160 out of 255), it's a light background
-        const isLight = brightness > 160;
-        
-        setIsLightBackground(isLight);
-        window.dispatchEvent(new CustomEvent('hero-brightness', { detail: { isLight } }));
-      } catch (e) {
-        // Fallback to dark background (white logo) on CORS or load errors
-        setIsLightBackground(false);
-        window.dispatchEvent(new CustomEvent('hero-brightness', { detail: { isLight: false } }));
-      }
-    };
-
-    checkImageBrightness();
-  }, [currentIndex, slideItems]);
+    window.dispatchEvent(new CustomEvent('hero-brightness', { detail: { isLight: isLightBackground } }));
+  }, [isLightBackground]);
 
   // Alignments mapping
   const horizontalAlignClasses = {
@@ -393,38 +370,47 @@ const Hero = ({
     const tabletImg = slide.imageUrlTablet || desktopImg;
     const ultrawideImg = slide.imageUrlUltrawide || desktopImg;
 
-    const commonProps = {
-      alt: slide.title || "Cinema Focus Hero",
-      fill: true,
-      priority: idx === 0,
-      fetchPriority: idx === 0 ? "high" : "auto",
-      loading: idx === 0 ? "eager" : "lazy",
-      style: { 
-        objectPosition: slide.imagePosition || 'center',
-        filter: `brightness(${slide.imageBrightness !== undefined ? slide.imageBrightness : 100}%) blur(${slide.imageBlur !== undefined ? slide.imageBlur : 0}px)`,
-        opacity: (slide.imageOpacity !== undefined ? slide.imageOpacity : 100) / 100
-      }
-    };
-
-    const getImgClass = (breakpointClass) => clsx(
-      breakpointClass,
-      "object-cover transition-all ease-out",
-      isActive ? "scale-105 duration-[8000ms]" : "scale-100 duration-500"
-    );
-
+    const isFirst = idx === 0;
     const sizes = isSplit ? "(max-width: 768px) 100vw, 50vw" : "100vw";
+    const imgFor = (src) =>
+      getImageProps({
+        src,
+        alt: slide.title || "Cinema Focus Hero",
+        fill: true,
+        sizes,
+        quality: 70,
+        priority: isFirst,
+        // The visible slide is above the fold even when it is not slide 0 (e.g. after autoplay
+        // advances, or when slide 0 is archived), so it must not be lazy.
+        loading: isFirst || isActive ? "eager" : "lazy",
+        fetchPriority: isFirst ? "high" : "auto",
+      }).props;
+
+    // One <picture>: the browser downloads only the source that matches the viewport
+    // (previously every breakpoint variant was a separate <img>, so hidden ones were fetched too).
+    const mobile = imgFor(mobileImg);
+    const tablet = imgFor(tabletImg);
+    const desktop = imgFor(desktopImg);
+    const ultrawide = imgFor(ultrawideImg);
+    const { srcSet: mobileSrcSet, style: baseStyle, ...imgProps } = mobile;
 
     return (
-      <>
-        {/* Mobile: 0 - 768px */}
-        <Image src={mobileImg} {...commonProps} className={getImgClass("block md:hidden")} sizes={sizes} />
-        {/* Tablet: 768px - 1024px */}
-        <Image src={tabletImg} {...commonProps} className={getImgClass("hidden md:block lg:hidden")} sizes={sizes} />
-        {/* Laptop/Desktop: 1024px - 2560px */}
-        <Image src={desktopImg} {...commonProps} className={getImgClass("hidden lg:block 3xl:hidden")} sizes={sizes} />
-        {/* Ultrawide: 2560px+ */}
-        <Image src={ultrawideImg} {...commonProps} className={getImgClass("hidden 3xl:block")} sizes={sizes} />
-      </>
+      <picture>
+        <source media="(min-width: 2560px)" srcSet={ultrawide.srcSet} sizes={sizes} />
+        <source media="(min-width: 1024px)" srcSet={desktop.srcSet} sizes={sizes} />
+        <source media="(min-width: 768px)" srcSet={tablet.srcSet} sizes={sizes} />
+        <img
+          {...imgProps}
+          srcSet={mobileSrcSet}
+          className={clsx("object-cover transition-all ease-out", isActive ? "scale-105 duration-[8000ms]" : "scale-100 duration-500")}
+          style={{
+            ...baseStyle,
+            objectPosition: slide.imagePosition || 'center',
+            filter: `brightness(${slide.imageBrightness !== undefined ? slide.imageBrightness : 100}%) blur(${slide.imageBlur !== undefined ? slide.imageBlur : 0}px)`,
+            opacity: (slide.imageOpacity !== undefined ? slide.imageOpacity : 100) / 100,
+          }}
+        />
+      </picture>
     );
   };
 
@@ -475,10 +461,10 @@ const Hero = ({
               )}>
                 {isActive && (
                   <Reveal className={clsx("w-full max-w-xl space-y-8 animate-fade-in-up flex flex-col", flexAlignItems)}>
-                     <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] drop-shadow-xl", alignClass)} style={getTitleStyle(slide)}>
+                     <h1 ref={titleRef} className={clsx("hero-intro text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] drop-shadow-xl", alignClass)} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p ref={subtitleRef} className={clsx("text-base sm:text-lg md:text-xl font-medium leading-relaxed drop-shadow-lg", pAlignClass)} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("hero-intro hero-intro-delayed text-base sm:text-lg md:text-xl font-medium leading-relaxed drop-shadow-lg", pAlignClass)} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
                      <div className="pt-4">
@@ -527,10 +513,10 @@ const Hero = ({
                 <div className={`w-full flex flex-col ${alignClass}`}>
                   {isActive && (
                     <Reveal className={`w-full max-w-4xl space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                      <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl", alignClass)} style={getTitleStyle(slide)}>
+                      <h1 ref={titleRef} className={clsx("hero-intro text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl", alignClass)} style={getTitleStyle(slide)}>
                         {slide.title}
                       </h1>
-                      <p ref={subtitleRef} className={clsx("text-base sm:text-lg md:text-2xl font-medium max-w-2xl leading-relaxed drop-shadow-xl", pAlignClass)} style={getSubtitleStyle(slide)}>
+                      <p ref={subtitleRef} className={clsx("hero-intro hero-intro-delayed text-base sm:text-lg md:text-2xl font-medium max-w-2xl leading-relaxed drop-shadow-xl", pAlignClass)} style={getSubtitleStyle(slide)}>
                         {slide.subtitle}
                       </p>
                       <div className="pt-8">
@@ -580,10 +566,10 @@ const Hero = ({
                <div className={`w-full flex flex-col ${alignClass}`}>
                  {isActive && (
                    <Reveal className={`w-full max-w-4xl space-y-6 md:space-y-8 animate-fade-in-up flex flex-col ${alignClass}`}>
-                     <h1 ref={titleRef} className={clsx("text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl", alignClass)} style={getTitleStyle(slide)}>
+                     <h1 ref={titleRef} className={clsx("hero-intro text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-semibold tracking-tight leading-[1.1] drop-shadow-2xl", alignClass)} style={getTitleStyle(slide)}>
                        {slide.title}
                      </h1>
-                     <p ref={subtitleRef} className={clsx("text-base sm:text-lg md:text-2xl font-medium max-w-2xl leading-relaxed drop-shadow-xl", pAlignClass)} style={getSubtitleStyle(slide)}>
+                     <p ref={subtitleRef} className={clsx("hero-intro hero-intro-delayed text-base sm:text-lg md:text-2xl font-medium max-w-2xl leading-relaxed drop-shadow-xl", pAlignClass)} style={getSubtitleStyle(slide)}>
                        {slide.subtitle}
                      </p>
                      <div className="pt-4 md:pt-8">

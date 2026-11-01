@@ -14,7 +14,7 @@ import {
   Shield, 
   Globe, 
   Plus, 
-  Trash2, 
+  Trash2, Archive, ArchiveRestore, 
   AlignLeft, 
   AlignCenter, 
   AlignRight, 
@@ -32,6 +32,9 @@ import { useSiteSettings } from '@/context/SiteSettingsContext';
 import clsx from 'clsx';
 import { seedDatabase } from '@/lib/seeder';
 import { revalidateData } from '@/lib/actions';
+
+// Unique storage key; kept outside the component so render-purity lint stays quiet
+const uniqueUploadName = (folder, ext) => `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${ext}`;
 
 // Extract all valid icon names from the lucide-react package
 const ALL_ICONS = Object.keys(LucideIcons)
@@ -128,7 +131,7 @@ function IconSelector({ value, onChange }) {
               })}
               {filteredIconNames.length === 0 && (
                 <div className="text-[11px] text-muted-foreground text-center py-4 italic">
-                  No icons found for "{search}"
+                  No icons found for &quot;{search}&quot;
                 </div>
               )}
               {filteredIconNames.length > 50 && (
@@ -174,10 +177,6 @@ export default function AdminSiteControlPage() {
     message: 'We are currently upgrading our digital studio to bring you an even more refined acoustic experience. Please check back shortly.',
     activeInDev: false
   });
-
-  useEffect(() => {
-    fetchData();
-  }, [activeTab]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -291,6 +290,12 @@ export default function AdminSiteControlPage() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    // Data fetch on tab change; fetchData sets the loading flag first
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+  }, [activeTab]);
+
   const handleSave = async (settingId, data) => {
     setLoading(true);
     try {
@@ -367,6 +372,18 @@ export default function AdminSiteControlPage() {
     setMessage("Slide deleted! Don't forget to save changes.");
   };
 
+  const toggleArchiveHeroSlide = (index) => {
+    setHero(prev => {
+      const slides = [...(prev.slides || [])];
+      const archiving = !slides[index].archived;
+      // Keep at least one live slide so the home hero is never empty
+      if (archiving && slides.filter((sl, i) => i !== index && !sl.archived).length === 0) return prev;
+      slides[index] = { ...slides[index], archived: archiving };
+      return { ...prev, slides };
+    });
+    setMessage("Slide updated! Don't forget to save changes.");
+  };
+
   const moveHeroSlide = (index, direction) => {
     setHero(prev => {
       const slides = [...(prev.slides || [])];
@@ -408,7 +425,7 @@ export default function AdminSiteControlPage() {
     try {
       setLoading(true);
       const fileExt = file.name.split('.').pop();
-      const fileName = `hero/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+      const fileName = uniqueUploadName('hero', fileExt);
       
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('images')
@@ -446,7 +463,7 @@ export default function AdminSiteControlPage() {
     try {
       setLoading(true);
       const fileExt = file.name.split('.').pop();
-      const fileName = `about/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+      const fileName = uniqueUploadName('about', fileExt);
       
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('images')
@@ -617,7 +634,8 @@ export default function AdminSiteControlPage() {
                              "flex items-center gap-2 p-1.5 px-3 rounded-lg border text-xs font-semibold transition-all shadow-sm",
                              idx === activeSlideIndex 
                                ? "bg-primary text-primary-foreground border-primary" 
-                               : "bg-background border-border text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                               : "bg-background border-border text-muted-foreground hover:bg-secondary/40 hover:text-foreground",
+                             slide.archived && "border-dashed opacity-60"
                            )}
                          >
                            <button 
@@ -625,7 +643,7 @@ export default function AdminSiteControlPage() {
                              onClick={() => setActiveSlideIndex(idx)}
                              className="cursor-pointer font-bold bg-transparent border-none text-current p-0 outline-none"
                            >
-                             Slide {idx + 1}
+                             Slide {idx + 1}{slide.archived && ' (archived)'}
                            </button>
                            
                            {/* Reordering */}
@@ -649,6 +667,17 @@ export default function AdminSiteControlPage() {
                                →
                              </button>
                            </div>
+
+                           {/* Archive: hides the slide on the site but keeps it for later */}
+                           <button
+                             type="button"
+                             onClick={() => toggleArchiveHeroSlide(idx)}
+                             disabled={!slide.archived && (hero.slides || []).filter((sl) => !sl.archived).length <= 1}
+                             className="hover:bg-black/10 dark:hover:bg-white/10 p-0.5 rounded transition-colors cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed"
+                             title={slide.archived ? "Restore slide" : "Archive slide (hide from site)"}
+                           >
+                             {slide.archived ? <ArchiveRestore size={11} /> : <Archive size={11} />}
+                           </button>
 
                            {/* Delete */}
                            {(hero.slides || []).length > 1 && (
