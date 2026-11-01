@@ -170,19 +170,21 @@ const Hero = ({
       isFirstSlideRun.current = false;
       return;
     }
-    if (!titleRef.current || !subtitleRef.current) return;
-
-    gsap.fromTo(
-      titleRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 }
-    );
-
-    gsap.fromTo(
-      subtitleRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 }
-    );
+    // A slide can have no tagline (e.g. the Product Stage), so animate each element only if present
+    if (titleRef.current) {
+      gsap.fromTo(
+        titleRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 }
+      );
+    }
+    if (subtitleRef.current) {
+      gsap.fromTo(
+        subtitleRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 }
+      );
+    }
   }, [currentIndex]);
 
   // Scroll indicator fade on scroll. Viewport height is cached (reading innerHeight on every
@@ -582,13 +584,15 @@ const Hero = ({
                     >
                       {slide.title}
                     </h1>
-                    <p
-                      ref={subtitleRef}
-                      className="hero-intro hero-intro-delayed mt-4 text-lg font-light text-balance md:text-2xl"
-                      style={{ color: subFg }}
-                    >
-                      {slide.subtitle}
-                    </p>
+                    {slide.subtitle ? (
+                      <p
+                        ref={subtitleRef}
+                        className="hero-intro hero-intro-delayed mt-4 text-lg font-light text-balance md:text-2xl"
+                        style={{ color: subFg }}
+                      >
+                        {slide.subtitle}
+                      </p>
+                    ) : null}
                     <div className="hero-intro hero-intro-delayed mt-6 flex items-center gap-6">
                       <Link
                         href={slide.ctaLink || '/products'}

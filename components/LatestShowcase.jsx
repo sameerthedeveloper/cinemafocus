@@ -93,24 +93,23 @@ function Tile({ product, featured = false, className }) {
 }
 
 /**
- * "The latest": one large featured product beside up to two compact ones.
- * Falls back gracefully for 1 or 2 products.
+ * "The latest": one large featured product beside up to four compact ones, newest first.
+ * Falls back gracefully for fewer products.
  */
 export default function LatestShowcase({ products = [] }) {
-  const [first, ...rest] = products.slice(0, 3);
+  const [first, ...rest] = products.slice(0, 5);
   if (!first) return null;
 
-  const side = rest.slice(0, 2);
   return (
-    <div className="grid gap-4 md:gap-6 lg:grid-cols-12 lg:grid-rows-2">
-      <Tile
-        product={first}
-        featured
-        className={clsx('lg:row-span-2', side.length === 0 ? 'lg:col-span-12' : 'lg:col-span-7')}
-      />
-      {side.map((p) => (
-        <Tile key={p.slug} product={p} className={clsx('lg:col-span-5', side.length === 1 && 'lg:row-span-2')} />
-      ))}
+    <div className="grid gap-4 md:gap-6 lg:grid-cols-12">
+      <Tile product={first} featured className={rest.length === 0 ? 'lg:col-span-12' : 'lg:col-span-7'} />
+      {rest.length > 0 && (
+        <div className="flex flex-col gap-4 md:gap-6 lg:col-span-5">
+          {rest.map((p) => (
+            <Tile key={p.slug} product={p} className="flex-1" />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

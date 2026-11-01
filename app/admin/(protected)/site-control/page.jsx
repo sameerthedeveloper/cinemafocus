@@ -334,7 +334,10 @@ export default function AdminSiteControlPage() {
       setTimeout(() => setMessage(''), 3000);
     } catch (e) {
       console.error(e);
-      setMessage('Error saving: ' + e.message);
+      // 401 = the admin session cookie is missing or expired (reads are public, writes are not)
+      setMessage(e?.status === 401
+        ? 'Your admin session has expired. Sign in again at /admin/login, then save again. Your edits on this page are still here.'
+        : 'Error saving: ' + e.message);
     } finally {
       setLoading(false);
     }

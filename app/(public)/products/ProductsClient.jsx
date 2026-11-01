@@ -38,11 +38,12 @@ function ProductListContent({ initialProducts, initialCategories, initialNewLaun
   const [categories, setCategories] = useState(initialCategories || []);
   const [newLaunches, setNewLaunches] = useState(initialNewLaunches || []);
   const [loading, setLoading] = useState(!initialProducts);
-  const skipInitialFetch = useRef(Boolean(initialProducts) && activeCategory === 'all');
+  const skipInitialFetch = useRef(Boolean(initialProducts) && (activeCategory === 'all' || activeCategory === 'new-arrivals'));
   const [filtersSticky, setFiltersSticky] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredProducts = products.filter((product) => {
+    if (!product?.slug) return false; // a record without a slug has no page to link to
     const q = searchQuery.toLowerCase();
     return (
       product.name?.toLowerCase().includes(q) ||
@@ -84,7 +85,9 @@ function ProductListContent({ initialProducts, initialCategories, initialNewLaun
         if (activeCategory === 'all') {
           p = await getProducts();
         } else if (activeCategory === 'new-arrivals') {
-          p = nl;
+          // New Launches entries whose product was deleted would link to a 404, so keep only live ones
+          const live = new Set((await getProducts()).map((x) => x.slug));
+          p = nl.filter((l) => live.has(l.slug)).map((l) => ({ ...l, image_url: l.image_url || l.images?.[0], is_new_launch: true }));
         } else {
           p = await getProducts({ category: activeCategory });
         }
@@ -236,11 +239,13 @@ function ProductListContent({ initialProducts, initialCategories, initialNewLaun
           </div>
         ) : (
           <div className="rounded-panel bg-secondary/40 px-6 py-20 text-center md:py-28">
-            <h2 className="text-xl font-medium md:text-2xl">No products found</h2>
+            <h2 className="text-xl font-medium md:text-2xl">{activeCategory === 'new-arrivals' && !searchQuery ? 'No new arrivals right now' : 'No products found'}</h2>
             <p className="mx-auto mt-2 max-w-sm text-muted-foreground">
               {searchQuery
                 ? `Nothing matches "${searchQuery}". Try a different word or clear the search.`
-                : 'There are no products here yet. Browse the full collection instead.'}
+                : activeCategory === 'new-arrivals'
+                  ? 'Check back soon, or browse the full collection.'
+                  : 'There are no products here yet. Browse the full collection instead.'}
             </p>
             <button
               type="button"

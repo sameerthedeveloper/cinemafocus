@@ -4,8 +4,11 @@ import React from 'react';
 import ProductCard from '@/components/ProductCard';
 import Section from '@/components/Section';
 
-export default function BrandClient({ category, products }) {
+export default function BrandClient({ category, products: allProducts }) {
   if (!category) return null;
+
+  // A record without a slug has no page to link to (and no stable React key), so leave it out
+  const products = (allProducts || []).filter((p) => p?.slug);
 
   return (
     <Section className="py-20 min-h-screen">

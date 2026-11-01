@@ -41,6 +41,12 @@ export default async function ProductsPage({ searchParams }) {
 
   const listed = (products || []).filter(isIndexableProduct);
 
+  // New arrivals = New Launches entries whose product still exists (a deleted product would be a 404 link)
+  const liveSlugs = new Set((products || []).map((p) => p.slug));
+  const arrivals = (newLaunches || [])
+    .filter((l) => liveSlugs.has(l.slug))
+    .map((l) => ({ ...cardFields(l), image_url: l.image_url || l.images?.[0], is_new_launch: true }));
+
   return (
     <>
       <JsonLd
@@ -60,7 +66,7 @@ export default async function ProductsPage({ searchParams }) {
         />
       )}
       <ProductsClient
-        initialProducts={category ? undefined : products?.map(cardFields)}
+        initialProducts={category === 'new-arrivals' ? (products ? arrivals : undefined) : category ? undefined : products?.map(cardFields)}
         initialCategories={categories}
         initialNewLaunches={newLaunches}
       />

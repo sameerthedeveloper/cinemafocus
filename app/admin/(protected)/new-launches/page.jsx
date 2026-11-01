@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/aws/queryClient';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Sparkles, Loader2, X } from 'lucide-react';
 import Reveal from '@/components/Reveal';
+import { revalidateData } from '@/lib/actions';
 
 export default function AdminNewLaunchesPage() {
   const [launches, setLaunches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [bulkRemoving, setBulkRemoving] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -41,10 +44,46 @@ export default function AdminNewLaunchesPage() {
         
         if (error) throw error;
         setLaunches(launches.filter(item => item.id !== id));
+        setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+        try { await revalidateData('products'); } catch (err) { console.warn('Revalidation skipped:', err); }
       } catch (error) {
         console.error("Error deleting launch:", error);
         alert("Failed to delete launch: " + error.message);
       }
+    }
+  };
+
+  const allSelected = launches.length > 0 && selectedIds.size === launches.length;
+  const someSelected = selectedIds.size > 0 && !allSelected;
+
+  const toggleSelect = (id) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const toggleSelectAll = () =>
+    setSelectedIds(allSelected ? new Set() : new Set(launches.map((l) => l.id)));
+
+  // Bulk "unselect" of new arrivals: removes the highlight only, never the product itself
+  const handleBulkRemove = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    if (!window.confirm(`Remove ${ids.length} new arrival${ids.length > 1 ? 's' : ''}? The products stay in your catalogue; they just stop being highlighted.`)) return;
+
+    setBulkRemoving(true);
+    try {
+      const { error } = await supabase.from('new_launches').delete().in('id', ids);
+      if (error) throw error;
+      setLaunches((prev) => prev.filter((l) => !selectedIds.has(l.id)));
+      setSelectedIds(new Set());
+      try { await revalidateData('products'); } catch (err) { console.warn('Revalidation skipped:', err); }
+    } catch (error) {
+      console.error('Error removing new arrivals:', error);
+      alert('Failed to remove new arrivals: ' + error.message);
+    } finally {
+      setBulkRemoving(false);
     }
   };
 
@@ -64,11 +103,46 @@ export default function AdminNewLaunchesPage() {
         </Link>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-secondary/30 px-4 py-3" role="region" aria-label="Bulk actions">
+          <span className="text-sm font-medium">
+            <span className="font-semibold text-primary">{selectedIds.size}</span> selected
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelectedIds(new Set())}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+          >
+            <X size={14} /> Clear selection
+          </button>
+          <button
+            type="button"
+            onClick={handleBulkRemove}
+            disabled={bulkRemoving}
+            className="ml-auto inline-flex items-center gap-2 rounded-full bg-red-500/10 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-500/20 disabled:opacity-50 cursor-pointer"
+          >
+            {bulkRemoving ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+            Remove from new arrivals
+          </button>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl border border-border overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
           <thead className="bg-secondary/30 border-b border-border">
             <tr>
+              <th className="w-12 p-4">
+                <input
+                  type="checkbox"
+                  aria-label="Select all new arrivals"
+                  checked={allSelected}
+                  ref={(el) => { if (el) el.indeterminate = someSelected; }}
+                  onChange={toggleSelectAll}
+                  disabled={launches.length === 0}
+                  className="h-4 w-4 cursor-pointer accent-black"
+                />
+              </th>
               <th className="p-4 font-medium text-xs uppercase tracking-wider text-muted-foreground">Product</th>
               <th className="p-4 font-medium text-xs uppercase tracking-wider text-muted-foreground">Brand</th>
               <th className="p-4 font-medium text-xs uppercase tracking-wider text-muted-foreground">Price</th>
@@ -78,13 +152,22 @@ export default function AdminNewLaunchesPage() {
           <tbody className="divide-y divide-border">
             {loading ? (
                <tr>
-                 <td colSpan="4" className="p-12 text-center text-muted-foreground">
+                 <td colSpan="5" className="p-12 text-center text-muted-foreground">
                     <Loader2 className="animate-spin mx-auto mb-2 text-primary/50" />
                     <span className="text-sm">Fetching arrivals...</span>
                  </td>
                </tr>
             ) : launches.map((launch) => (
-              <tr key={launch.id} className="hover:bg-secondary/5 transition-colors">
+              <tr key={launch.id} className={`transition-colors hover:bg-secondary/5 ${selectedIds.has(launch.id) ? 'bg-secondary/20' : ''}`}>
+                <td className="w-12 p-4">
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${launch.name}`}
+                    checked={selectedIds.has(launch.id)}
+                    onChange={() => toggleSelect(launch.id)}
+                    className="h-4 w-4 cursor-pointer accent-black"
+                  />
+                </td>
                 <td className="p-4 font-medium flex items-center gap-3">
                    {launch.images && launch.images[0] ? (
                       <img src={launch.images[0]} alt={launch.name} className="w-12 h-12 rounded-lg object-cover border border-border" />
@@ -109,7 +192,7 @@ export default function AdminNewLaunchesPage() {
             ))}
             {!loading && launches.length === 0 && (
                <tr>
-                 <td colSpan="4" className="p-12 text-center text-muted-foreground">
+                 <td colSpan="5" className="p-12 text-center text-muted-foreground">
                     <div className="max-w-xs mx-auto space-y-2">
                        <Sparkles size={40} className="mx-auto opacity-10" />
                        <p className="font-medium text-foreground">No featured arrivals</p>

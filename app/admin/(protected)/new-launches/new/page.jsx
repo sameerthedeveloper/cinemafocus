@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ArrowLeft, Save, Sparkles, Search, Loader2 } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import Reveal from '@/components/Reveal';
+import { revalidateData } from '@/lib/actions';
 
 export default function AddNewLaunchPage() {
   const router = useRouter();
@@ -81,9 +82,13 @@ export default function AddNewLaunchPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.name.trim()) { alert('Choose a product first.'); return; }
+    // The product page is addressed by slug, so a record without one would be a dead link on the site
+    if (!formData.slug) { alert('This product has no slug, so it has no page to link to. Open it under Products, press Save once to restore the slug, then feature it.'); return; }
     setLoading(true);
     try {
       const payload = {
+        id: formData.slug || undefined,
         name: formData.name,
         brand: formData.brand,
         price: Number(formData.price),
@@ -92,7 +97,9 @@ export default function AddNewLaunchPage() {
         short_description: formData.shortDescription,
         images: overrideImage ? [overrideImage, ...formData.images] : formData.images,
         featured: true,
-        original_product_id: selectedProductId === '' ? null : selectedProductId
+        original_product_id: selectedProductId === '' ? null : selectedProductId,
+        // the backend checks this spelling (and clears it if the product is deleted)
+        originalProductId: selectedProductId === '' ? null : selectedProductId
       };
       
       const { error } = await supabase
@@ -101,7 +108,10 @@ export default function AddNewLaunchPage() {
 
       if (error) throw error;
 
-      router.push('/admin/site-control'); // Redirecting back to site control where launches are managed usually, or a specific page
+      // Refresh the cached home page and product list so the new arrival shows straight away
+      try { await revalidateData('products'); } catch (err) { console.warn('Revalidation skipped:', err); }
+
+      router.push('/admin/new-launches');
     } catch (error) {
       console.error("Error adding new launch:", error);
       alert("Failed to feature product: " + error.message);

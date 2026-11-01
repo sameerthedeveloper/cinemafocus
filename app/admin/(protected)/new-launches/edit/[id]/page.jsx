@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ArrowLeft, Save, Sparkles, Loader2 } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import Reveal from '@/components/Reveal';
+import { revalidateData } from '@/lib/actions';
 
 export default function EditLaunchPage() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function EditLaunchPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [overrideImage, setOverrideImage] = useState('');
+  // Full record as loaded: the update replaces the whole item, so fields the form does not edit (slug, category, dates) must go back
+  const [original, setOriginal] = useState(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -46,6 +49,7 @@ export default function EditLaunchPage() {
       if (error) throw error;
       
       if (data) {
+        setOriginal(data);
         setFormData({
           name: data.name || '',
           brand: data.brand || '',
@@ -85,7 +89,12 @@ export default function EditLaunchPage() {
         }
       }
 
+      // A launch saved while its product had no slug has an empty one; restore it from the product id ("pl-<slug>" for imported products)
+      const productRef = original?.original_product_id || original?.originalProductId || '';
+      const slug = original?.slug || (String(productRef).startsWith('pl-') ? String(productRef).slice(3) : '');
       const payload = {
+        ...(original || {}),
+        ...(slug ? { slug } : {}),
         name: formData.name,
         brand: formData.brand,
         price: Number(formData.price),
@@ -99,6 +108,8 @@ export default function EditLaunchPage() {
         .eq('id', launchId);
 
       if (error) throw error;
+
+      try { await revalidateData('products'); } catch (err) { console.warn('Revalidation skipped:', err); }
 
       router.push('/admin/new-launches');
     } catch (error) {

@@ -30,6 +30,12 @@ const nextConfig = {
         hostname: "d2x0o69dm3vdcd.cloudfront.net",
         pathname: '/**',
       },
+      // Store site image CDN (store.cinemafocus.in): used by hero slides that point at store product photos
+      {
+        protocol: 'https',
+        hostname: "d54bgf57pn0o3.cloudfront.net",
+        pathname: '/products/**',
+      },
     ],
     // The optimizer is enabled. Source images on the CDN are often full-resolution PNG/JPG uploads
     // (1-4 MB); <Hero> and <OptimizedImage optimize> route them through it for AVIF/WebP + responsive

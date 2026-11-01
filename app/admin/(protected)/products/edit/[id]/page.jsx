@@ -35,6 +35,8 @@ export default function EditProductPage() {
 
   const [imageFiles, setImageFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
+  // The full record as loaded: the update replaces the whole item, so anything the form does not edit must be sent back
+  const [original, setOriginal] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +56,7 @@ export default function EditProductPage() {
           .single();
 
         if (product) {
+          setOriginal(product);
           setFormData({
             name: product.name || '',
             brand: product.brand || '',
@@ -158,7 +161,11 @@ export default function EditProductPage() {
       const finalImages = [...formData.images, ...newImageUrls];
 
       // 2. Prepare Data (mapping camelCase to snake_case for Supabase)
+      // Keep the slug; if an earlier save already lost it, restore it from the id ("pl-<slug>" for imported products)
+      const slug = original?.slug || (String(id).startsWith('pl-') ? String(id).slice(3) : undefined);
       const productData = {
+        ...(original || {}),
+        ...(slug ? { slug } : {}),
         name: formData.name,
         brand: formData.brand,
         price: formData.price === '' ? null : Number(formData.price),

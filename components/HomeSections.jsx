@@ -18,7 +18,9 @@ import * as LucideIcons from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
 import { 
   getCategories, 
-  getFeaturedProducts, 
+  getFeaturedProducts,
+  getProducts,
+  getNewLaunches,
   getTrustBadges, 
   getProjects, 
   getPressReleases
@@ -47,7 +49,35 @@ export async function CollectionSection() {
 }
 
 export async function FeaturedSection() {
-  const data = await getFeaturedProducts();
+  const [featured, rawLaunches, catalogue] = await Promise.all([
+    getFeaturedProducts(),
+    getNewLaunches().catch(() => []),
+    getProducts().catch(() => null),
+  ]);
+  // A New Launches entry whose product was deleted would link to a 404, so only keep ones that still exist
+  const liveSlugs = catalogue ? new Set(catalogue.map((p) => p.slug)) : null;
+  const launches = liveSlugs ? rawLaunches.filter((l) => liveSlugs.has(l.slug)) : rawLaunches;
+
+  // New Launches entries are products too (same slug), so show them here as well. Newest first,
+  // one card per product.
+  const launchAsProduct = (l) => ({
+    slug: l.slug,
+    name: l.name,
+    brand: l.brand,
+    category: l.category,
+    price: l.price,
+    images: l.images,
+    image_url: l.image_url || l.images?.[0],
+    short_description: l.short_description || l.shortDescription,
+    created_at: l.created_at,
+    is_new_launch: true,
+  });
+  const seen = new Set();
+  const data = [...launches.map(launchAsProduct), ...featured]
+    .filter((p) => p?.slug && !seen.has(p.slug) && seen.add(p.slug))
+    .sort((a, b) => (Date.parse(b.created_at) || 0) - (Date.parse(a.created_at) || 0))
+    .slice(0, 5);
+
   return (
     <Section id="featured" background="bg-secondary/5">
       <SectionHeader title="The latest" href="/products" linkLabel="View all products" />

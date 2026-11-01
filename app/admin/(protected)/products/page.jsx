@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Plus, Edit, Trash2, Upload, X, Check, Loader2, AlertCircle, CheckSquare, Square, Search, Eye, EyeOff } from 'lucide-react';
 import { revalidateData } from '@/lib/actions';
 import Reveal from '@/components/Reveal';
+import { readZip } from '@/lib/zipReader';
+import { baseName, isImageFile, mimeFor, pickProductsFile, productsFromJson, normalizeProduct, matchImages } from '@/lib/productImport';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState([]);
@@ -31,11 +33,13 @@ export default function AdminProductsPage() {
     updateBrand: false,
     updateCategory: false,
     updatePrice: false,
+    updateNewArrival: false,
   });
   const [bulkEditData, setBulkEditData] = useState({
     brand: '',
     category: '',
     price: '',
+    newArrival: 'add',
   });
   const [categories, setCategories] = useState([]);
 
@@ -142,7 +146,7 @@ export default function AdminProductsPage() {
     e.preventDefault();
     if (selectedIds.size === 0) return;
     
-    if (!bulkEditFields.updateBrand && !bulkEditFields.updateCategory && !bulkEditFields.updatePrice) {
+    if (!bulkEditFields.updateBrand && !bulkEditFields.updateCategory && !bulkEditFields.updatePrice && !bulkEditFields.updateNewArrival) {
       alert("Please select at least one field to update.");
       return;
     }
@@ -161,12 +165,52 @@ export default function AdminProductsPage() {
       }
 
       const ids = Array.from(selectedIds);
-      const { error } = await supabase
-        .from('products')
-        .update(payload)
-        .in('id', ids);
+      if (Object.keys(payload).length > 0) {
+        const { error } = await supabase
+          .from('products')
+          .update(payload)
+          .in('id', ids);
 
-      if (error) throw error;
+        if (error) throw error;
+      }
+
+      // New arrival: add the selected products to, or remove them from, the New Arrivals list
+      let arrivalNote = '';
+      if (bulkEditFields.updateNewArrival) {
+        const chosen = products.filter((p) => selectedIds.has(p.id));
+        if (bulkEditData.newArrival === 'add') {
+          const eligible = chosen.filter((p) => p.slug);
+          const rows = eligible.map((p) => ({
+            id: p.slug, // same slug = same entry, so adding twice never duplicates
+            name: p.name,
+            brand: p.brand,
+            price: Number(p.price) || 0,
+            slug: p.slug,
+            category: p.category,
+            short_description: p.short_description || '',
+            images: p.images || [],
+            featured: true,
+            original_product_id: p.id,
+            originalProductId: p.id,
+            created_at: new Date().toISOString(),
+          }));
+          if (rows.length > 0) {
+            const { error: addError } = await supabase.from('new_launches').upsert(rows);
+            if (addError) throw addError;
+          }
+          arrivalNote = `${rows.length} added to new arrivals` + (chosen.length > rows.length ? `, ${chosen.length - rows.length} skipped (no slug: open the product and Save once)` : '');
+        } else {
+          const slugs = new Set(chosen.map((p) => p.slug).filter(Boolean));
+          const { data: launches, error: listError } = await supabase.from('new_launches').select('*');
+          if (listError) throw listError;
+          const launchIds = (launches || []).filter((l) => slugs.has(l.slug) || chosen.some((p) => p.id === l.original_product_id)).map((l) => l.id);
+          if (launchIds.length > 0) {
+            const { error: delError } = await supabase.from('new_launches').delete().in('id', launchIds);
+            if (delError) throw delError;
+          }
+          arrivalNote = `${launchIds.length} removed from new arrivals`;
+        }
+      }
 
       // Update local state
       setProducts(prev => prev.map(p => {
@@ -181,9 +225,9 @@ export default function AdminProductsPage() {
 
       setSelectedIds(new Set());
       setShowBulkEditModal(false);
-      setBulkEditFields({ updateBrand: false, updateCategory: false, updatePrice: false });
-      setBulkEditData({ brand: '', category: '', price: '' });
-      alert("Successfully updated selected products.");
+      setBulkEditFields({ updateBrand: false, updateCategory: false, updatePrice: false, updateNewArrival: false });
+      setBulkEditData({ brand: '', category: '', price: '', newArrival: 'add' });
+      alert("Successfully updated selected products." + (arrivalNote ? `\n${arrivalNote}.` : ''));
 
       try {
         await revalidateData('products');
@@ -270,19 +314,94 @@ export default function AdminProductsPage() {
     setDragActive(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processJsonFile(e.dataTransfer.files[0]);
+      processImportFile(e.dataTransfer.files[0]);
     }
   };
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      processJsonFile(e.target.files[0]);
+      processImportFile(e.target.files[0]);
+      e.target.value = ''; // allow choosing the same file again
     }
   };
 
   const addLog = (message) => {
     const timestamp = new Date().toLocaleTimeString();
     setImportLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+  };
+
+  const processImportFile = (file) => {
+    if (/\.zip$/i.test(file.name) || file.type === 'application/zip' || file.type === 'application/x-zip-compressed') {
+      return processZipFile(file);
+    }
+    return processJsonFile(file);
+  };
+
+  // ZIP import: a products .json plus the product images. Each image is uploaded through the
+  // same optimizing upload route as the product editor, then the products are imported with
+  // their new image URLs.
+  const processZipFile = async (file) => {
+    setImportError('');
+    setImporting(true);
+    setImportSuccess(false);
+    setImportLogs([]);
+    setImportProgress({ current: 0, total: 0, status: 'Reading ZIP...' });
+    addLog(`Reading file: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`);
+
+    try {
+      const entries = await readZip(await file.arrayBuffer());
+      const jsonEntry = pickProductsFile(entries);
+      if (!jsonEntry) throw new Error('No .json file found in the ZIP. Add a products.json next to an images folder.');
+
+      const rawProducts = productsFromJson(JSON.parse(new TextDecoder().decode(await jsonEntry.read())));
+      const zipImages = entries.filter((e) => isImageFile(e.name));
+      addLog(`Found ${rawProducts.length} products in ${jsonEntry.name} and ${zipImages.length} images.`);
+
+      // Work out which images each product needs
+      const plan = rawProducts.map((raw) => {
+        const product = normalizeProduct(raw);
+        return { product, ...matchImages(product, zipImages) };
+      });
+      plan.forEach(({ product, missing, files }) => {
+        if (missing.length && files.length === 0) addLog(`⚠️ ${product.name}: no image file found in the ZIP (looked for ${missing.map(baseName).join(', ')}).`);
+      });
+
+      const toUpload = [...new Map(plan.flatMap((p) => p.files).map((f) => [f.name, f])).values()];
+      const urlByFile = new Map();
+      const usedNames = new Set();
+
+      for (let i = 0; i < toUpload.length; i++) {
+        const entry = toUpload[i];
+        setImportProgress({ current: i, total: toUpload.length, status: `Uploading image ${i + 1}/${toUpload.length}: ${baseName(entry.name)}` });
+        try {
+          let name = baseName(entry.name);
+          while (usedNames.has(name.toLowerCase())) name = `${i}-${name}`; // same file name in two folders
+          usedNames.add(name.toLowerCase());
+          const bytes = await entry.read();
+          const upload = new File([bytes], name, { type: mimeFor(name) });
+          const path = `products/${name}`;
+          const { error: upErr } = await supabase.storage.from('images').upload(path, upload);
+          if (upErr) throw new Error(upErr.message || 'upload failed');
+          const { data: pub } = supabase.storage.from('images').getPublicUrl(path);
+          urlByFile.set(entry.name, pub.publicUrl);
+          addLog(`✔ Uploaded ${name}`);
+        } catch (err) {
+          addLog(`✘ Could not upload ${baseName(entry.name)}: ${err.message}`);
+        }
+      }
+
+      const products = plan.map(({ product, urls, files }) => ({
+        ...product,
+        images: [...urls, ...files.map((f) => urlByFile.get(f.name)).filter(Boolean)],
+      }));
+
+      addLog(`Uploaded ${urlByFile.size} of ${toUpload.length} images. Importing products...`);
+      await runImport(products);
+    } catch (err) {
+      console.error(err);
+      setImportError(err.message || 'Failed to read the ZIP file.');
+      setImporting(false);
+    }
   };
 
   const processJsonFile = async (file) => {
@@ -382,7 +501,14 @@ export default function AdminProductsPage() {
           long_description: prod.longDescription || prod.long_description || '',
           featured: prod.featured || false,
           images: prod.images || [],
-          specifications: prod.specifications || []
+          specifications: prod.specifications || [],
+          // Keep these when the file is a backup/export, so restoring does not un-hide hidden
+          // products or reset dates (only copied when present)
+          ...Object.fromEntries(
+            ['is_active', 'created_at', 'updated_at', 'seo_title', 'seo_description', 'canonical_slug', 'seo_noindex', 'price_verified']
+              .filter((k) => prod[k] !== undefined)
+              .map((k) => [k, prod[k]])
+          ),
         };
 
         setImportProgress({
@@ -443,7 +569,7 @@ export default function AdminProductsPage() {
             className="flex items-center gap-2 px-6 py-2.5 border border-border bg-background hover:bg-secondary/30 text-foreground rounded-full font-medium transition-colors justify-center cursor-pointer"
           >
             <Upload size={18} className="text-primary" />
-            Import JSON
+            Import products
           </button>
           <Link href="/admin/products/new" className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity justify-center">
             <Plus size={18} />
@@ -483,7 +609,7 @@ export default function AdminProductsPage() {
           </button>
           <button
             onClick={() => {
-              setBulkEditFields({ updateBrand: false, updateCategory: false, updatePrice: false });
+              setBulkEditFields({ updateBrand: false, updateCategory: false, updatePrice: false, updateNewArrival: false });
               setBulkEditData({ brand: '', category: '', price: '' });
               setShowBulkEditModal(true);
             }}
@@ -650,7 +776,7 @@ export default function AdminProductsPage() {
                    <Upload className="text-primary" size={20} />
                    Bulk Product Import
                  </h2>
-                 <p className="text-xs text-muted-foreground mt-0.5">Upload database-compatible JSON files in one click.</p>
+                 <p className="text-xs text-muted-foreground mt-0.5">Import a JSON file, or a ZIP with the JSON and its product images.</p>
                </div>
                <button 
                  onClick={() => {
@@ -676,7 +802,7 @@ export default function AdminProductsPage() {
                 >
                   <input 
                     type="file" 
-                    accept=".json,application/json" 
+                    accept=".json,.zip,application/json,application/zip" 
                     onChange={handleFileChange} 
                     className="hidden" 
                     id="json-file-upload" 
@@ -686,12 +812,26 @@ export default function AdminProductsPage() {
                        <Upload size={32} className="text-primary animate-pulse" />
                      </div>
                      <div>
-                       <span className="font-medium text-base block">Drag & drop your product JSON file here</span>
+                       <span className="font-medium text-base block">Drag & drop a product JSON or ZIP file here</span>
                        <span className="text-sm text-muted-foreground block mt-1">or click to browse from files</span>
                      </div>
-                     <span className="text-xs px-3 py-1 bg-secondary rounded-full text-muted-foreground font-mono">supabase_products.json</span>
+                     <span className="text-xs px-3 py-1 bg-secondary rounded-full text-muted-foreground font-mono">products.json &middot; products.zip</span>
                   </label>
                 </div>
+              )}
+
+              {!importing && !importSuccess && (
+                <details className="rounded-xl border border-border bg-secondary/10 p-4 text-sm">
+                  <summary className="cursor-pointer font-medium">How to prepare a ZIP with images</summary>
+                  <ul className="mt-3 list-disc space-y-1.5 pl-5 text-xs text-muted-foreground">
+                    <li>Put a <code>products.json</code> and your pictures in one ZIP (folders are fine, e.g. an <code>images</code> folder).</li>
+                    <li>In the JSON, list file names under <code>images</code>, for example <code>&quot;images&quot;: [&quot;s18evo-1.jpg&quot;]</code>.</li>
+                    <li>Or leave <code>images</code> empty and name the files after the product slug: <code>my-slug.jpg</code>, <code>my-slug-1.jpg</code>, <code>my-slug-2.jpg</code>.</li>
+                    <li>Links that start with <code>https://</code> are kept as they are and not uploaded.</li>
+                    <li>Each image is resized and converted to WebP on upload, and added to the product. The first image is shown on cards.</li>
+                    <li>Importing the same ZIP again updates the products but uploads the images again.</li>
+                  </ul>
+                </details>
               )}
 
               {/* Progress Panel */}
@@ -871,6 +1011,44 @@ export default function AdminProductsPage() {
                       placeholder="e.g. 1250" 
                     />
                   </Reveal>
+                )}
+              </div>
+
+              {/* New Arrival */}
+              <div className="p-4 border border-border rounded-2xl bg-secondary/15 space-y-3 transition-colors hover:border-border/80">
+                <label className="flex items-center gap-2.5 font-medium text-sm text-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={bulkEditFields.updateNewArrival}
+                    onChange={e => setBulkEditFields(prev => ({ ...prev, updateNewArrival: e.target.checked }))}
+                    className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                  />
+                  <span>
+                    New Arrival <span className="text-xs font-normal text-muted-foreground ml-1">(shows in &quot;The latest&quot; and the New Arrivals tab)</span>
+                  </span>
+                </label>
+                {bulkEditFields.updateNewArrival && (
+                  <div className="grid grid-cols-2 gap-2 animate-fade-in" role="radiogroup" aria-label="New arrival action">
+                    {[
+                      { value: 'add', label: 'Add to new arrivals' },
+                      { value: 'remove', label: 'Remove from new arrivals' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={bulkEditData.newArrival === opt.value}
+                        onClick={() => setBulkEditData(prev => ({ ...prev, newArrival: opt.value }))}
+                        className={`rounded-xl border p-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                          bulkEditData.newArrival === opt.value
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-border bg-background text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
 
