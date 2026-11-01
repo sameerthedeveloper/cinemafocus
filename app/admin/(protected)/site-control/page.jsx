@@ -433,7 +433,7 @@ export default function AdminSiteControlPage() {
       
     } catch (error) {
       console.error("Error uploading image:", error);
-      setMessage("Failed to upload image.");
+      setMessage(`Failed to upload image: ${error?.message || "unknown error"}`);
     } finally {
       setLoading(false);
     }
@@ -466,7 +466,7 @@ export default function AdminSiteControlPage() {
       
     } catch (error) {
       console.error("Error uploading image:", error);
-      setMessage("Failed to upload image.");
+      setMessage(`Failed to upload image: ${error?.message || "unknown error"}`);
     } finally {
       setLoading(false);
     }

@@ -70,7 +70,8 @@ export async function POST(request) {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ folder, fileName, contentType }),
+      // size: the deployed presign Lambda validates it (integer, 1..10485760 bytes)
+      body: JSON.stringify({ folder, fileName, contentType, size: buffer.length }),
     });
     const presignData = await presignRes.json();
 
