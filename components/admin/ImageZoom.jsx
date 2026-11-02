@@ -150,7 +150,7 @@ export function ImageZoomModal({ src, alt = '', onClose }) {
  * Small round "Zoom" button to lay over an image corner. The parent must be `relative`.
  * Sits above file-input overlays (z-20) and stops the click from reaching them.
  */
-export default function ImageZoomButton({ src, alt = '', className }) {
+export default function ImageZoomButton({ src, alt = '', className, label }) {
   const [open, setOpen] = useState(false);
   if (!src) return null;
   return (
@@ -158,11 +158,12 @@ export default function ImageZoomButton({ src, alt = '', className }) {
       <button
         type="button"
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
-        className={clsx('absolute z-20 flex h-9 w-9 items-center justify-center rounded-full bg-background text-foreground shadow-float transition-opacity hover:bg-secondary focus-visible:opacity-100', className ?? 'bottom-2 right-2')}
+        className={clsx('absolute z-20 flex h-9 items-center justify-center gap-1.5 rounded-full bg-background text-foreground shadow-float transition-opacity hover:bg-secondary focus-visible:opacity-100', label ? 'px-3.5 text-xs font-medium' : 'w-9', className ?? 'bottom-2 right-2')}
         aria-label="Zoom image"
         title="Zoom"
       >
         <Search size={16} />
+        {label}
       </button>
       {open && <ImageZoomModal src={src} alt={alt} onClose={() => setOpen(false)} />}
     </>

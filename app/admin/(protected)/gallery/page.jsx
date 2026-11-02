@@ -6,6 +6,7 @@ import { Plus, Trash2, Image as ImageIcon, Loader2, Edit2, Star, Move } from 'lu
 import { revalidateData } from '@/lib/actions';
 import Reveal from '@/components/Reveal';
 import ImageZoomButton from '@/components/admin/ImageZoom';
+import ImageCropButton from '@/components/admin/ImageCrop';
 
 function ImagePositionAdjuster({ value, onChange }) {
   const parsePos = (val) => {
@@ -490,7 +491,13 @@ export default function AdminGalleryPage() {
                           style={{ objectPosition: editingProject.image_position || editingProject.imagePosition || '50% 50%' }}
                           className="w-full h-full object-cover transition-all duration-150"
                         />
-                        <ImageZoomButton src={editingProject.newImageFile ? URL.createObjectURL(editingProject.newImageFile) : editingProject.image_url} alt={editingProject.title} />
+                        <ImageZoomButton src={editingProject.newImageFile ? URL.createObjectURL(editingProject.newImageFile) : editingProject.image_url} alt={editingProject.title} label="Zoom" className="right-3 top-3" />
+                        <ImageCropButton
+                          src={editingProject.newImageFile ? URL.createObjectURL(editingProject.newImageFile) : editingProject.image_url}
+                          name={editingProject.newImageFile?.name || 'gallery-image'}
+                          onCrop={(file) => setEditingProject((p) => ({ ...p, newImageFile: file }))}
+                          className="left-3 top-3"
+                        />
                       </div>
                       <input 
                         type="file" 
