@@ -555,7 +555,7 @@ export default function AdminProductsPage() {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0 mb-8 md:mb-10">
         <div>
            <h1 className="text-2xl md:text-3xl font-medium tracking-tight">Products</h1>
-           <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage your inventory.</p>
+           <p className="text-muted-foreground mt-1 text-sm md:text-base">{loading ? 'Manage your inventory.' : `${products.length} product${products.length === 1 ? '' : 's'} in your inventory.`}</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <button 
@@ -566,23 +566,23 @@ export default function AdminProductsPage() {
               setImporting(false);
               setShowImportModal(true);
             }} 
-            className="flex items-center gap-2 px-6 py-2.5 border border-border bg-background hover:bg-secondary/30 text-foreground rounded-full font-medium transition-colors justify-center cursor-pointer"
+            className="flex h-11 items-center gap-2 px-6 bg-secondary hover:bg-accent text-foreground rounded-full text-sm font-medium tracking-tight transition-colors justify-center cursor-pointer"
           >
-            <Upload size={18} className="text-primary" />
+            <Upload size={16} />
             Import products
           </button>
-          <Link href="/admin/products/new" className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity justify-center">
-            <Plus size={18} />
-            Add Product
+          <Link href="/admin/products/new" className="flex h-11 items-center gap-2 px-6 bg-primary text-primary-foreground rounded-full text-sm font-medium tracking-tight hover:bg-primary/90 transition-colors justify-center">
+            <Plus size={16} />
+            Add product
           </Link>
         </div>
       </header>
 
       {/* Bulk Action Toolbar */}
       {selectedIds.size > 0 && (
-        <Reveal className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 px-6 py-3 bg-background border border-border rounded-2xl shadow-2xl animate-fade-in">
+        <Reveal className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 px-6 py-3 bg-background border border-border rounded-full shadow-float animate-fade-in max-w-[calc(100vw-2rem)] flex-wrap justify-center">
           <span className="text-sm font-medium text-foreground">
-            <span className="text-primary font-semibold">{selectedIds.size}</span> product{selectedIds.size > 1 ? 's' : ''} selected
+            <span className="font-semibold">{selectedIds.size}</span> product{selectedIds.size > 1 ? 's' : ''} selected
           </span>
           <div className="w-px h-5 bg-border" />
           <button
@@ -596,7 +596,7 @@ export default function AdminProductsPage() {
             disabled={bulkToggling}
             className="flex items-center gap-1.5 px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-full text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
           >
-            {bulkToggling ? <Loader2 size={12} className="animate-spin" /> : <EyeOff size={12} className="text-amber-500" />}
+            {bulkToggling ? <Loader2 size={12} className="animate-spin" /> : <EyeOff size={12} />}
             Disable
           </button>
           <button
@@ -604,7 +604,7 @@ export default function AdminProductsPage() {
             disabled={bulkToggling}
             className="flex items-center gap-1.5 px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-full text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
           >
-            {bulkToggling ? <Loader2 size={12} className="animate-spin" /> : <Eye size={12} className="text-emerald-500" />}
+            {bulkToggling ? <Loader2 size={12} className="animate-spin" /> : <Eye size={12} />}
             Enable
           </button>
           <button
@@ -615,13 +615,13 @@ export default function AdminProductsPage() {
             }}
             className="flex items-center gap-1.5 px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-full text-xs font-semibold transition-colors cursor-pointer"
           >
-            <Edit size={12} className="text-primary" />
-            Bulk Edit
+            <Edit size={12} />
+            Bulk edit
           </button>
           <button
             onClick={handleBulkDelete}
             disabled={bulkDeleting}
-            className="flex items-center gap-2 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm font-medium transition-colors disabled:opacity-60 cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2 bg-danger hover:bg-danger/90 text-white rounded-full text-sm font-medium transition-colors disabled:opacity-60 cursor-pointer"
           >
             {bulkDeleting ? (
               <Loader2 size={14} className="animate-spin" />
@@ -634,18 +634,18 @@ export default function AdminProductsPage() {
       )}
 
       <div className="mb-6 max-w-md relative">
-        <Search className="absolute left-3.5 top-3 text-muted-foreground w-4 h-4" />
+        <Search className="absolute left-4 top-3.5 text-muted-foreground w-4 h-4" />
         <input
           type="text"
-          placeholder="Search products by name, brand, or category..."
+          placeholder="Search by name, brand or category"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-border/80 bg-background/50 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 shadow-sm"
+          className="h-11 w-full pl-11 pr-10 text-sm rounded-full border border-transparent bg-secondary outline-none focus:border-foreground focus:bg-background transition-colors placeholder:text-muted-foreground"
         />
         {searchTerm && (
           <button
             onClick={() => setSearchTerm('')}
-            className="absolute right-3 top-3 p-0.5 rounded-full hover:bg-secondary/85 text-muted-foreground transition-colors cursor-pointer"
+            className="absolute right-3.5 top-3.5 p-0.5 rounded-full hover:bg-secondary/85 text-muted-foreground transition-colors cursor-pointer"
             title="Clear search"
           >
             <X className="w-3.5 h-3.5" />
@@ -654,14 +654,14 @@ export default function AdminProductsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-muted-foreground">Loading products...</div>
+        <div className="rounded-card border border-border py-20 text-center text-muted-foreground">Loading products…</div>
       ) : (
-        <div className="bg-background rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div className="bg-background rounded-card border border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-border bg-secondary/50">
-                  <th className="p-4 w-10">
+                <tr className="border-b border-border bg-secondary">
+                  <th className="px-4 py-3.5 w-10">
                     <button
                       onClick={toggleSelectAll}
                       className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
@@ -678,13 +678,13 @@ export default function AdminProductsPage() {
                       )}
                     </button>
                   </th>
-                  <th className="p-4 font-medium text-sm text-muted-foreground">Image</th>
-                  <th className="p-4 font-medium text-sm text-muted-foreground">Name</th>
-                  <th className="p-4 font-medium text-sm text-muted-foreground">Brand</th>
-                  <th className="p-4 font-medium text-sm text-muted-foreground">Brand Category</th>
-                  <th className="p-4 font-medium text-sm text-muted-foreground">Price</th>
-                  <th className="p-4 font-medium text-sm text-muted-foreground">Status</th>
-                  <th className="p-4 font-medium text-sm text-muted-foreground text-right">Actions</th>
+                  <th className="px-4 py-3.5 font-medium text-xs text-muted-foreground">Image</th>
+                  <th className="px-4 py-3.5 font-medium text-xs text-muted-foreground">Name</th>
+                  <th className="px-4 py-3.5 font-medium text-xs text-muted-foreground">Brand</th>
+                  <th className="px-4 py-3.5 font-medium text-xs text-muted-foreground">Brand category</th>
+                  <th className="px-4 py-3.5 font-medium text-xs text-muted-foreground">Price</th>
+                  <th className="px-4 py-3.5 font-medium text-xs text-muted-foreground">Status</th>
+                  <th className="px-4 py-3.5 font-medium text-xs text-muted-foreground text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -693,7 +693,7 @@ export default function AdminProductsPage() {
                   return (
                     <tr
                       key={product.id}
-                      className={`hover:bg-secondary/20 transition-colors ${isChecked ? 'bg-primary/5' : ''}`}
+                      className={`hover:bg-secondary/50 transition-colors ${isChecked ? 'bg-secondary' : ''}`}
                     >
                       <td className="p-4">
                         <button
@@ -708,13 +708,13 @@ export default function AdminProductsPage() {
                         </button>
                       </td>
                       <td className="p-4">
-                        <div className="w-12 h-12 rounded-lg bg-secondary overflow-hidden">
+                        <div className="w-14 h-14 rounded-media bg-secondary overflow-hidden">
                           {product.images && product.images[0] && (
-                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain mix-blend-multiply p-1" />
                           )}
                         </div>
                       </td>
-                      <td className="p-4 font-medium">{product.name}</td>
+                      <td className="p-4 font-medium tracking-tight">{product.name}</td>
                       <td className="p-4 text-muted-foreground">{product.brand}</td>
                       <td className="p-4 text-muted-foreground text-sm capitalize">{product.category?.replace('-', ' ')}</td>
                       <td className="p-4 font-medium">
@@ -727,24 +727,24 @@ export default function AdminProductsPage() {
                           className="cursor-pointer"
                         >
                           {product.is_active === false ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                              <EyeOff size={11} /> Disabled
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-border text-muted-foreground hover:bg-secondary transition-colors">
+                              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" aria-hidden="true" /> Disabled
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                              <Eye size={11} /> Active
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-secondary text-foreground hover:bg-accent transition-colors">
+                              <span className="h-1.5 w-1.5 rounded-full bg-foreground" aria-hidden="true" /> Active
                             </span>
                           )}
                         </button>
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Link href={`/admin/products/edit/${product.id}`} className="p-2 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-colors">
+                          <Link href={`/admin/products/edit/${product.id}`} className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors" aria-label={`Edit ${product.name}`}>
                             <Edit size={16} />
                           </Link>
                           <button
                             onClick={() => handleDelete(product.id)}
-                            className="p-2 text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                            className="p-2.5 text-muted-foreground hover:text-danger hover:bg-secondary rounded-full transition-colors" aria-label={`Delete ${product.name}`}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -755,7 +755,7 @@ export default function AdminProductsPage() {
                 })}
                 {filteredProducts.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="p-12 text-center text-muted-foreground font-light italic">
+                    <td colSpan="8" className="p-12 text-center text-muted-foreground ">
                       {searchTerm ? 'No products match your search. Try adjusting your query.' : 'No products found. Add your first one to get started.'}
                     </td>
                   </tr>
@@ -768,13 +768,12 @@ export default function AdminProductsPage() {
 
       {/* Bulk Import Modal */}
       {showImportModal && (
-        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-background rounded-2xl w-full max-w-2xl shadow-2xl border border-border overflow-hidden flex flex-col max-h-[85vh]">
-            <div className="p-6 border-b border-border flex justify-between items-center bg-secondary/30">
+        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
+          <div className="bg-background rounded-card w-full max-w-2xl shadow-float border border-border overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="p-6 border-b border-border flex justify-between items-center">
                <div>
                  <h2 className="text-xl font-medium flex items-center gap-2">
-                   <Upload className="text-primary" size={20} />
-                   Bulk Product Import
+                   Import products
                  </h2>
                  <p className="text-xs text-muted-foreground mt-0.5">Import a JSON file, or a ZIP with the JSON and its product images.</p>
                </div>
@@ -792,8 +791,8 @@ export default function AdminProductsPage() {
             <div className="p-6 overflow-y-auto space-y-6 flex-1">
               {!importing && !importSuccess && (
                 <div 
-                  className={`border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-300 ${
-                    dragActive ? 'border-primary bg-primary/5 scale-[0.99]' : 'border-border bg-secondary/10 hover:border-primary/50'
+                  className={`border-2 border-dashed rounded-card p-10 text-center transition-all duration-300 ${
+                    dragActive ? 'border-foreground bg-secondary' : 'border-border bg-background hover:border-foreground/40'
                   }`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
@@ -808,20 +807,20 @@ export default function AdminProductsPage() {
                     id="json-file-upload" 
                   />
                   <label htmlFor="json-file-upload" className="cursor-pointer flex flex-col items-center gap-4">
-                     <div className="p-5 bg-background rounded-full shadow-md border border-border group-hover:scale-110 transition-transform">
-                       <Upload size={32} className="text-primary animate-pulse" />
+                     <div className="p-5 bg-secondary rounded-full">
+                       <Upload size={28} />
                      </div>
                      <div>
                        <span className="font-medium text-base block">Drag & drop a product JSON or ZIP file here</span>
                        <span className="text-sm text-muted-foreground block mt-1">or click to browse from files</span>
                      </div>
-                     <span className="text-xs px-3 py-1 bg-secondary rounded-full text-muted-foreground font-mono">products.json &middot; products.zip</span>
+                     <span className="text-xs px-3 py-1 bg-secondary rounded-full text-muted-foreground">products.json &middot; products.zip</span>
                   </label>
                 </div>
               )}
 
               {!importing && !importSuccess && (
-                <details className="rounded-xl border border-border bg-secondary/10 p-4 text-sm">
+                <details className="rounded-media border border-border p-4 text-sm">
                   <summary className="cursor-pointer font-medium">How to prepare a ZIP with images</summary>
                   <ul className="mt-3 list-disc space-y-1.5 pl-5 text-xs text-muted-foreground">
                     <li>Put a <code>products.json</code> and your pictures in one ZIP (folders are fine, e.g. an <code>images</code> folder).</li>
@@ -838,16 +837,16 @@ export default function AdminProductsPage() {
               {(importing || importProgress.current > 0) && (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center text-sm font-medium">
-                    <span className="text-primary animate-pulse font-medium">{importProgress.status}</span>
-                    <span className="text-muted-foreground font-mono">
+                    <span className="font-medium">{importProgress.status}</span>
+                    <span className="text-muted-foreground tabular-nums">
                       {Math.round((importProgress.current / importProgress.total) * 100)}% ({importProgress.current}/{importProgress.total})
                     </span>
                   </div>
                   
                   {/* Progress Bar Container */}
-                  <div className="w-full bg-secondary h-3 rounded-full overflow-hidden border border-border/30 relative">
+                  <div className="w-full bg-secondary h-2 rounded-full overflow-hidden relative">
                     <div 
-                      className="bg-primary h-full rounded-full transition-all duration-300 ease-out shadow-[0_0_12px_rgba(var(--color-primary),0.5)]"
+                      className="bg-foreground h-full rounded-full transition-all duration-300 ease-out"
                       style={{ width: `${(importProgress.current / importProgress.total) * 100}%` }}
                     />
                   </div>
@@ -857,8 +856,8 @@ export default function AdminProductsPage() {
               {/* Real-time Activity Log Terminal Console */}
               {importLogs.length > 0 && (
                 <div className="space-y-2">
-                  <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Console Logs</span>
-                  <div className="w-full bg-black/95 text-green-400 font-mono text-xs rounded-xl p-4 h-48 overflow-y-auto border border-border shadow-inner leading-relaxed">
+                  <span className="text-sm font-medium text-muted-foreground">Import log</span>
+                  <div className="w-full bg-stage text-white/85 font-mono text-xs rounded-media p-4 h-48 overflow-y-auto leading-relaxed">
                     {importLogs.map((log, idx) => (
                       <div key={idx} className="whitespace-pre-wrap">{log}</div>
                     ))}
@@ -868,36 +867,36 @@ export default function AdminProductsPage() {
 
               {/* Success Panel */}
               {importSuccess && (
-                <Reveal className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-6 rounded-2xl flex flex-col items-center gap-3 text-center animate-fade-in">
-                  <div className="p-3 bg-emerald-500/25 rounded-full text-emerald-400 animate-bounce">
-                    <Check size={32} />
+                <Reveal className="bg-secondary text-foreground p-6 rounded-media flex flex-col items-center gap-3 text-center animate-fade-in">
+                  <div className="p-3 bg-foreground rounded-full text-background">
+                    <Check size={24} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Import Completed Successfully!</h3>
-                    <p className="text-sm text-emerald-400/80 mt-1">All {importProgress.total} products and their brands are fully synced in the database.</p>
+                    <h3 className="font-medium text-lg tracking-tight">Import complete</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{importProgress.total} products and their brands are now in your inventory.</p>
                   </div>
                 </Reveal>
               )}
 
               {/* Error Alert */}
               {importError && (
-                <Reveal className="bg-red-500/10 border border-red-500/25 text-red-400 p-4 rounded-xl flex gap-3 items-start animate-fade-in">
+                <Reveal className="bg-secondary border border-danger/30 text-danger p-4 rounded-media flex gap-3 items-start animate-fade-in">
                   <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-sm">Failed to import products</h4>
-                    <p className="text-xs text-red-400/90 mt-1">{importError}</p>
+                    <h4 className="font-semibold text-sm">Could not import products</h4>
+                    <p className="text-xs mt-1">{importError}</p>
                   </div>
                 </Reveal>
               )}
             </div>
 
-            <div className="p-6 border-t border-border flex justify-end gap-3 bg-secondary/30">
+            <div className="p-6 border-t border-border flex justify-end gap-3">
                <button 
                  onClick={() => setShowImportModal(false)}
                  disabled={importing}
-                 className="px-6 py-2.5 text-muted-foreground hover:bg-secondary rounded-full font-medium transition-colors cursor-pointer disabled:opacity-50"
+                 className="h-11 px-6 text-muted-foreground hover:bg-secondary rounded-full font-medium transition-colors cursor-pointer disabled:opacity-50"
                >
-                 {importSuccess ? 'Close Panel' : 'Cancel'}
+                 {importSuccess ? 'Close' : 'Cancel'}
                </button>
             </div>
           </div>
@@ -906,20 +905,19 @@ export default function AdminProductsPage() {
 
       {/* Bulk Product Edit Modal */}
       {showBulkEditModal && (
-        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
           <form 
             onSubmit={handleBulkEdit}
-            className="bg-background rounded-2xl w-full max-w-lg shadow-2xl border border-border overflow-hidden flex flex-col max-h-[85vh] animate-scale-up"
+            className="bg-background rounded-card w-full max-w-lg shadow-float border border-border overflow-hidden flex flex-col max-h-[85vh] animate-scale-up"
           >
             {/* Header */}
-            <div className="p-6 border-b border-border flex justify-between items-center bg-secondary/30">
+            <div className="p-6 border-b border-border flex justify-between items-center">
                <div>
                  <h2 className="text-xl font-medium flex items-center gap-2 text-foreground">
-                   <Edit className="text-primary" size={20} />
-                   Bulk Edit Products
+                   Bulk edit products
                  </h2>
                  <p className="text-xs text-muted-foreground mt-0.5">
-                   Applying changes to <span className="text-primary font-semibold">{selectedIds.size}</span> selected products.
+                   Applying changes to <span className="font-semibold text-foreground">{selectedIds.size}</span> selected products.
                  </p>
                </div>
                <button 
@@ -938,15 +936,15 @@ export default function AdminProductsPage() {
             <div className="p-6 overflow-y-auto space-y-5 flex-1">
               
               {/* Brand Upgrade */}
-              <div className="p-4 border border-border rounded-2xl bg-secondary/15 space-y-3 transition-colors hover:border-border/80">
+              <div className="p-4 border border-border rounded-media space-y-3 transition-colors hover:border-foreground/30">
                 <label className="flex items-center gap-2.5 font-medium text-sm text-foreground cursor-pointer select-none">
                   <input 
                     type="checkbox" 
                     checked={bulkEditFields.updateBrand} 
                     onChange={e => setBulkEditFields(prev => ({ ...prev, updateBrand: e.target.checked }))} 
-                    className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer" 
+                    className="rounded border-border accent-foreground w-4 h-4 cursor-pointer" 
                   />
-                  <span>Update Brand</span>
+                  <span>Update brand</span>
                 </label>
                 {bulkEditFields.updateBrand && (
                   <input 
@@ -954,31 +952,31 @@ export default function AdminProductsPage() {
                     required 
                     value={bulkEditData.brand} 
                     onChange={e => setBulkEditData(prev => ({ ...prev, brand: e.target.value }))} 
-                    className="w-full p-2.5 bg-background border border-border rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 shadow-sm animate-fade-in" 
+                    className="w-full h-11 px-3.5 bg-background border border-input rounded-control text-sm outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground/60 animate-fade-in" 
                     placeholder="e.g. McIntosh" 
                   />
                 )}
               </div>
 
               {/* Brand Category Upgrade */}
-              <div className="p-4 border border-border rounded-2xl bg-secondary/15 space-y-3 transition-colors hover:border-border/80">
+              <div className="p-4 border border-border rounded-media space-y-3 transition-colors hover:border-foreground/30">
                 <label className="flex items-center gap-2.5 font-medium text-sm text-foreground cursor-pointer select-none">
                   <input 
                     type="checkbox" 
                     checked={bulkEditFields.updateCategory} 
                     onChange={e => setBulkEditFields(prev => ({ ...prev, updateCategory: e.target.checked }))} 
-                    className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer" 
+                    className="rounded border-border accent-foreground w-4 h-4 cursor-pointer" 
                   />
-                  <span>Update Brand Category</span>
+                  <span>Update brand category</span>
                 </label>
                 {bulkEditFields.updateCategory && (
                   <select 
                     required 
                     value={bulkEditData.category} 
                     onChange={e => setBulkEditData(prev => ({ ...prev, category: e.target.value }))} 
-                    className="w-full p-2.5 bg-background border border-border rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-foreground cursor-pointer animate-fade-in"
+                    className="w-full h-11 px-3.5 bg-background border border-input rounded-control text-sm outline-none focus:border-foreground transition-colors text-foreground cursor-pointer animate-fade-in"
                   >
-                    <option value="">Select Brand Category</option>
+                    <option value="">Select brand category</option>
                     {categories.map(cat => (
                       <option key={cat.slug} value={cat.slug}>{cat.name}</option>
                     ))}
@@ -987,13 +985,13 @@ export default function AdminProductsPage() {
               </div>
 
               {/* Price Upgrade */}
-              <div className="p-4 border border-border rounded-2xl bg-secondary/15 space-y-3 transition-colors hover:border-border/80">
+              <div className="p-4 border border-border rounded-media space-y-3 transition-colors hover:border-foreground/30">
                 <label className="flex items-center gap-2.5 font-medium text-sm text-foreground cursor-pointer select-none">
                   <input 
                     type="checkbox" 
                     checked={bulkEditFields.updatePrice} 
                     onChange={e => setBulkEditFields(prev => ({ ...prev, updatePrice: e.target.checked }))} 
-                    className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer" 
+                    className="rounded border-border accent-foreground w-4 h-4 cursor-pointer" 
                   />
                   <span>
                     Update Price <span className="text-xs font-normal text-muted-foreground ml-1">(Optional - Keep blank for Call for Price)</span>
@@ -1001,13 +999,13 @@ export default function AdminProductsPage() {
                 </label>
                 {bulkEditFields.updatePrice && (
                   <Reveal className="relative animate-fade-in">
-                    <span className="absolute left-3.5 top-2.5 text-xs text-muted-foreground font-mono">INR</span>
+                    <span className="absolute left-3.5 top-3 text-xs text-muted-foreground">INR</span>
                     <input 
                       type="number" 
                       step="any"
                       value={bulkEditData.price} 
                       onChange={e => setBulkEditData(prev => ({ ...prev, price: e.target.value }))} 
-                      className="w-full pl-14 pr-4 p-2.5 bg-background border border-border rounded-xl text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/60 shadow-sm" 
+                      className="w-full h-11 pl-14 pr-4 bg-background border border-input rounded-control text-sm outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground/60" 
                       placeholder="e.g. 1250" 
                     />
                   </Reveal>
@@ -1015,13 +1013,13 @@ export default function AdminProductsPage() {
               </div>
 
               {/* New Arrival */}
-              <div className="p-4 border border-border rounded-2xl bg-secondary/15 space-y-3 transition-colors hover:border-border/80">
+              <div className="p-4 border border-border rounded-media space-y-3 transition-colors hover:border-foreground/30">
                 <label className="flex items-center gap-2.5 font-medium text-sm text-foreground cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={bulkEditFields.updateNewArrival}
                     onChange={e => setBulkEditFields(prev => ({ ...prev, updateNewArrival: e.target.checked }))}
-                    className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                    className="rounded border-border accent-foreground w-4 h-4 cursor-pointer"
                   />
                   <span>
                     New Arrival <span className="text-xs font-normal text-muted-foreground ml-1">(shows in &quot;The latest&quot; and the New Arrivals tab)</span>
@@ -1039,10 +1037,10 @@ export default function AdminProductsPage() {
                         role="radio"
                         aria-checked={bulkEditData.newArrival === opt.value}
                         onClick={() => setBulkEditData(prev => ({ ...prev, newArrival: opt.value }))}
-                        className={`rounded-xl border p-2.5 text-sm font-medium transition-colors cursor-pointer ${
+                        className={`rounded-full border h-11 px-3 text-sm font-medium transition-colors cursor-pointer ${
                           bulkEditData.newArrival === opt.value
-                            ? 'border-primary bg-primary/10 text-primary'
-                            : 'border-border bg-background text-muted-foreground hover:text-foreground'
+                            ? 'border-foreground bg-foreground text-background'
+                            : 'border-border bg-background text-muted-foreground hover:text-foreground hover:bg-secondary'
                         }`}
                       >
                         {opt.label}
@@ -1055,22 +1053,22 @@ export default function AdminProductsPage() {
             </div>
 
             {/* Actions Footer */}
-            <div className="p-6 border-t border-border flex justify-end gap-3 bg-secondary/30">
+            <div className="p-6 border-t border-border flex justify-end gap-3">
                <button 
                  type="button"
                  onClick={() => setShowBulkEditModal(false)}
                  disabled={bulkEditing}
-                 className="px-6 py-2.5 text-muted-foreground hover:bg-secondary rounded-full font-medium transition-colors cursor-pointer disabled:opacity-50 text-sm"
+                 className="h-11 px-6 text-muted-foreground hover:bg-secondary rounded-full font-medium transition-colors cursor-pointer disabled:opacity-50 text-sm"
                >
                  Cancel
                </button>
                <button 
                  type="submit"
                  disabled={bulkEditing}
-                 className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer disabled:opacity-50 text-sm"
+                 className="h-11 px-6 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 text-sm"
                >
                  {bulkEditing && <Loader2 size={16} className="animate-spin" />}
-                 {bulkEditing ? 'Updating...' : `Save Bulk Changes`}
+                 {bulkEditing ? 'Saving…' : 'Save changes'}
                </button>
             </div>
           </form>

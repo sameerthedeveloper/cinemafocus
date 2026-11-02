@@ -23,7 +23,7 @@ export default async function PortalBrands() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {brands.map((category) => (
-            <div key={category.id} className="bg-background group rounded-2xl border border-border overflow-hidden flex flex-col hover:border-primary/50 transition-colors">
+            <div key={category.id} className="bg-background group rounded-2xl border border-border overflow-hidden flex flex-col hover:border-foreground/40 transition-colors">
               <div className="aspect-video bg-secondary relative overflow-hidden">
                 {(category.image_url || category.imageUrl) && (
                   <img src={category.image_url || category.imageUrl} alt={category.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -32,16 +32,16 @@ export default async function PortalBrands() {
               <div className="p-5 flex-1 flex flex-col">
                 <h3 className="font-medium text-lg">{category.name}</h3>
                 <p className="text-sm text-muted-foreground mt-1 line-clamp-2 flex-grow">{category.description}</p>
-                <div className="mt-4 pt-4 border-t border-border flex justify-between items-center text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                <div className="mt-4 pt-4 border-t border-border flex justify-between items-center text-xs text-muted-foreground font-medium">
                   <span>/{category.slug}</span>
                   <span>{category.productCount} Products</span>
-                  <span className="text-[10px] uppercase tracking-widest font-semibold bg-secondary px-2 py-0.5 rounded-full">Brand</span>
+                  <span className="text-xs font-medium bg-secondary px-2.5 py-1 rounded-full">Brand</span>
                 </div>
               </div>
             </div>
           ))}
           {brands.length === 0 && (
-            <div className="col-span-full py-20 text-center text-muted-foreground bg-secondary/30 rounded-2xl border-dashed border-2 border-border">No brands found.</div>
+            <div className="col-span-full py-20 text-center text-muted-foreground rounded-card border-dashed border-2 border-border">No brands found.</div>
           )}
         </div>
       )}

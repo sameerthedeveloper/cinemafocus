@@ -18,7 +18,7 @@ export default async function PortalPress() {
       {releases === null ? (
         <EmptyState title="Press releases couldn't be loaded" hint="Refresh to try again." />
       ) : (
-        <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden overflow-x-auto">
+        <div className="bg-white rounded-card border border-border overflow-hidden overflow-x-auto">
           <table className="w-full">
             <thead className="bg-secondary/20 border-b border-border">
               <tr>
@@ -34,7 +34,7 @@ export default async function PortalPress() {
                   <td className="p-4 text-muted-foreground text-sm">{formatDate(release.date)}</td>
                   <td className="p-4">
                     <div className="flex justify-end gap-3">
-                      <a href={`/press/${release.slug || release.id}`} target="_blank" rel="noopener noreferrer" className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors" title="View on website">
+                      <a href={`/press/${release.slug || release.id}`} target="_blank" rel="noopener noreferrer" className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors" title="View on website">
                         <ExternalLink size={18} />
                       </a>
                     </div>

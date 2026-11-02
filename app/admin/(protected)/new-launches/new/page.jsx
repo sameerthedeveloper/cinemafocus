@@ -189,7 +189,7 @@ export default function AddNewLaunchPage() {
                  <button 
                    type="button" 
                    onClick={() => handleProductSelect('')}
-                   className="text-xs uppercase tracking-widest text-red-500 hover:text-red-700 font-bold px-3 py-1 hover:bg-red-50 rounded transition-colors"
+                   className="text-xs uppercase tracking-widest text-danger hover:text-danger font-bold px-3 py-1 hover:bg-secondary rounded transition-colors"
                  >
                    Change
                  </button>
@@ -271,7 +271,7 @@ export default function AddNewLaunchPage() {
                     <button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full md:w-auto bg-primary text-primary-foreground px-8 py-3 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50 font-medium shadow-sm"
+                        className="w-full md:w-auto bg-primary text-primary-foreground px-8 py-3 rounded-full flex items-center justify-center gap-2 hover:bg-primary/90 transition-opacity disabled:opacity-50 font-medium shadow-sm"
                     >
                         {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                         {loading ? 'Processing...' : 'Feature Launch'}

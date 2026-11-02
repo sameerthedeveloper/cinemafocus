@@ -196,7 +196,7 @@ export default function AdminCategoriesPage() {
             setFormData({ name: '', description: '', imageUrl: '', seoTitle: '', seoDescription: '', seoNoindex: false });
             setShowModal(true);
           }}
-          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity w-full md:w-auto justify-center"
+          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-opacity w-full md:w-auto justify-center"
         >
           <Plus size={18} />
           Add Brand
@@ -222,7 +222,7 @@ export default function AdminCategoriesPage() {
                   </button>
                   <button 
                     onClick={() => handleDelete(category.id)}
-                    className="p-2 bg-white/90 text-red-500 rounded-lg hover:bg-red-50 shadow-sm transition-colors"
+                    className="p-2 bg-white/90 text-danger rounded-lg hover:bg-secondary shadow-sm transition-colors"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -248,16 +248,22 @@ export default function AdminCategoriesPage() {
       )}
 
       {showModal && (
-        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-background rounded-2xl w-full max-w-lg shadow-xl border border-border overflow-hidden">
-            <div className="p-6 border-b border-border flex justify-between items-center bg-secondary/30">
-               <h2 className="text-xl font-medium">{editingCategory ? 'Edit Brand' : 'New Brand'}</h2>
-               <button onClick={closeModal} className="text-muted-foreground hover:text-foreground">
+        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="brand-modal-title"
+            className="bg-background rounded-2xl w-full max-w-lg shadow-xl border border-border overflow-hidden flex flex-col max-h-[calc(100dvh-2rem)]"
+          >
+            <div className="shrink-0 p-5 md:p-6 border-b border-border flex justify-between items-center bg-secondary/30">
+               <h2 id="brand-modal-title" className="text-xl font-medium">{editingCategory ? 'Edit Brand' : 'New Brand'}</h2>
+               <button type="button" onClick={closeModal} aria-label="Close" className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-secondary">
                  <X size={20} />
                </button>
             </div>
-            
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+
+            <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+              <div className="flex-1 overflow-y-auto overscroll-contain p-5 md:p-6 space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Brand Name</label>
                 <input 
@@ -304,7 +310,9 @@ export default function AdminCategoriesPage() {
                 <label htmlFor="brandNoindex" className="text-sm font-medium">Hide this brand page from search engines (noindex)</label>
               </div>
 
-              <div className="pt-4 flex justify-end gap-3">
+              </div>
+
+              <div className="shrink-0 border-t border-border bg-background p-4 md:px-6 flex justify-end gap-3">
                  <button 
                    type="button" 
                    onClick={closeModal}
@@ -315,7 +323,7 @@ export default function AdminCategoriesPage() {
                  <button 
                    type="submit" 
                    disabled={saving}
-                   className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
+                   className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-opacity flex items-center gap-2 disabled:opacity-50"
                  >
                    {saving ? (
                      <Loader2 className="animate-spin" size={18} />

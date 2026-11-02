@@ -142,7 +142,7 @@ export default function AddPressReleasePage() {
                  <button 
                    type="button"
                    onClick={() => handleRemoveCoverImage(idx)}
-                   className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                   className="absolute top-1 right-1 bg-danger text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                  >
                    <Trash2 size={12} />
                  </button>
@@ -196,7 +196,7 @@ export default function AddPressReleasePage() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full md:w-auto bg-primary text-primary-foreground px-8 py-3 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50 font-medium"
+            className="w-full md:w-auto bg-primary text-primary-foreground px-8 py-3 rounded-full flex items-center justify-center gap-2 hover:bg-primary/90 transition-opacity disabled:opacity-50 font-medium"
           >
             <Save size={18} />
             {loading ? 'Saving...' : 'Publish Release'}

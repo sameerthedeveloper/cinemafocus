@@ -652,7 +652,7 @@ export default function AdminSiteControlPage() {
                        <button 
                          type="button" 
                          onClick={addHeroSlide} 
-                         className="flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-md hover:bg-primary/25 transition-all cursor-pointer"
+                         className="flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full hover:bg-primary/25 transition-all cursor-pointer"
                        >
                          <Plus size={12} /> Add Hero Slide
                        </button>
@@ -1111,7 +1111,7 @@ export default function AdminSiteControlPage() {
                          placeholder='{ "slides": [ ... ] }'
                        />
                        <div className="flex flex-wrap gap-2">
-                         <button type="button" onClick={importHeroJson} disabled={!heroJson.trim()} className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-40 cursor-pointer">Load into editor</button>
+                         <button type="button" onClick={importHeroJson} disabled={!heroJson.trim()} className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-40 cursor-pointer">Load into editor</button>
                          <button type="button" onClick={() => setHeroJson(JSON.stringify(hero, null, 2))} className="rounded-lg border border-border px-4 py-2 text-xs font-semibold cursor-pointer hover:bg-secondary/40">Show current JSON</button>
                        </div>
                      </div>
@@ -1297,7 +1297,7 @@ export default function AdminSiteControlPage() {
                    )}
 
                    <div className="pt-4 border-t border-border flex items-center gap-4">
-                     <button onClick={() => saveSection("hero_main", hero)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50 cursor-pointer">
+                     <button onClick={() => saveSection("hero_main", hero)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50 cursor-pointer">
                        {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Changes
                      </button>
                    </div>
@@ -1676,7 +1676,7 @@ export default function AdminSiteControlPage() {
                     <button 
                       type="button" 
                       onClick={addBullet} 
-                      className="flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-md hover:bg-primary/25 transition-all cursor-pointer select-none"
+                      className="flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full hover:bg-primary/25 transition-all cursor-pointer select-none"
                     >
                       <Plus size={12} /> Add Feature Bullet
                     </button>
@@ -1716,7 +1716,7 @@ export default function AdminSiteControlPage() {
               <button 
                 onClick={() => saveSection("philosophy", philosophy)} 
                 disabled={loading} 
-                className="px-8 py-3 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50 shadow-md cursor-pointer text-sm select-none"
+                className="px-8 py-3 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50 shadow-md cursor-pointer text-sm select-none"
               >
                 {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save About Section
               </button>
@@ -1730,7 +1730,7 @@ export default function AdminSiteControlPage() {
            <div className="bg-background border border-border rounded-2xl p-4 md:p-8 space-y-6">
               <div className="flex justify-between items-center mb-4">
                  <p className="text-sm text-muted-foreground font-medium">Edit highlight markers.</p>
-                 <button onClick={() => saveSection("trust_badges", { items: trustBadges })} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2 font-medium transition-opacity">
+                 <button onClick={() => saveSection("trust_badges", { items: trustBadges })} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 flex items-center gap-2 font-medium transition-opacity">
                    {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save All
                  </button>
               </div>
@@ -1784,7 +1784,7 @@ export default function AdminSiteControlPage() {
                         <button onClick={() => {
                             const newPhones = footer.phones.filter((_, i) => i !== idx);
                             setFooter({...footer, phones: newPhones});
-                        }} className="p-3 text-red-500 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/20 transition-all">
+                        }} className="p-3 text-danger hover:bg-secondary rounded-lg border border-transparent hover:border-red-500/20 transition-all">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -1825,7 +1825,7 @@ export default function AdminSiteControlPage() {
                 </div>
              </div>
 
-             <button onClick={() => saveSection("footer", footer)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50">
+             <button onClick={() => saveSection("footer", footer)} disabled={loading} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50">
                {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Update Footer & Contact
              </button>
           </div>
@@ -2174,7 +2174,7 @@ export default function AdminSiteControlPage() {
                 type="button" 
                 onClick={() => saveSection("maintenance", maintenance)} 
                 disabled={loading} 
-                className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50 cursor-pointer shadow-sm"
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 flex items-center gap-2 font-medium transition-opacity disabled:opacity-50 cursor-pointer shadow-sm"
               >
                 {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Maintenance Settings
               </button>

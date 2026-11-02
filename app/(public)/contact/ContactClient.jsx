@@ -37,6 +37,8 @@ export default function ContactClient({ initialInfo }) {
 
   const email = info.email || geo.email;
   const phones = (info.phones && info.phones.length ? info.phones : [info.phone || geo.mobile]).filter(Boolean);
+  const digits = String(phones[0] || '').replace(/\D/g, '');
+  const waNumber = digits.length === 10 ? `91${digits}` : digits.length >= 11 ? digits : '';
   const address = info.address || geo.address;
   const hours = info.workingHours || 'Monday to Saturday, 11 am to 8 pm';
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(geo.address)}`;
@@ -88,6 +90,11 @@ export default function ContactClient({ initialInfo }) {
                   </a>
                 </div>
               ))}
+              {waNumber && (
+                <a href={`https://wa.me/${waNumber}`} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block underline underline-offset-4 transition-colors hover:text-foreground">
+                  Message on WhatsApp
+                </a>
+              )}
             </Row>
             <Row icon={Mail} title="Email">
               <a href={`mailto:${email}`} className="break-all transition-colors hover:text-foreground">{email}</a>

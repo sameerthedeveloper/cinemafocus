@@ -67,7 +67,7 @@ export default function AdminAccountPage() {
           <h2 className="text-lg font-medium">Change Password</h2>
         </div>
 
-        {error && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg">{error}</div>}
+        {error && <div className="p-3 bg-red-50 text-danger text-sm rounded-lg">{error}</div>}
         {success && (
           <div className="p-3 bg-green-50 text-green-700 text-sm rounded-lg flex items-center gap-2">
             <CheckCircle size={16} />

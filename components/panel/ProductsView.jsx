@@ -5,7 +5,7 @@ import { Search, X, Eye, EyeOff, ExternalLink, ChevronLeft, ChevronRight } from 
 
 const PAGE = 25;
 const inr = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
-const ctl = "px-4 py-2.5 text-sm rounded-xl border border-border/80 bg-background/50 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all";
+const ctl = "h-11 px-4 text-sm rounded-full border border-transparent bg-secondary outline-none focus:border-foreground focus:bg-background transition-colors";
 
 /** Read-only product table. Same columns, image cell and Active/Disabled pills as the admin Products page. */
 export default function ProductsView({ products, brands }) {
@@ -53,7 +53,7 @@ export default function ProductsView({ products, brands }) {
         <div className="md:ml-auto self-center text-xs text-muted-foreground tabular">{rows.length} of {products.length}</div>
       </div>
 
-      <div className="bg-background rounded-2xl border border-border shadow-sm overflow-hidden">
+      <div className="bg-background rounded-card border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -69,10 +69,10 @@ export default function ProductsView({ products, brands }) {
             </thead>
             <tbody className="divide-y divide-border">
               {slice.map((product, i) => (
-                <tr key={product.id ?? i} className="hover:bg-secondary/20 transition-colors">
+                <tr key={product.id ?? i} className="hover:bg-secondary/50 transition-colors">
                   <td className="p-4">
-                    <div className="w-12 h-12 rounded-lg bg-secondary overflow-hidden">
-                      {product.images?.[0] && <img src={product.images[0]} alt={product.name} loading="lazy" className="w-full h-full object-cover" />}
+                    <div className="w-14 h-14 rounded-media bg-secondary overflow-hidden">
+                      {product.images?.[0] && <img src={product.images[0]} alt={product.name} loading="lazy" className="w-full h-full object-contain mix-blend-multiply p-1" />}
                     </div>
                   </td>
                   <td className="p-4 font-medium">{product.name}</td>
@@ -81,14 +81,14 @@ export default function ProductsView({ products, brands }) {
                   <td className="p-4 font-medium">{inr(product.price)}</td>
                   <td className="p-4">
                     {product.is_active === false ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20"><EyeOff size={11} /> Disabled</span>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-border text-muted-foreground"><span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" aria-hidden="true" /> Disabled</span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"><Eye size={11} /> Active</span>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-secondary text-foreground"><span className="h-1.5 w-1.5 rounded-full bg-foreground" aria-hidden="true" /> Active</span>
                     )}
                   </td>
                   <td className="p-4 text-right">
                     {product.slug && product.is_active !== false && (
-                      <a href={`/products/${product.slug}`} target="_blank" rel="noopener noreferrer" className="inline-flex p-2 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-colors" title="View on website">
+                      <a href={`/products/${product.slug}`} target="_blank" rel="noopener noreferrer" className="inline-flex p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors" title="View on website">
                         <ExternalLink size={16} />
                       </a>
                     )}

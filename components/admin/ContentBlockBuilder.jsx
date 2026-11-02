@@ -118,7 +118,7 @@ export default function ContentBlockBuilder({ blocks, onChange }) {
                  <button 
                    type="button"
                    onClick={() => removeBlock(block.id)}
-                   className="p-1.5 hover:bg-red-50 text-red-500 rounded ml-2"
+                   className="p-1.5 hover:bg-secondary text-danger rounded ml-2"
                    title="Delete Block"
                  >
                     <Trash2 size={14} />
@@ -228,7 +228,7 @@ export default function ContentBlockBuilder({ blocks, onChange }) {
                          <div className="pt-2 mt-2 border-t border-dashed border-border">
                            <span className="text-xs text-muted-foreground block mb-2">Preview:</span>
                            {block.data.style === 'button' ? (
-                             <span className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm">
+                             <span className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-full font-medium text-sm">
                                {block.data.text} <ExternalLink size={14} />
                              </span>
                            ) : (
@@ -279,7 +279,7 @@ export default function ContentBlockBuilder({ blocks, onChange }) {
                                      const newImages = block.data.images.filter((_, i) => i !== idx);
                                      updateBlock(block.id, { images: newImages });
                                   }}
-                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity"
+                                  className="absolute top-1 right-1 bg-danger text-white p-1 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity"
                                 >
                                    <Trash2 size={12} />
                                 </button>

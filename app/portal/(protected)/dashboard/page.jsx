@@ -48,7 +48,7 @@ export default async function PortalDashboard({ searchParams }) {
       <PageHeader title="Dashboard" description="How your website is doing — visitors, enquiries and what's live." />
 
       {failed && (
-        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 text-sm px-4 py-3">
+        <div className="mb-6 rounded-media border border-border bg-secondary text-foreground text-sm px-4 py-3">
           {forbidden
             ? "Some numbers couldn't be loaded for this account. If this persists, ask your administrator to check your access."
             : "Some numbers couldn't be loaded just now. Refresh in a moment to try again."}
@@ -121,7 +121,7 @@ export default async function PortalDashboard({ searchParams }) {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead>
-                <tr className="text-[11px] uppercase tracking-wider text-[var(--admin-muted)] border-y border-[var(--admin-border)]">
+                <tr className="text-xs text-[var(--admin-muted)] border-y border-[var(--admin-border)]">
                   <th className="font-medium px-5 md:px-6 py-3">Name</th>
                   <th className="font-medium px-3 py-3">Subject</th>
                   <th className="font-medium px-3 py-3">Date</th>

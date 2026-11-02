@@ -110,7 +110,7 @@ export default function AdminUsersPage() {
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity w-full md:w-auto justify-center"
+          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-opacity w-full md:w-auto justify-center"
         >
           <Plus size={18} />
           Add User
@@ -161,7 +161,7 @@ export default function AdminUsersPage() {
                     {user.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Pending'}
                   </td>
                   <td className="p-4 text-right">
-                    <button onClick={() => handleDelete(user.id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all" title="Remove Record">
+                    <button onClick={() => handleDelete(user.id)} className="p-2 text-muted-foreground hover:text-danger hover:bg-secondary rounded-lg transition-all" title="Remove Record">
                       <Trash2 size={16} />
                     </button>
                   </td>
@@ -184,7 +184,7 @@ export default function AdminUsersPage() {
 
       {/* Add Modal */}
       {showModal && (
-         <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+         <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
            <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6">
               <div className="flex justify-between items-center">
                  <h2 className="text-xl font-medium tracking-tight">Add User</h2>
@@ -252,7 +252,7 @@ export default function AdminUsersPage() {
                  </div>
                  <div className="flex justify-end gap-3 pt-4">
                     <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2 text-muted-foreground hover:bg-secondary rounded-lg font-medium transition-colors">Cancel</button>
-                    <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50">
+                    <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-opacity font-medium disabled:opacity-50">
                       {saving ? 'Creating…' : 'Create user'}
                     </button>
                  </div>

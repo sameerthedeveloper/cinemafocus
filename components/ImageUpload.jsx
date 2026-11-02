@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useId } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
+import ImageZoomButton from '@/components/admin/ImageZoom';
 
 export default function ImageUpload({ onUploadComplete, initialImage = '', type = 'product' }) {
   const [uploading, setUploading] = useState(false);
@@ -54,6 +55,7 @@ export default function ImageUpload({ onUploadComplete, initialImage = '', type 
         {imageUrl ? (
            <div className="relative group">
               <img src={imageUrl} alt="Uploaded" className="w-full h-48 object-cover rounded-lg" />
+              <ImageZoomButton src={imageUrl} alt="Uploaded image" className="bottom-2 right-2" />
               <button 
                 type="button"
                 onClick={handleRemove}

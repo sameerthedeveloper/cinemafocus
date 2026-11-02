@@ -48,16 +48,16 @@ export default function PanelShell({
         onClick={() => setOpen(false)}
         aria-current={active ? 'page' : undefined}
         className={clsx(
-          "press relative flex items-center gap-2.5 h-9 px-3 rounded-[10px] text-[13px] font-medium transition-all duration-300",
+          "press relative flex items-center gap-2.5 h-9 px-3 rounded-full text-[13px] font-medium transition-colors duration-200",
           active
-            ? "bg-black/[0.06] text-[var(--admin-text)]"
-            : "text-[var(--admin-muted)] hover:bg-black/[0.03] hover:text-[var(--admin-text)]"
+            ? "bg-black text-white"
+            : "text-[var(--admin-muted)] hover:bg-secondary hover:text-[var(--admin-text)]"
         )}
       >
-        <Icon size={16} strokeWidth={active ? 2.25 : 1.75} className={active ? "text-[var(--admin-accent)]" : undefined} />
+        <Icon size={16} strokeWidth={active ? 2.25 : 1.75}  />
         <span className="flex-1">{item.label}</span>
         {count > 0 && (
-          <span className="min-w-5 h-5 px-1.5 rounded-full bg-[var(--admin-accent-soft)] text-[var(--admin-accent)] text-[11px] font-semibold flex items-center justify-center tabular">
+          <span className="min-w-5 h-5 px-1.5 rounded-full bg-signal text-white text-[11px] font-semibold flex items-center justify-center tabular">
             {count}
           </span>
         )}
@@ -74,13 +74,13 @@ export default function PanelShell({
       <aside
         className={clsx(
           "glass fixed inset-y-0 left-0 z-50 w-[248px] border-r border-[var(--admin-hairline)] flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 md:sticky md:top-0 md:h-screen shrink-0",
-          open ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+          open ? "translate-x-0 shadow-float" : "-translate-x-full"
         )}
       >
         <div className="h-16 px-5 border-b border-[var(--admin-border)] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <img src={logoPng.src} alt={`Cinema Focus ${brand}`} className="h-8 w-auto" />
-            <span className="text-[11px] font-semibold text-[var(--admin-muted)] uppercase tracking-[0.18em]">{brand}</span>
+            <span className="text-xs font-medium text-[var(--admin-muted)] rounded-full bg-secondary px-2.5 py-1">{brand}</span>
           </div>
           <button onClick={() => setOpen(false)} className="md:hidden text-[var(--admin-muted)] hover:text-[var(--admin-text)]" aria-label="Close menu">
             <X size={18} />
@@ -101,7 +101,7 @@ export default function PanelShell({
           <button
             onClick={onLogout}
             type="button"
-            className="press w-full flex items-center gap-2.5 h-9 px-3 rounded-[10px] text-[13px] font-medium text-[var(--admin-danger)] hover:bg-red-50 transition-colors"
+            className="press w-full flex items-center gap-2.5 h-9 px-3 rounded-full text-[13px] font-medium text-[var(--admin-danger)] hover:bg-secondary transition-colors"
           >
             <LogOut size={16} strokeWidth={1.75} />
             Logout
@@ -112,12 +112,12 @@ export default function PanelShell({
       <div className="flex-1 min-w-0 flex flex-col h-screen">
         <header className="glass h-16 shrink-0 border-b border-[var(--admin-hairline)] flex items-center justify-between px-4 md:px-8 z-30">
           <div className="flex items-center gap-3 min-w-0">
-            <button onClick={() => setOpen(true)} className="md:hidden p-2 -ml-2 text-[var(--admin-text)] hover:bg-black/[0.045] rounded-lg" aria-label="Open menu">
+            <button onClick={() => setOpen(true)} className="md:hidden p-2 -ml-2 text-[var(--admin-text)] hover:bg-secondary rounded-full" aria-label="Open menu">
               <Menu size={20} />
             </button>
             <div className="min-w-0">
               <div className="text-[11px] text-[var(--admin-muted)] leading-none mb-1 hidden sm:block">{brand}{current ? ` / ${current.label}` : ''}</div>
-              <div className="text-[15px] font-semibold tracking-[-0.02em] leading-none truncate">{current?.label || brand}</div>
+              <div className="text-[15px] font-medium tracking-tight leading-none truncate">{current?.label || brand}</div>
             </div>
           </div>
 
@@ -126,22 +126,22 @@ export default function PanelShell({
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="press hidden sm:flex items-center gap-1.5 h-8 px-3.5 rounded-full bg-black/[0.045] text-xs font-medium text-[var(--admin-muted)] hover:text-[var(--admin-text)] hover:bg-black/[0.07] transition-all duration-300"
+              className="press hidden sm:flex items-center gap-1.5 h-8 px-3.5 rounded-full bg-secondary text-xs font-medium text-[var(--admin-muted)] hover:text-[var(--admin-text)] hover:bg-accent transition-colors"
             >
               View site <ExternalLink size={13} />
             </Link>
             {notifHref && (
               <Link
                 href={notifHref}
-                className="press relative h-8 w-8 flex items-center justify-center rounded-full text-[var(--admin-muted)] hover:text-[var(--admin-text)] hover:bg-black/[0.045] transition-colors"
+                className="press relative h-8 w-8 flex items-center justify-center rounded-full text-[var(--admin-muted)] hover:text-[var(--admin-text)] hover:bg-secondary transition-colors"
                 aria-label={notifCount > 0 ? `${notifCount} unread messages` : 'Messages'}
               >
                 <Bell size={17} strokeWidth={1.75} />
-                {notifCount > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[var(--admin-accent)] ring-2 ring-white" />}
+                {notifCount > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-signal ring-2 ring-white" />}
               </Link>
             )}
             <span className="flex items-center gap-2 pl-1" title={email}>
-              <span className="w-8 h-8 rounded-full bg-[var(--admin-accent-soft)] text-[var(--admin-accent)] text-xs font-semibold flex items-center justify-center">{initials}</span>
+              <span className="w-8 h-8 rounded-full bg-black text-white text-xs font-semibold flex items-center justify-center">{initials}</span>
             </span>
           </div>
         </header>

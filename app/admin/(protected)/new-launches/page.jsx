@@ -97,7 +97,7 @@ export default function AdminNewLaunchesPage() {
            </h1>
            <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage the featured product carousel on the homepage.</p>
         </div>
-        <Link href="/admin/new-launches/new" className="bg-primary text-primary-foreground px-6 py-2.5 rounded-full flex items-center gap-2 hover:opacity-90 transition-opacity w-full md:w-auto justify-center font-medium shadow-sm">
+        <Link href="/admin/new-launches/new" className="bg-primary text-primary-foreground px-6 py-2.5 rounded-full flex items-center gap-2 hover:bg-primary/90 transition-opacity w-full md:w-auto justify-center font-medium shadow-sm">
           <Plus size={18} />
           Feature Product
         </Link>
@@ -119,7 +119,7 @@ export default function AdminNewLaunchesPage() {
             type="button"
             onClick={handleBulkRemove}
             disabled={bulkRemoving}
-            className="ml-auto inline-flex items-center gap-2 rounded-full bg-red-500/10 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-500/20 disabled:opacity-50 cursor-pointer"
+            className="ml-auto inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger/20 disabled:opacity-50 cursor-pointer"
           >
             {bulkRemoving ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
             Remove from new arrivals
@@ -184,7 +184,7 @@ export default function AdminNewLaunchesPage() {
                   <Link href={`/admin/new-launches/edit/${launch.id}`} className="p-2 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-all" title="Edit">
                     <Edit size={18} />
                   </Link>
-                  <button onClick={() => handleDelete(launch.id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all" title="Delete">
+                  <button onClick={() => handleDelete(launch.id)} className="p-2 text-muted-foreground hover:text-danger hover:bg-secondary rounded-lg transition-all" title="Delete">
                     <Trash2 size={18} />
                   </button>
                 </td>

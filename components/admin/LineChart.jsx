@@ -88,7 +88,7 @@ export default function LineChart({ data = [], color = 'var(--admin-accent)', va
 
       {h && (
         <div
-          className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-xl border border-black/5 bg-white/85 backdrop-blur-xl px-3 py-2 text-xs shadow-[0_8px_24px_-8px_rgba(0,0,0,0.25)]"
+          className="pointer-events-none absolute -translate-x-1/2 -translate-y-full rounded-xl border border-black/5 bg-white/85 px-3 py-2 text-xs shadow-[0_8px_24px_-8px_rgba(0,0,0,0.25)]"
           style={{ left: `${(x(hover) / W) * 100}%`, top: `${(y(h.value) / H) * 100}%`, marginTop: -10 }}
         >
           <div className="font-medium text-[#111827] tabular">{h.value} {valueLabel.toLowerCase()}</div>

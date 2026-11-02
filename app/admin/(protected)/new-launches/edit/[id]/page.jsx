@@ -225,7 +225,7 @@ export default function EditLaunchPage() {
             <button 
               type="submit" 
               disabled={saving}
-              className="bg-primary text-primary-foreground px-8 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50 font-medium shadow-sm"
+              className="bg-primary text-primary-foreground px-8 py-2.5 rounded-full flex items-center justify-center gap-2 hover:bg-primary/90 transition-opacity disabled:opacity-50 font-medium shadow-sm"
             >
               {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
               {saving ? 'Saving...' : 'Save Changes'}

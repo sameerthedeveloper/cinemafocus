@@ -193,7 +193,7 @@ export default function BackupTools() {
 
             {message && (
                 <div className={`text-xs flex items-center gap-1.5 mt-2 p-2 rounded-md ${
-                    status === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 
+                    status === 'error' ? 'bg-red-50 text-danger border border-red-100' : 
                     status === 'success' ? 'bg-green-50 text-green-600 border border-green-100' : 
                     'text-muted-foreground'
                 }`}>

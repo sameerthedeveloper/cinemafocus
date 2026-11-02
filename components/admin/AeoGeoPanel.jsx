@@ -115,7 +115,7 @@ export default function AeoGeoPanel() {
               <button
                 type="button"
                 onClick={() => setData((d) => ({ ...d, faqs: d.faqs.filter((_, idx) => idx !== i) }))}
-                className="p-3 text-red-500 hover:bg-red-500/10 rounded-lg"
+                className="p-3 text-danger hover:bg-secondary rounded-lg"
                 title="Remove FAQ"
               >
                 <Trash2 size={18} />
@@ -203,7 +203,7 @@ export default function AeoGeoPanel() {
       </div>
 
       <div className="flex items-center gap-4">
-        <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity disabled:opacity-60">
+        <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-opacity disabled:opacity-60">
           {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Save AEO &amp; GEO
         </button>
         {message && <span className="text-sm text-muted-foreground">{message}</span>}

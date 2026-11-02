@@ -2,40 +2,67 @@
 
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, Mail, Reply, CheckCircle, Circle } from 'lucide-react';
+import { Search, X, Mail, Reply, Check, CheckCheck, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { EmptyState } from '@/components/panel/ui';
 
 const FILTERS = [['all', 'All'], ['unread', 'Unread'], ['read', 'Read']];
 
-/** Inbox. Cards match the admin Messages page; adds search, a read/unread filter and mark as seen/unseen. */
+/** Inbox. Search, read/unread filter, and "Mark as read" per message or for everything at once. */
 export default function MessagesView({ messages: initial }) {
   const router = useRouter();
   const [messages, setMessages] = useState(initial);
-  const [pending, setPending] = useState(null);
+  const [pending, setPending] = useState(() => new Set());
   const [failed, setFailed] = useState(null);
+  const [markingAll, setMarkingAll] = useState(false);
   const [q, setQ] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('unread');
 
-  const setSeen = async (message, seen) => {
-    const status = seen ? 'read' : 'unread';
-    setPending(message.id);
+  const patch = async (id, status) => {
+    const res = await fetch(`/api/portal/messages/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) throw new Error();
+  };
+
+  const applyStatus = (ids, status) => {
+    const set = new Set(ids);
+    setMessages((all) => all.map((m) => (set.has(m.id) ? { ...m, status } : m)));
+    window.dispatchEvent(new Event('portal:messages-changed'));
+    router.refresh();
+  };
+
+  const setRead = async (message, read) => {
+    const status = read ? 'read' : 'unread';
+    setPending((p) => new Set(p).add(message.id));
     setFailed(null);
     try {
-      const res = await fetch(`/api/portal/messages/${encodeURIComponent(message.id)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-      if (!res.ok) throw new Error();
-      setMessages((all) => all.map((m) => (m.id === message.id ? { ...m, status } : m)));
-      window.dispatchEvent(new Event('portal:messages-changed'));
-      router.refresh();
+      await patch(message.id, status);
+      applyStatus([message.id], status);
     } catch {
       setFailed(message.id);
     } finally {
-      setPending(null);
+      setPending((p) => { const n = new Set(p); n.delete(message.id); return n; });
     }
+  };
+
+  const markAllRead = async () => {
+    const ids = messages.filter((m) => m.id && m.status !== 'read').map((m) => m.id);
+    if (!ids.length) return;
+    setMarkingAll(true);
+    setFailed(null);
+    const done = [];
+    // a few at a time, so a long inbox does not flood the API
+    for (let i = 0; i < ids.length; i += 5) {
+      const batch = ids.slice(i, i + 5);
+      const results = await Promise.allSettled(batch.map((id) => patch(id, 'read')));
+      results.forEach((r, j) => { if (r.status === 'fulfilled') done.push(batch[j]); });
+    }
+    if (done.length) applyStatus(done, 'read');
+    if (done.length < ids.length) setFailed('all');
+    setMarkingAll(false);
   };
 
   const counts = useMemo(() => {
@@ -54,96 +81,105 @@ export default function MessagesView({ messages: initial }) {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mb-6">
-        <div className="max-w-md w-full relative">
-          <Search className="absolute left-3.5 top-3 text-muted-foreground w-4 h-4" />
+      <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search by name, email or message..."
+            placeholder="Search by name, email or message"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-border/80 bg-background/50 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
+            className="h-11 w-full rounded-full border border-transparent bg-secondary pl-11 pr-10 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground focus:bg-background"
           />
           {q && (
-            <button onClick={() => setQ('')} className="absolute right-3 top-3 p-0.5 rounded-full hover:bg-secondary/85 text-muted-foreground transition-colors" title="Clear search">
-              <X className="w-3.5 h-3.5" />
+            <button onClick={() => setQ('')} className="absolute right-3.5 top-3.5 rounded-full p-0.5 text-muted-foreground transition-colors hover:bg-accent" aria-label="Clear search">
+              <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {FILTERS.map(([key, label]) => (
             <button
               key={key}
               onClick={() => setFilter(key)}
-              className={clsx("px-4 py-2 rounded-full text-xs font-semibold transition-colors tabular", filter === key ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/80 text-foreground")}
+              aria-pressed={filter === key}
+              className={clsx('h-9 rounded-full px-4 text-xs font-medium tabular transition-colors', filter === key ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground hover:bg-accent')}
             >
-              {label} <span className={filter === key ? "opacity-70" : "text-muted-foreground"}>{counts[key]}</span>
+              {label} <span className={filter === key ? 'opacity-70' : 'text-muted-foreground'}>{counts[key]}</span>
             </button>
           ))}
+          <button
+            type="button"
+            onClick={markAllRead}
+            disabled={markingAll || counts.unread === 0}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border px-4 text-xs font-medium transition-colors hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {markingAll ? <Loader2 size={14} className="animate-spin" /> : <CheckCheck size={14} />}
+            Mark all as read
+          </button>
         </div>
       </div>
+      {failed === 'all' && <p className="mb-4 text-sm text-danger" role="alert">Some messages could not be updated. Try again.</p>}
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {rows.map((message, i) => {
           const read = message.status === 'read';
+          const busy = pending.has(message.id);
           const d = message.created_at ? new Date(message.created_at) : null;
           return (
-            <div
+            <article
               key={message.id ?? i}
-              className={clsx(
-                "bg-background p-6 rounded-2xl border transition-all group",
-                read ? "border-border opacity-75" : "border-primary/50 shadow-sm bg-primary/5"
-              )}
+              className={clsx('rounded-card border p-5 transition-colors md:p-6', read ? 'border-border' : 'border-foreground')}
             >
-              <div className="flex justify-between items-start gap-4">
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className={clsx("font-medium text-lg", !read && "text-primary")}>{message.name}</span>
-                    <span className="text-sm text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">{message.subject || 'New Inquiry'}</span>
-                    {!read && <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>}
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-6">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    {!read && <span className="h-2 w-2 shrink-0 rounded-full bg-signal" role="img" aria-label="Unread" />}
+                    <h3 className={clsx('text-lg tracking-tight', read ? 'font-normal text-muted-foreground' : 'font-medium')}>{message.name}</h3>
+                    <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs text-muted-foreground">{message.subject || 'New enquiry'}</span>
                   </div>
-
-                  <p className="text-muted-foreground text-sm flex items-center gap-2">
-                    <Mail size={14} /> {message.email} • {d ? d.toLocaleString() : ''}
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+                    <Mail size={14} /> <span className="break-all">{message.email}</span>
+                    {d && <span aria-hidden="true">·</span>}
+                    {d && <time dateTime={d.toISOString()}>{d.toLocaleString()}</time>}
                   </p>
-
-                  <p className="text-foreground mt-2 leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                  <p className={clsx('whitespace-pre-wrap leading-relaxed', read ? 'text-muted-foreground' : 'text-foreground')}>{message.text}</p>
                 </div>
 
-                <div className="flex flex-col gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                  {message.email && (
-                    <a
-                      href={`mailto:${encodeURIComponent(message.email)}?subject=${encodeURIComponent(`Re: ${message.subject || 'Inquiry'} - Cinema Focus`)}`}
-                      className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors border border-transparent hover:border-primary/20 flex items-center justify-center"
-                      title="Reply by email"
-                    >
-                      <Reply size={18} />
-                    </a>
-                  )}
+                <div className="flex shrink-0 flex-wrap gap-2 md:flex-col md:items-stretch">
                   {message.id && (
                     <button
                       type="button"
-                      onClick={() => setSeen(message, !read)}
-                      disabled={pending === message.id}
-                      aria-label={read ? 'Mark as unseen' : 'Mark as seen'}
-                      title={failed === message.id ? 'Could not update. Try again.' : read ? 'Mark as unseen' : 'Mark as seen'}
+                      onClick={() => setRead(message, !read)}
+                      disabled={busy}
                       className={clsx(
-                        "p-2 rounded-lg transition-colors border disabled:opacity-50 flex items-center justify-center",
-                        failed === message.id ? "text-red-500 border-red-500/30"
-                          : read ? "text-green-500 border-transparent hover:bg-secondary"
-                          : "text-muted-foreground border-transparent hover:text-green-500 hover:bg-green-500/10 hover:border-green-500/20"
+                        'inline-flex h-10 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors disabled:opacity-50',
+                        read ? 'border border-border text-muted-foreground hover:bg-secondary hover:text-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90'
                       )}
                     >
-                      {read ? <CheckCircle size={18} /> : <Circle size={18} />}
+                      {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                      {read ? 'Mark as unread' : 'Mark as read'}
                     </button>
+                  )}
+                  {message.email && (
+                    <a
+                      href={`mailto:${encodeURIComponent(message.email)}?subject=${encodeURIComponent(`Re: ${message.subject || 'Enquiry'} - Cinema Focus`)}`}
+                      className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-secondary px-4 text-sm font-medium transition-colors hover:bg-accent"
+                    >
+                      <Reply size={14} /> Reply
+                    </a>
                   )}
                 </div>
               </div>
-            </div>
+              {failed === message.id && <p className="mt-3 text-sm text-danger" role="alert">Could not update this message. Try again.</p>}
+            </article>
           );
         })}
         {rows.length === 0 && (
-          <EmptyState title={messages.length ? 'No messages match your search.' : 'No inquiries received yet.'} />
+          <EmptyState
+            title={messages.length ? (filter === 'unread' && !q ? 'You are all caught up.' : 'No messages match.') : 'No enquiries received yet.'}
+            hint={filter === 'unread' && !q && messages.length ? 'Switch to All to see read messages.' : undefined}
+          />
         )}
       </div>
     </div>

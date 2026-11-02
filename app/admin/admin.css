@@ -1,73 +1,71 @@
-/* Admin / portal design tokens — Apple-style: SF type, frosted glass, soft large radii,
-   layered shadows, spring easing. Scoped to .admin-shell so the public site is unaffected. */
+/* Admin / portal tokens — same design language as the public site (see design.md):
+   monochrome, Inter, no blur, no resting shadows, pill controls, 24px cards.
+   Scoped to .admin-shell so the public site is unaffected. */
 .admin-shell {
-  --admin-bg: #f5f5f7;
+  --admin-bg: #ffffff;
   --admin-card: #ffffff;
-  --admin-border: rgba(0, 0, 0, 0.08);
-  --admin-hairline: rgba(0, 0, 0, 0.06);
-  --admin-text: #1d1d1f;
-  --admin-muted: #6e6e73;
-  --admin-subtle: #86868b;
-  --admin-accent: #b8862b;
-  --admin-accent-soft: #fbf3e2;
-  --admin-success: #248a3d;
-  --admin-warning: #b25e09;
+  --admin-border: #e5e5e5;
+  --admin-hairline: #ebebeb;
+  --admin-text: #000000;
+  --admin-muted: #737373;
+  --admin-subtle: #8a8a8a;
+  --admin-accent: #000000;
+  --admin-accent-soft: #f5f5f5;
+  --admin-success: #000000;
+  --admin-warning: #737373;
   --admin-danger: #d70015;
-  --admin-info: #0071e3;
-  --admin-spring: cubic-bezier(0.16, 1, 0.3, 1);
-  --admin-glass: rgba(255, 255, 255, 0.72);
-  --admin-shadow: 0 1px 1px rgba(0, 0, 0, 0.03), 0 8px 24px -12px rgba(0, 0, 0, 0.12);
-  --admin-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.04), 0 18px 40px -16px rgba(0, 0, 0, 0.22);
+  --admin-info: #000000;
+  --admin-ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-inter), system-ui, sans-serif;
-  letter-spacing: -0.011em;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   background: var(--admin-bg);
   color: var(--admin-text);
 }
-.admin-shell h1, .admin-shell h2, .admin-shell h3 {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-inter), system-ui, sans-serif;
-  letter-spacing: -0.022em;
-}
+.admin-shell h1, .admin-shell h2, .admin-shell h3 { letter-spacing: -0.02em; }
 
-/* One large-title style for every page heading in the admin and the portal */
-.admin-shell main h1 { font-size: clamp(28px, 3.2vw, 34px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+/* One page-title style for every admin and portal page */
+.admin-shell main h1 { font-size: clamp(28px, 3.2vw, 34px); font-weight: 500; letter-spacing: -0.03em; line-height: 1.1; }
 
-/* Frosted glass surfaces (sidebar, top bar, overlays) */
-.admin-shell .glass {
-  background: var(--admin-glass);
-  -webkit-backdrop-filter: saturate(180%) blur(24px);
-  backdrop-filter: saturate(180%) blur(24px);
-}
+/* Surfaces are solid: the site never uses blur */
+.admin-shell .glass { background: #fff; }
 
-/* Cards: large soft corners, hairline border, layered shadow (applies to existing admin pages too) */
-.admin-shell .rounded-2xl { border-radius: 20px; }
-.admin-shell .rounded-xl { border-radius: 16px; }
-.admin-shell .shadow-sm { box-shadow: var(--admin-shadow); }
-.admin-shell .shadow-2xl { box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.35); }
+/* Radii follow the site scale: controls 12px, media 16px, cards 24px */
+.admin-shell .rounded-lg { border-radius: 0.75rem; }
+.admin-shell .rounded-xl { border-radius: 1rem; }
+.admin-shell .rounded-2xl { border-radius: 1.5rem; }
+/* No resting shadows; only floating layers (menus, toasts, modals) keep one */
+.admin-shell .shadow-sm, .admin-shell .shadow-md, .admin-shell .shadow-inner { box-shadow: none; }
+.admin-shell .shadow-lg, .admin-shell .shadow-xl, .admin-shell .shadow-2xl { box-shadow: 0 8px 30px -14px rgba(0, 0, 0, 0.35); }
 
-/* Spring easing on interactive surfaces */
-.admin-shell a, .admin-shell button, .admin-shell input, .admin-shell select {
-  transition-timing-function: var(--admin-spring);
-}
-.admin-shell .lift { transition: transform 0.5s var(--admin-spring), box-shadow 0.5s var(--admin-spring), border-color 0.3s; }
-.admin-shell .lift:hover { transform: translateY(-2px); box-shadow: var(--admin-shadow-hover); }
-.admin-shell .press:active { transform: scale(0.97); }
+/* Colour is reserved for errors: status tints from older pages fall back to neutral greys */
+.admin-shell [class*="text-emerald"], .admin-shell [class*="text-green"], .admin-shell [class*="text-blue"], .admin-shell [class*="text-amber"], .admin-shell [class*="text-yellow"] { color: var(--admin-text); }
+.admin-shell [class*="bg-emerald"], .admin-shell [class*="bg-green"], .admin-shell [class*="bg-blue"], .admin-shell [class*="bg-amber"], .admin-shell [class*="bg-yellow"] { background-color: #f5f5f5; }
+.admin-shell [class*="border-emerald"], .admin-shell [class*="border-green"], .admin-shell [class*="border-blue"], .admin-shell [class*="border-amber"] { border-color: var(--admin-border); }
 
-/* Apple-style segmented control */
-.admin-shell .segmented { display: inline-flex; padding: 2px; border-radius: 999px; background: rgba(0, 0, 0, 0.06); }
-.admin-shell .segmented > * { padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--admin-muted); transition: background 0.3s var(--admin-spring), color 0.3s, box-shadow 0.3s; }
-.admin-shell .segmented > [aria-current="true"], .admin-shell .segmented > .is-active { background: #fff; color: var(--admin-text); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04); }
+/* Easing on interactive surfaces */
+.admin-shell a, .admin-shell button, .admin-shell input, .admin-shell select, .admin-shell textarea { transition-timing-function: var(--admin-ease); }
+.admin-shell .lift { transition: transform 0.4s var(--admin-ease), box-shadow 0.4s var(--admin-ease), border-color 0.3s; }
+.admin-shell .lift:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08); }
+.admin-shell .press:active { transform: scale(0.98); }
+
+/* Segmented control, pill like the site's filter chips */
+.admin-shell .segmented { display: inline-flex; padding: 3px; border-radius: 999px; background: #f5f5f5; }
+.admin-shell .segmented > * { padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--admin-muted); transition: background 0.25s var(--admin-ease), color 0.25s; }
+.admin-shell .segmented > [aria-current="true"], .admin-shell .segmented > .is-active { background: #000; color: #fff; }
 
 .admin-shell .tabular { font-variant-numeric: tabular-nums; }
 .admin-shell main table { border-collapse: collapse; }
 
-/* Loading skeletons: soft shimmer sweep */
-.admin-shell .shimmer { position: relative; overflow: hidden; background: rgba(0, 0, 0, 0.055); }
+/* Keyboard focus */
+.admin-shell :focus-visible { outline: 2px solid #000; outline-offset: 2px; }
+
+/* Loading skeletons */
+.admin-shell .shimmer { position: relative; overflow: hidden; background: #f0f0f0; }
 .admin-shell .shimmer::after {
   content: ""; position: absolute; inset: 0; transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
-  animation: panel-shimmer 1.4s var(--admin-spring) infinite;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: panel-shimmer 1.4s var(--admin-ease) infinite;
 }
 @keyframes panel-shimmer { to { transform: translateX(100%); } }
 @media (prefers-reduced-motion: reduce) { .admin-shell .shimmer::after { animation: none; } }

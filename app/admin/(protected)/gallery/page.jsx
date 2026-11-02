@@ -5,6 +5,7 @@ import { createClient } from '@/lib/aws/queryClient';
 import { Plus, Trash2, Image as ImageIcon, Loader2, Edit2, Star, Move } from 'lucide-react';
 import { revalidateData } from '@/lib/actions';
 import Reveal from '@/components/Reveal';
+import ImageZoomButton from '@/components/admin/ImageZoom';
 
 function ImagePositionAdjuster({ value, onChange }) {
   const parsePos = (val) => {
@@ -307,7 +308,7 @@ export default function AdminGalleryPage() {
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity w-full md:w-auto justify-center"
+          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-opacity w-full md:w-auto justify-center"
         >
           <Plus size={18} />
           Add Item
@@ -332,7 +333,7 @@ export default function AdminGalleryPage() {
                  {/* Featured Badge */}
                  {project.featured && (
                    <div className="absolute top-2 left-2 z-10">
-                     <span className="px-2.5 py-1 text-xs font-semibold bg-amber-500 text-black rounded-full shadow flex items-center gap-1 backdrop-blur-md">
+                     <span className="px-2.5 py-1 text-xs font-semibold bg-amber-500 text-black rounded-full shadow flex items-center gap-1 ">
                        <Star size={12} fill="currentColor" /> Featured on Home
                      </span>
                    </div>
@@ -355,7 +356,7 @@ export default function AdminGalleryPage() {
                    </button>
                    <button 
                       onClick={() => handleDelete(project.id)}
-                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow-sm transition-colors"
+                      className="p-2 bg-danger text-white rounded-lg hover:bg-danger/90 shadow-sm transition-colors"
                       title="Delete Image"
                    >
                      <Trash2 size={16} />
@@ -390,7 +391,7 @@ export default function AdminGalleryPage() {
 
       {/* Add Modal */}
       {showModal && (
-        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
            <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center">
                  <h2 className="text-xl font-medium">Add New Image</h2>
@@ -459,7 +460,7 @@ export default function AdminGalleryPage() {
 
                  <div className="flex justify-end gap-3 pt-2">
                     <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2 text-muted-foreground hover:bg-secondary rounded-lg font-medium transition-colors">Cancel</button>
-                    <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 font-medium disabled:opacity-50">
+                    <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-opacity flex items-center gap-2 font-medium disabled:opacity-50">
                       {saving ? <Loader2 className="animate-spin" size={18} /> : null}
                       {saving ? 'Creating...' : 'Add Item'}
                     </button>
@@ -471,7 +472,7 @@ export default function AdminGalleryPage() {
 
       {/* Edit Modal */}
       {editingProject && (
-        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+        <Reveal className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
            <div className="bg-background rounded-2xl w-full max-w-md shadow-xl border border-border p-6 space-y-6 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center">
                  <h2 className="text-xl font-medium">Edit Image Details</h2>
@@ -489,6 +490,7 @@ export default function AdminGalleryPage() {
                           style={{ objectPosition: editingProject.image_position || editingProject.imagePosition || '50% 50%' }}
                           className="w-full h-full object-cover transition-all duration-150"
                         />
+                        <ImageZoomButton src={editingProject.newImageFile ? URL.createObjectURL(editingProject.newImageFile) : editingProject.image_url} alt={editingProject.title} />
                       </div>
                       <input 
                         type="file" 
@@ -548,7 +550,7 @@ export default function AdminGalleryPage() {
 
                  <div className="flex justify-end gap-3 pt-2">
                     <button type="button" onClick={() => setEditingProject(null)} className="px-5 py-2 text-muted-foreground hover:bg-secondary rounded-lg font-medium transition-colors">Cancel</button>
-                    <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 font-medium disabled:opacity-50">
+                    <button type="submit" disabled={saving} className="px-6 py-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-opacity flex items-center gap-2 font-medium disabled:opacity-50">
                       {saving ? <Loader2 className="animate-spin" size={18} /> : null}
                       {saving ? 'Saving...' : 'Save Changes'}
                     </button>

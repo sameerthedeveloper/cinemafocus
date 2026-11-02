@@ -132,7 +132,7 @@ export default function CustomRoutesPage() {
         <button
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 shrink-0"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 shrink-0"
         >
           {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
           Save All
@@ -205,7 +205,7 @@ export default function CustomRoutesPage() {
                     <button
                       type="button"
                       onClick={() => deleteRoute(slug)}
-                      className="p-1.5 rounded-md hover:bg-red-50 text-muted-foreground hover:text-red-500 transition-colors"
+                      className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-danger transition-colors"
                       title="Delete route"
                     >
                       <Trash2 size={14} />
@@ -297,7 +297,7 @@ export default function CustomRoutesPage() {
                 type="button"
                 onClick={addRoute}
                 disabled={!newSlugInput.trim()}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-40"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-40"
               >
                 Add Route
               </button>
