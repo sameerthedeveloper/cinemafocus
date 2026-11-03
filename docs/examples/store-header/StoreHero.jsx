@@ -9,7 +9,7 @@ import { ArrowRight } from 'lucide-react';
  * Store hero: the Cinema Focus "product stage". Big headline on a studio-white (or dark) stage,
  * the product photo sitting on the bottom edge, two pill buttons, a slide timer along the bottom.
  *
- * Needs the tokens from design.md plus these three CSS rules in globals.css:
+ * Needs the tokens from docs/design/design.md plus these three CSS rules in globals.css:
  *
  *   @keyframes hero-intro { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
  *   .hero-intro { animation: hero-intro 0.7s cubic-bezier(0.215, 0.61, 0.355, 1) 0.05s backwards; }

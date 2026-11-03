@@ -41,7 +41,7 @@ fi
 
 # Infra definition + non-secret config needed to redeploy in the new account
 cp infra/serverless.yml "$OUT/config/serverless.yml"
-cp supabase_schema.sql "$OUT/config/" 2>/dev/null || true
+cp infra/legacy/supabase_schema.sql "$OUT/config/" 2>/dev/null || true
 grep -E '^[A-Z_]+=' .env.local 2>/dev/null | sed -E 's/=.*/=/' > "$OUT/config/env-variable-names.txt" || true
 
 # Integrity manifest

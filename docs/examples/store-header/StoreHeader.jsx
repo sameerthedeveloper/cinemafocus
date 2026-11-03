@@ -8,7 +8,7 @@ import { Menu, X, Search, ShoppingBag, User } from 'lucide-react';
 
 /**
  * Store header: the Cinema Focus floating pill, with search, account and cart.
- * Needs: Inter, Tailwind tokens from design.md (bg-background, border-border, bg-secondary,
+ * Needs: Inter, Tailwind tokens from docs/design/design.md (bg-background, border-border, bg-secondary,
  * bg-primary, shadow-float, ease-settle, bg-signal), lucide-react, clsx, next/image.
  * Put /public/images/logo.png in the project, or pass `logo`.
  *

@@ -26,7 +26,7 @@
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   --font-serif: 'SF Pro Display', var(--font-inter), sans-serif;
 
-  /* Design-system tokens — see DESIGN_SYSTEM.md */
+  /* Design-system tokens — see docs/design/DESIGN_SYSTEM.md */
   --color-signal: #e05600;   /* "New" markers only; never decorative */
   --color-danger: #d70015;   /* errors, destructive actions */
   --color-stage: #0a0a0a;    /* dark hero / launch surfaces (matches themeColor) */

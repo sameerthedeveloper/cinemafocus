@@ -1,4 +1,4 @@
-/* Admin / portal tokens — same design language as the public site (see design.md):
+/* Admin / portal tokens — same design language as the public site (see docs/design/design.md):
    monochrome, Inter, no blur, no resting shadows, pill controls, 24px cards.
    Scoped to .admin-shell so the public site is unaffected. */
 .admin-shell {
